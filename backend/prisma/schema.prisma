@@ -1,0 +1,184 @@
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum RoleType {
+  regular
+  cashier
+  manager
+  superuser
+}
+
+enum TransactionType {
+  purchase
+  redemption
+  adjustment
+  event
+  transfer
+}
+
+enum PromotionType {
+  automatic
+  onetime
+}
+
+model User {
+  id                Int      @id @default(autoincrement())
+  utorid            String   @unique
+  name              String
+  email             String   @unique
+  password          String
+  birthday          String?
+  role              RoleType @default(regular)
+  points            Int      @default(0)
+  verified          Boolean  @default(false)
+  suspicious        Boolean  @default(false)
+  avatarUrl         String?
+  resetToken        String?  @unique
+  resetTokenExpiry  DateTime?
+  createdAt         DateTime @default(now())
+  lastLogin         DateTime?
+
+  // Relations
+  transactions           Transaction[] @relation("UserTransactions")
+  createdTransactions    Transaction[] @relation("TransactionCreator")
+  processedTransactions  Transaction[] @relation("TransactionProcessor")
+  
+  eventOrganizers        EventOrganizer[]
+  eventGuests            EventGuest[]
+  
+  userPromotions         UserPromotion[]
+
+  @@index([utorid])
+  @@index([email])
+  @@index([resetToken])
+}
+
+model Transaction {
+  id          Int             @id @default(autoincrement())
+  userId      Int
+  type        TransactionType
+  amount      Int
+  spent       Float?
+  relatedId   Int?
+  suspicious  Boolean         @default(false)
+  processed   Boolean         @default(false)
+  processedBy Int?
+  remark      String?
+  createdAt   DateTime        @default(now())
+  createdBy   Int
+
+  // Relations
+  user      User @relation("UserTransactions", fields: [userId], references: [id])
+  creator   User @relation("TransactionCreator", fields: [createdBy], references: [id])
+  processor User? @relation("TransactionProcessor", fields: [processedBy], references: [id])
+  
+  transactionPromotions TransactionPromotion[]
+
+  @@index([userId])
+  @@index([type])
+  @@index([createdBy])
+  @@index([createdAt])
+  @@index([suspicious])
+}
+
+model Event {
+  id              Int       @id @default(autoincrement())
+  name            String
+  description     String
+  location        String
+  startTime       DateTime
+  endTime         DateTime
+  capacity        Int?
+  pointsAllocated Int
+  pointsRemain    Int
+  published       Boolean   @default(false)
+  createdAt       DateTime  @default(now())
+
+  // Relations
+  organizers EventOrganizer[]
+  guests     EventGuest[]
+
+  @@index([startTime])
+  @@index([endTime])
+  @@index([published])
+}
+
+model EventOrganizer {
+  id      Int @id @default(autoincrement())
+  eventId Int
+  userId  Int
+
+  event Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([eventId, userId])
+  @@index([eventId])
+  @@index([userId])
+}
+
+model EventGuest {
+  id      Int @id @default(autoincrement())
+  eventId Int
+  userId  Int
+
+  event Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([eventId, userId])
+  @@index([eventId])
+  @@index([userId])
+}
+
+model Promotion {
+  id          Int           @id @default(autoincrement())
+  name        String
+  description String
+  type        PromotionType
+  startTime   DateTime
+  endTime     DateTime
+  minSpending Float?
+  rate        Float?
+  points      Int?
+  createdAt   DateTime      @default(now())
+
+  // Relations
+  userPromotions        UserPromotion[]
+  transactionPromotions TransactionPromotion[]
+
+  @@index([type])
+  @@index([startTime])
+  @@index([endTime])
+}
+
+model UserPromotion {
+  id          Int  @id @default(autoincrement())
+  userId      Int
+  promotionId Int
+  used        Boolean @default(false)
+
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  promotion Promotion @relation(fields: [promotionId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, promotionId])
+  @@index([userId])
+  @@index([promotionId])
+}
+
+model TransactionPromotion {
+  id            Int @id @default(autoincrement())
+  transactionId Int
+  promotionId   Int
+
+  transaction Transaction @relation(fields: [transactionId], references: [id], onDelete: Cascade)
+  promotion   Promotion   @relation(fields: [promotionId], references: [id], onDelete: Cascade)
+
+  @@unique([transactionId, promotionId])
+  @@index([transactionId])
+  @@index([promotionId])
+}
