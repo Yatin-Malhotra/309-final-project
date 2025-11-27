@@ -113,6 +113,14 @@ function App() {
                   </ProtectedRoute>
                 }
               />
+              <Route
+                path="/promotions/:promotionId/edit"
+                element={
+                  <ProtectedRoute requiredRole="manager">
+                    <CreatePromotion />
+                  </ProtectedRoute>
+                }
+              />
 
               <Route
                 path="/users"
