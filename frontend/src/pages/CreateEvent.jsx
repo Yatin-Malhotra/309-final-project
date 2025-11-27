@@ -1,10 +1,13 @@
-// Create event page (for managers)
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+// Create/Edit event page (for managers)
+import { useState, useEffect, useCallback } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import { eventAPI } from '../services/api';
 
 const CreateEvent = () => {
   const navigate = useNavigate();
+  const { eventId } = useParams();
+  const isEditMode = !!eventId;
+  
   const [formData, setFormData] = useState({
     name: '',
     description: '',
@@ -16,6 +19,50 @@ const CreateEvent = () => {
   });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [loadingEvent, setLoadingEvent] = useState(isEditMode);
+
+  const loadEvent = useCallback(async () => {
+    if (!eventId) return;
+    
+    setLoadingEvent(true);
+    setError('');
+    try {
+      const response = await eventAPI.getEvent(eventId);
+      const event = response.data;
+      
+      // Format datetime-local inputs (convert ISO to local datetime string)
+      const formatDateTimeLocal = (isoString) => {
+        if (!isoString) return '';
+        const date = new Date(isoString);
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        const hours = String(date.getHours()).padStart(2, '0');
+        const minutes = String(date.getMinutes()).padStart(2, '0');
+        return `${year}-${month}-${day}T${hours}:${minutes}`;
+      };
+
+      setFormData({
+        name: event.name || '',
+        description: event.description || '',
+        location: event.location || '',
+        startTime: formatDateTimeLocal(event.startTime),
+        endTime: formatDateTimeLocal(event.endTime),
+        capacity: event.capacity ? String(event.capacity) : '',
+        points: event.points ? String(event.points) : '',
+      });
+    } catch (err) {
+      setError(err.response?.data?.error || 'Failed to load event.');
+    } finally {
+      setLoadingEvent(false);
+    }
+  }, [eventId]);
+
+  useEffect(() => {
+    if (isEditMode) {
+      loadEvent();
+    }
+  }, [isEditMode, loadEvent]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -36,18 +83,30 @@ const CreateEvent = () => {
         data.capacity = parseInt(formData.capacity);
       }
 
-      await eventAPI.createEvent(data);
+      if (isEditMode) {
+        await eventAPI.updateEvent(eventId, data);
+      } else {
+        await eventAPI.createEvent(data);
+      }
       navigate('/events');
     } catch (err) {
-      setError(err.response?.data?.error || 'Failed to create event.');
+      setError(err.response?.data?.error || `Failed to ${isEditMode ? 'update' : 'create'} event.`);
     } finally {
       setLoading(false);
     }
   };
 
+  if (loadingEvent) {
+    return (
+      <div className="container">
+        <div className="loading">Loading event...</div>
+      </div>
+    );
+  }
+
   return (
     <div className="container">
-      <h1>Create Event</h1>
+      <h1>{isEditMode ? 'Edit Event' : 'Create Event'}</h1>
       <div className="card">
         <form onSubmit={handleSubmit}>
           <div className="form-group">
@@ -149,7 +208,7 @@ const CreateEvent = () => {
               Cancel
             </button>
             <button type="submit" className="btn btn-primary" disabled={loading}>
-              {loading ? 'Creating...' : 'Create Event'}
+              {loading ? (isEditMode ? 'Updating...' : 'Creating...') : (isEditMode ? 'Update Event' : 'Create Event')}
             </button>
           </div>
         </form>

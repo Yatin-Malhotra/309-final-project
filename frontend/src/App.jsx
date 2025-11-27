@@ -89,6 +89,14 @@ function App() {
                 }
               />
               <Route
+                path="/events/:eventId/edit"
+                element={
+                  <ProtectedRoute requiredRole="manager">
+                    <CreateEvent />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
                 path="/events/:eventId"
                 element={
                   <ProtectedRoute>
@@ -107,6 +115,14 @@ function App() {
               />
               <Route
                 path="/promotions/create"
+                element={
+                  <ProtectedRoute requiredRole="manager">
+                    <CreatePromotion />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/promotions/:promotionId/edit"
                 element={
                   <ProtectedRoute requiredRole="manager">
                     <CreatePromotion />

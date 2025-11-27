@@ -1,10 +1,13 @@
-// Create promotion page (for managers)
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+// Create/Edit promotion page (for managers)
+import { useState, useEffect, useCallback } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import { promotionAPI } from '../services/api';
 
 const CreatePromotion = () => {
   const navigate = useNavigate();
+  const { promotionId } = useParams();
+  const isEditMode = !!promotionId;
+  
   const [formData, setFormData] = useState({
     name: '',
     description: '',
@@ -17,6 +20,51 @@ const CreatePromotion = () => {
   });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [loadingPromotion, setLoadingPromotion] = useState(isEditMode);
+
+  const loadPromotion = useCallback(async () => {
+    if (!promotionId) return;
+    
+    setLoadingPromotion(true);
+    setError('');
+    try {
+      const response = await promotionAPI.getPromotion(promotionId);
+      const promo = response.data;
+      
+      // Format datetime-local inputs (convert ISO to local datetime string)
+      const formatDateTimeLocal = (isoString) => {
+        if (!isoString) return '';
+        const date = new Date(isoString);
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        const hours = String(date.getHours()).padStart(2, '0');
+        const minutes = String(date.getMinutes()).padStart(2, '0');
+        return `${year}-${month}-${day}T${hours}:${minutes}`;
+      };
+
+      setFormData({
+        name: promo.name || '',
+        description: promo.description || '',
+        type: promo.type || 'automatic',
+        startTime: formatDateTimeLocal(promo.startTime),
+        endTime: formatDateTimeLocal(promo.endTime),
+        minSpending: promo.minSpending ? String(promo.minSpending) : '',
+        rate: promo.rate ? String(promo.rate) : '',
+        points: promo.points !== undefined && promo.points !== null ? String(promo.points) : '',
+      });
+    } catch (err) {
+      setError(err.response?.data?.error || 'Failed to load promotion.');
+    } finally {
+      setLoadingPromotion(false);
+    }
+  }, [promotionId]);
+
+  useEffect(() => {
+    if (isEditMode) {
+      loadPromotion();
+    }
+  }, [isEditMode, loadPromotion]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -61,18 +109,30 @@ const CreatePromotion = () => {
         data.points = parseInt(formData.points);
       }
 
-      await promotionAPI.createPromotion(data);
+      if (isEditMode) {
+        await promotionAPI.updatePromotion(promotionId, data);
+      } else {
+        await promotionAPI.createPromotion(data);
+      }
       navigate('/promotions');
     } catch (err) {
-      setError(err.response?.data?.error || 'Failed to create promotion.');
+      setError(err.response?.data?.error || `Failed to ${isEditMode ? 'update' : 'create'} promotion.`);
     } finally {
       setLoading(false);
     }
   };
 
+  if (loadingPromotion) {
+    return (
+      <div className="container">
+        <div className="loading">Loading promotion...</div>
+      </div>
+    );
+  }
+
   return (
     <div className="container">
-      <h1>Create Promotion</h1>
+      <h1>{isEditMode ? 'Edit Promotion' : 'Create Promotion'}</h1>
       <div className="card">
         <form onSubmit={handleSubmit}>
           <div className="form-group">
@@ -205,7 +265,7 @@ const CreatePromotion = () => {
               Cancel
             </button>
             <button type="submit" className="btn btn-primary" disabled={loading}>
-              {loading ? 'Creating...' : 'Create Promotion'}
+              {loading ? (isEditMode ? 'Updating...' : 'Creating...') : (isEditMode ? 'Update Promotion' : 'Create Promotion')}
             </button>
           </div>
         </form>
