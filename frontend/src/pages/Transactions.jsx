@@ -156,8 +156,7 @@ const Transactions = () => {
                       </span>
                     </td>
                     <td>
-                      {tx.type === 'redemption' ? '-' : '+'}
-                      {Math.abs(tx.amount || 0)}
+                      {tx.amount}
                     </td>
                     {hasRole('manager') && <td>{tx.utorid || tx.user?.utorid}</td>}
                     <td>{tx.createdAt ? formatDate(tx.createdAt) : 'N/A'}</td>

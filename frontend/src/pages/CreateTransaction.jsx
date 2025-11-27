@@ -1,9 +1,12 @@
 // Create transaction page (for cashiers)
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { transactionAPI } from '../services/api';
+import { promotionAPI, transactionAPI } from '../services/api';
+import { useAuth } from '../contexts/AuthContext';
+import PromotionSelector from './PromotionSelector';
 
 const CreateTransaction = () => {
+  const { hasRole } = useAuth();
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     utorid: '',
@@ -11,9 +14,23 @@ const CreateTransaction = () => {
     spent: '',
     amount: '',
     remark: '',
+    relatedId: ''
   });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+
+  const [promotions, setPromotions] = useState([]); 
+  const [promotionIds, setPromotionIds] = useState([]); 
+
+  // this uses manager id for now
+  const getPromotions = async () => {
+    const response = await promotionAPI.getPromotions()
+    setPromotions(response.data.results)
+  }
+
+  useEffect(() => {
+    getPromotions()
+  }, [])
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -25,6 +42,7 @@ const CreateTransaction = () => {
         utorid: formData.utorid,
         type: formData.type,
         remark: formData.remark || undefined,
+        promotionIds: promotionIds.map((id) => parseInt(id))
       };
 
       if (formData.spent) {
@@ -33,6 +51,10 @@ const CreateTransaction = () => {
       if (formData.amount) {
         data.amount = parseInt(formData.amount);
       }
+      if (formData.relatedId) {
+        data.relatedId = parseInt(formData.relatedId)
+      }
+      
 
       await transactionAPI.createTransaction(data);
       navigate('/transactions');
@@ -71,34 +93,57 @@ const CreateTransaction = () => {
               required
             >
               <option value="purchase">Purchase</option>
-              <option value="adjustment">Adjustment</option>
+              {hasRole('manager') && (<option value="adjustment">Adjustment</option>)}
             </select>
           </div>
-          <div className="form-group">
-            <label htmlFor="spent">Amount Spent ($)</label>
-            <input
-              type="number"
-              id="spent"
-              step="0.01"
-              min="0"
-              value={formData.spent}
-              onChange={(e) =>
-                setFormData({ ...formData, spent: e.target.value })
-              }
-            />
-          </div>
-          <div className="form-group">
-            <label htmlFor="amount">Points Amount</label>
-            <input
-              type="number"
-              id="amount"
-              min="0"
-              value={formData.amount}
-              onChange={(e) =>
-                setFormData({ ...formData, amount: e.target.value })
-              }
-            />
-          </div>
+          {formData.type === 'purchase' && (
+            <div className="form-group">
+              <label htmlFor="spent">Amount Spent ($)</label>
+              <input
+                type="number"
+                id="spent"
+                step="0.01"
+                min="0"
+                value={formData.spent}
+                onChange={(e) =>
+                  setFormData({ ...formData, spent: e.target.value })
+                }
+              />
+            </div>
+          )}
+          {formData.type === 'adjustment' && (
+            <>
+              <div className="form-group">
+                <label htmlFor="amount">Points Amount</label>
+                <input
+                  type="number"
+                  id="amount"
+                  value={formData.amount}
+                  onChange={(e) =>
+                    setFormData({ ...formData, amount: e.target.value })
+                  }
+                />
+              </div>
+              <div className="form-group">
+                <label htmlFor="amount">Related Id</label>
+                <input
+                  type="number"
+                  id="relatedId"
+                  min="0"
+                  value={formData.relatedId}
+                  onChange={(e) =>
+                    setFormData({ ...formData, relatedId: e.target.value })
+                  }
+                />
+              </div>
+            </>
+          )}
+          <PromotionSelector
+            promotions={promotions}
+            value={promotionIds}
+            onChange={setPromotionIds}
+            formData={formData}
+          />
           <div className="form-group">
             <label htmlFor="remark">Remark</label>
             <textarea

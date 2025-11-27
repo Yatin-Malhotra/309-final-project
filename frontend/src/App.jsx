@@ -58,7 +58,7 @@ function App() {
               <Route
                 path="/transactions"
                 element={
-                  <ProtectedRoute requiredRole="manager">
+                  <ProtectedRoute>
                     <Transactions />
                   </ProtectedRoute>
                 }
