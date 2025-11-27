@@ -48,6 +48,14 @@ export const authAPI = {
 export const userAPI = {
   getMe: () => api.get('/users/me'),
   updateMe: (data) => {
+    // If data is already a FormData instance, use it directly
+    if (data instanceof FormData) {
+      return api.patch('/users/me', data, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+    }
+    
+    // Otherwise, create FormData from plain object
     const formData = new FormData();
     Object.keys(data).forEach((key) => {
       if (data[key] !== undefined && data[key] !== null) {
