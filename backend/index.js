@@ -1206,7 +1206,9 @@ app.get('/transactions', requireRole('manager'), validateQuery(z.object({
                 type: tx.type,
                 promotionIds: tx.transactionPromotions.map(tp => tp.promotionId),
                 remark: tx.remark,
-                createdBy: tx.creator.utorid
+                createdBy: tx.creator.utorid,
+                createdAt: tx.createdAt,
+                processed: tx.processed
             };
             if (tx.spent) result.spent = tx.spent;
             if (tx.relatedId) result.relatedId = tx.relatedId;
@@ -1453,7 +1455,9 @@ app.get('/users/me/transactions', requireRole('regular'), validateQuery(z.object
                 amount: tx.amount,
                 promotionIds: tx.transactionPromotions.map(tp => tp.promotionId),
                 remark: tx.remark,
-                createdBy: tx.creator.utorid
+                createdBy: tx.creator.utorid,
+                createdAt: tx.createdAt,
+                processed: tx.processed
             };
             if (tx.spent) result.spent = tx.spent;
             if (tx.relatedId) result.relatedId = tx.relatedId;
