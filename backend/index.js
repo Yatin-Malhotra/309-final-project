@@ -1221,6 +1221,68 @@ app.get('/transactions', requireRole('manager'), validateQuery(z.object({
     } catch (error) { next(error); }
 });
 
+// GET /transactions/redemptions - List redemption transactions (cashier only)
+app.get('/transactions/redemptions', requireRole('cashier'), validateQuery(z.object({
+    page: z.preprocess(
+        (val) => (val === undefined || val === null || val === '') ? '1' : val,
+        z.string().regex(/^\d+$/)
+    ),
+    limit: z.preprocess(
+        (val) => (val === undefined || val === null || val === '') ? '10' : val,
+        z.string().regex(/^\d+$/)
+    ),
+    processed: z.string().optional()
+})), async (req, res, next) => {
+    try {
+        const { page = '1', limit = '10', processed } = req.validatedQuery;
+        const pageNum = parseInt(page), limitNum = parseInt(limit);
+        
+        if (pageNum < 1) {
+            return res.status(400).json({ error: 'Page must be at least 1' });
+        }
+        if (limitNum < 1 || limitNum > 100) {
+            return res.status(400).json({ error: 'Limit must be between 1 and 100' });
+        }
+        
+        const skip = (pageNum - 1) * limitNum;
+        
+        const where = { type: 'redemption' };
+        if (processed !== undefined) {
+            where.processed = processed === 'true';
+        }
+        
+        const count = await prisma.transaction.count({ where });
+        const transactions = await prisma.transaction.findMany({
+            where, skip, take: limitNum,
+            include: {
+                user: { select: { utorid: true, name: true } },
+                creator: { select: { utorid: true } },
+                processor: { select: { utorid: true } }
+            },
+            orderBy: { createdAt: 'desc' }
+        });
+        
+        const results = transactions.map(tx => {
+            const result = {
+                id: tx.id,
+                utorid: tx.user.utorid,
+                userName: tx.user.name,
+                amount: Math.abs(tx.amount), // Return as positive
+                type: tx.type,
+                remark: tx.remark,
+                createdBy: tx.creator.utorid,
+                createdAt: tx.createdAt,
+                processed: tx.processed,
+                redeemed: Math.abs(tx.amount)
+            };
+            if (tx.processor) result.processedBy = tx.processor.utorid;
+            return result;
+        });
+        
+        res.json({ count, results });
+    } catch (error) { next(error); }
+});
+
 // GET /transactions/:transactionId - Get single transaction
 app.get('/transactions/:transactionId', requireRole('manager'), async (req, res, next) => {
     try {
@@ -1548,6 +1610,7 @@ app.get('/users/:userId/transactions', requireRole('manager'), validateQuery(z.o
         res.json({ count, results });
     } catch (error) { next(error); }
 });
+
 
 // PATCH /transactions/:transactionId/processed - Process redemption
 app.patch('/transactions/:transactionId/processed', requireRole('cashier'), async (req, res, next) => {

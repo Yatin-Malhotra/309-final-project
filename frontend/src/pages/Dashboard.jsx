@@ -29,13 +29,11 @@ const Dashboard = () => {
           // Count pending redemptions (for cashiers/managers)
           let pendingCount = 0;
           if (hasRole('cashier')) {
-            const allTxResponse = await transactionAPI.getTransactions({
-              type: 'redemption',
-              limit: 100,
+            const response = await transactionAPI.getRedemptionTransactions({
+              processed: 'false',
+              limit: 1,
             });
-            pendingCount = allTxResponse.data.results.filter(
-              (tx) => !tx.processed
-            ).length;
+            pendingCount = response.data.count;
           }
 
           setStats({
@@ -72,7 +70,7 @@ const Dashboard = () => {
             <div className="dashboard-card-value">
               {stats.pendingRedemptions}
             </div>
-            <Link to="/transactions?type=redemption&processed=false">
+            <Link to="/transactions">
               View All
             </Link>
           </div>
