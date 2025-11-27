@@ -1,0 +1,127 @@
+// API service layer for backend communication
+import axios from 'axios';
+
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+
+// Create axios instance with default config
+const api = axios.create({
+  baseURL: API_BASE_URL,
+  headers: {
+    'Content-Type': 'application/json',
+  },
+});
+
+// Add token to requests if available
+api.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
+
+// Handle token expiration
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401) {
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      window.location.href = '/login';
+    }
+    return Promise.reject(error);
+  }
+);
+
+// Auth endpoints
+export const authAPI = {
+  login: (utorid, password) => api.post('/auth/tokens', { utorid, password }),
+  requestReset: (utorid) => api.post('/auth/resets', { utorid }),
+  resetPassword: (resetToken, utorid, password) =>
+    api.post(`/auth/resets/${resetToken}`, { utorid, password }),
+};
+
+// User endpoints
+export const userAPI = {
+  getMe: () => api.get('/users/me'),
+  updateMe: (data) => {
+    const formData = new FormData();
+    Object.keys(data).forEach((key) => {
+      if (data[key] !== undefined && data[key] !== null) {
+        if (key === 'avatar' && data[key] instanceof File) {
+          formData.append('avatar', data[key]);
+        } else if (key !== 'avatar') {
+          formData.append(key, data[key]);
+        }
+      }
+    });
+    return api.patch('/users/me', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+  },
+  changePassword: (oldPassword, newPassword) =>
+    api.patch('/users/me/password', { old: oldPassword, new: newPassword }),
+  getUsers: (params) => api.get('/users', { params }),
+  getUser: (userId) => api.get(`/users/${userId}`),
+  createUser: (data) => api.post('/users', data),
+  updateUser: (userId, data) => api.patch(`/users/${userId}`, data),
+};
+
+// Transaction endpoints
+export const transactionAPI = {
+  createTransaction: (data) => api.post('/transactions', data),
+  getTransactions: (params) => api.get('/transactions', { params }),
+  getTransaction: (transactionId) => api.get(`/transactions/${transactionId}`),
+  markSuspicious: (transactionId, suspicious) =>
+    api.patch(`/transactions/${transactionId}/suspicious`, { suspicious }),
+  createRedemption: (amount, remark) =>
+    api.post('/users/me/transactions', { type: 'redemption', amount, remark }),
+  createTransfer: (userId, amount, remark) =>
+    api.post(`/users/${userId}/transactions`, {
+      type: 'transfer',
+      amount,
+      remark,
+    }),
+  getMyTransactions: (params) => api.get('/users/me/transactions', { params }),
+  processRedemption: (transactionId) =>
+    api.patch(`/transactions/${transactionId}/processed`, { processed: true }),
+};
+
+// Event endpoints
+export const eventAPI = {
+  createEvent: (data) => api.post('/events', data),
+  getEvents: (params) => api.get('/events', { params }),
+  getEvent: (eventId) => api.get(`/events/${eventId}`),
+  updateEvent: (eventId, data) => api.patch(`/events/${eventId}`, data),
+  deleteEvent: (eventId) => api.delete(`/events/${eventId}`),
+  addOrganizer: (eventId, userId) =>
+    api.post(`/events/${eventId}/organizers`, { userId }),
+  removeOrganizer: (eventId, userId) =>
+    api.delete(`/events/${eventId}/organizers/${userId}`),
+  registerForEvent: (eventId) =>
+    api.post(`/events/${eventId}/guests/me`),
+  unregisterFromEvent: (eventId) =>
+    api.delete(`/events/${eventId}/guests/me`),
+  addGuest: (eventId, userId) =>
+    api.post(`/events/${eventId}/guests`, { userId }),
+  removeGuest: (eventId, userId) =>
+    api.delete(`/events/${eventId}/guests/${userId}`),
+  createEventTransaction: (eventId, userId) =>
+    api.post(`/events/${eventId}/transactions`, { userId }),
+};
+
+// Promotion endpoints
+export const promotionAPI = {
+  createPromotion: (data) => api.post('/promotions', data),
+  getPromotions: (params) => api.get('/promotions', { params }),
+  getPromotion: (promotionId) => api.get(`/promotions/${promotionId}`),
+  updatePromotion: (promotionId, data) =>
+    api.patch(`/promotions/${promotionId}`, data),
+  deletePromotion: (promotionId) => api.delete(`/promotions/${promotionId}`),
+};
+
+export default api;
+
