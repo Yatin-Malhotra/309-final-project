@@ -68,6 +68,7 @@ export const userAPI = {
   getUser: (userId) => api.get(`/users/${userId}`),
   createUser: (data) => api.post('/users', data),
   updateUser: (userId, data) => api.patch(`/users/${userId}`, data),
+  getUserTransactions: (userId, params) => api.get(`/users/${userId}/transactions`, { params }),
 };
 
 // Transaction endpoints

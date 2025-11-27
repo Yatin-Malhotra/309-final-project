@@ -44,7 +44,11 @@ const Transactions = () => {
   };
 
   const handleFilterChange = (key, value) => {
-    const newFilters = { ...filters, [key]: value, page: 1 };
+    const newFilters = { ...filters, [key]: value };
+    // Only reset to page 1 if changing a non-page filter
+    if (key !== 'page') {
+      newFilters.page = 1;
+    }
     setFilters(newFilters);
     setSearchParams(newFilters);
   };

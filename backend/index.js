@@ -772,7 +772,7 @@ app.get('/users/:userId', requireRole('cashier'), async (req, res, next) => {
             id: user.id, utorid: user.utorid, name: user.name, email: user.email,
             birthday: user.birthday, role: user.role, points: user.points,
             createdAt: user.createdAt, lastLogin: user.lastLogin, verified: user.verified,
-            avatarUrl: user.avatarUrl, promotions
+            suspicious: user.suspicious, avatarUrl: user.avatarUrl, promotions
         });
     } catch (error) { next(error); }
 });
@@ -836,8 +836,8 @@ app.patch('/users/:userId', requireRole('manager'), async (req, res, next) => {
         if (req.body.suspicious !== undefined && req.body.suspicious !== null) {
             providedFields.add('suspicious');
             const suspiciousVal = coerceBoolean(req.body.suspicious);
-            if (!suspiciousVal) {
-                return res.status(400).json({ error: 'Invalid verified value' });
+            if (suspiciousVal === null) {
+                return res.status(400).json({ error: 'Invalid suspicious value' });
             }
             if (user.suspicious !== suspiciousVal) {
                 updates.suspicious = suspiciousVal;
@@ -1457,6 +1457,86 @@ app.get('/users/me/transactions', requireRole('regular'), validateQuery(z.object
             };
             if (tx.spent) result.spent = tx.spent;
             if (tx.relatedId) result.relatedId = tx.relatedId;
+            if (tx.type === 'redemption') result.redeemed = Math.abs(tx.amount);
+            return result;
+        });
+        
+        res.json({ count, results });
+    } catch (error) { next(error); }
+});
+
+// GET /users/:userId/transactions - List specific user's transactions
+app.get('/users/:userId/transactions', requireRole('manager'), validateQuery(z.object({
+    type: z.string().optional(),
+    relatedId: z.string().optional(),
+    promotionId: z.string().optional(),
+    amount: z.string().optional(),
+    operator: z.string().optional(),
+    page: z.preprocess(
+        (val) => (val === undefined || val === null || val === '') ? '1' : val,
+        z.string().regex(/^\d+$/)
+    ),
+    limit: z.preprocess(
+        (val) => (val === undefined || val === null || val === '') ? '10' : val,
+        z.string().regex(/^\d+$/)
+    )
+})), async (req, res, next) => {
+    try {
+        const identifier = req.params.userId;
+        const whereClause = /^\d+$/.test(identifier)
+            ? { id: parseInt(identifier, 10) }
+            : { utorid: identifier };
+
+        const targetUser = await prisma.user.findUnique({ where: whereClause });
+        if (!targetUser) return res.status(404).json({ error: 'User not found' });
+
+        const { type, relatedId, promotionId, amount, operator, page = '1', limit = '10' } = req.validatedQuery;
+        const pageNum = parseInt(page), limitNum = parseInt(limit);
+        
+        if (pageNum < 1) {
+            return res.status(400).json({ error: 'Page must be at least 1' });
+        }
+        if (limitNum < 1 || limitNum > 100) {
+            return res.status(400).json({ error: 'Limit must be between 1 and 100' });
+        }
+        
+        const skip = (pageNum - 1) * limitNum;
+        
+        const where = { userId: targetUser.id };
+        if (type) where.type = type;
+        if (relatedId) where.relatedId = parseInt(relatedId);
+        if (promotionId) {
+            const txPromos = await prisma.transactionPromotion.findMany({ where: { promotionId: parseInt(promotionId) } });
+            where.id = { in: txPromos.map(tp => tp.transactionId) };
+        }
+        if (amount && operator) {
+            where.amount = operator === 'gte' ? { gte: parseInt(amount) } : { lte: parseInt(amount) };
+        }
+        
+        const count = await prisma.transaction.count({ where });
+        const transactions = await prisma.transaction.findMany({
+            where, skip, take: limitNum,
+            include: {
+                creator: { select: { utorid: true } },
+                transactionPromotions: { select: { promotionId: true } }
+            },
+            orderBy: { createdAt: 'desc' }
+        });
+        
+        const results = transactions.map(tx => {
+            const result = {
+                id: tx.id,
+                type: tx.type,
+                amount: tx.amount,
+                promotionIds: tx.transactionPromotions.map(tp => tp.promotionId),
+                remark: tx.remark,
+                createdBy: tx.creator.utorid,
+                createdAt: tx.createdAt,
+                processed: tx.processed
+            };
+            if (tx.spent) result.spent = tx.spent;
+            if (tx.relatedId) result.relatedId = tx.relatedId;
+            if (tx.type === 'purchase' || tx.type === 'adjustment') result.suspicious = tx.suspicious;
             if (tx.type === 'redemption') result.redeemed = Math.abs(tx.amount);
             return result;
         });

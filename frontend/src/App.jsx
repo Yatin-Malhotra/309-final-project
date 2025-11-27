@@ -15,8 +15,10 @@ import Events from './pages/Events';
 import EventDetail from './pages/EventDetail';
 import CreateEvent from './pages/CreateEvent';
 import Promotions from './pages/Promotions';
+import CreatePromotion from './pages/CreatePromotion';
 import Users from './pages/Users';
 import CreateUser from './pages/CreateUser';
+import UserDetail from './pages/UserDetail';
 
 import './App.css';
 
@@ -103,6 +105,14 @@ function App() {
                   </ProtectedRoute>
                 }
               />
+              <Route
+                path="/promotions/create"
+                element={
+                  <ProtectedRoute requiredRole="manager">
+                    <CreatePromotion />
+                  </ProtectedRoute>
+                }
+              />
 
               <Route
                 path="/users"
@@ -117,6 +127,14 @@ function App() {
                 element={
                   <ProtectedRoute requiredRole="cashier">
                     <CreateUser />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/users/:userId"
+                element={
+                  <ProtectedRoute requiredRole="cashier">
+                    <UserDetail />
                   </ProtectedRoute>
                 }
               />
