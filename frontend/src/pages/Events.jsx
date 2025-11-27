@@ -75,7 +75,7 @@ const Events = () => {
         )}
       </div>
 
-      {hasRole('manager') && (
+      {(
         <div className="filters">
           <div className="form-group">
             <label>Name</label>
@@ -86,7 +86,7 @@ const Events = () => {
               placeholder="Search by name..."
             />
           </div>
-          <div className="form-group">
+          {hasRole('manager') && (<div className="form-group">
             <label>Published</label>
             <select
               value={filters.published}
@@ -96,7 +96,7 @@ const Events = () => {
               <option value="true">Published</option>
               <option value="false">Unpublished</option>
             </select>
-          </div>
+          </div>)}
           <div className="form-group">
             <label>Limit</label>
             <select

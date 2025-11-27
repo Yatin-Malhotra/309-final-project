@@ -31,10 +31,10 @@ const Navbar = () => {
         {user ? (
           <div className="navbar-links">
             <Link to="/dashboard">Dashboard</Link>
-            {hasRole('cashier') && <Link to="/transactions">Transactions</Link>}
+            {<Link to="/transactions">Transactions</Link>}
             {hasRole('manager') && <Link to="/users">Users</Link>}
-            {hasRole('manager') && <Link to="/events">Events</Link>}
-            {hasRole('manager') && <Link to="/promotions">Promotions</Link>}
+            {<Link to="/events">Events</Link>}
+            {<Link to="/promotions">Promotions</Link>}
             <Link to="/profile">Profile</Link>
             <div className="navbar-user">
               <div className="user-info">
