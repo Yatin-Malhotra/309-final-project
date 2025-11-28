@@ -1428,7 +1428,8 @@ app.post('/users/:userId/transactions', requireRole('regular'), async (req, res,
                 amount: -amount,
                 relatedId: recipient.id,
                 remark: remark || '',
-                createdBy: sender.id
+                createdBy: sender.id,
+                processed: true
             }
         });
         
@@ -1439,7 +1440,8 @@ app.post('/users/:userId/transactions', requireRole('regular'), async (req, res,
                 amount: amount,
                 relatedId: sender.id,
                 remark: remark || '',
-                createdBy: sender.id
+                createdBy: sender.id,
+                processed: true
             }
         });
         

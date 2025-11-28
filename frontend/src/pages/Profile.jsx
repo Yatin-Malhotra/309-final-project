@@ -4,7 +4,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { userAPI } from '../services/api';
 
 const Profile = () => {
-  const { user, updateUser } = useAuth();
+  const { user, updateLocalUser } = useAuth();
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -47,7 +47,7 @@ const Profile = () => {
       if (formData.avatar) data.append('avatar', formData.avatar);
 
       const response = await userAPI.updateMe(data);
-      updateUser(response.data);
+      updateLocalUser();
       setSuccess('Profile updated successfully!');
     } catch (err) {
       setError(err.response?.data?.error || 'Failed to update profile.');

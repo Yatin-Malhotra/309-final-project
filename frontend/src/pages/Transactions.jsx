@@ -92,11 +92,9 @@ const Transactions = () => {
     <div className="container">
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
         <h1>{isCashierOnly ? 'Redemption Transactions' : 'Transactions'}</h1>
-        {hasRole('cashier') && (
-          <Link to="/transactions/create" className="btn btn-primary">
-            Create Transaction
-          </Link>
-        )}
+        <Link to="/transactions/create" className="btn btn-primary">
+          Create Transaction
+        </Link>
       </div>
 
       <div className="filters">
