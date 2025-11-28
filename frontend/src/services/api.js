@@ -95,6 +95,7 @@ export const transactionAPI = {
       remark,
     }),
   getMyTransactions: (params) => api.get('/users/me/transactions', { params }),
+  getRedemptionTransactions: (params) => api.get('/transactions/redemptions', { params }),
   processRedemption: (transactionId) =>
     api.patch(`/transactions/${transactionId}/processed`, { processed: true }),
 };

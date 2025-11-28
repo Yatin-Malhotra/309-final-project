@@ -1,11 +1,13 @@
 // Create/Edit event page (for managers)
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
 import { eventAPI } from '../services/api';
 
 const CreateEvent = () => {
   const navigate = useNavigate();
   const { eventId } = useParams();
+  const { user, hasRole } = useAuth();
   const isEditMode = !!eventId;
   
   const [formData, setFormData] = useState({
@@ -16,19 +18,29 @@ const CreateEvent = () => {
     endTime: '',
     capacity: '',
     points: '',
+    published: false,
   });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [loadingEvent, setLoadingEvent] = useState(isEditMode);
+  const [isOrganizer, setIsOrganizer] = useState(false);
 
   const loadEvent = useCallback(async () => {
-    if (!eventId) return;
+    if (!eventId || !user) return;
     
     setLoadingEvent(true);
     setError('');
     try {
       const response = await eventAPI.getEvent(eventId);
       const event = response.data;
+      
+      const isOrg = event.organizers?.some(o => o.id === user.id);
+      setIsOrganizer(isOrg);
+
+      if (!hasRole('manager') && !isOrg) {
+        setError('You do not have permission to edit this event.');
+        return;
+      }
       
       // Format datetime-local inputs (convert ISO to local datetime string)
       const formatDateTimeLocal = (isoString) => {
@@ -50,13 +62,14 @@ const CreateEvent = () => {
         endTime: formatDateTimeLocal(event.endTime),
         capacity: event.capacity ? String(event.capacity) : '',
         points: event.points ? String(event.points) : '',
+        published: event.published || false,
       });
     } catch (err) {
       setError(err.response?.data?.error || 'Failed to load event.');
     } finally {
       setLoadingEvent(false);
     }
-  }, [eventId]);
+  }, [eventId, user, hasRole]);
 
   useEffect(() => {
     if (isEditMode) {
@@ -77,6 +90,7 @@ const CreateEvent = () => {
         startTime: new Date(formData.startTime).toISOString(),
         endTime: new Date(formData.endTime).toISOString(),
         points: parseInt(formData.points),
+        published: formData.published,
       };
 
       if (formData.capacity) {
@@ -198,6 +212,31 @@ const CreateEvent = () => {
               />
             </div>
           </div>
+          
+          {(hasRole('manager') || isOrganizer) && (
+            <div className="form-group">
+              <label>Published Status</label>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <label className="switch">
+                  <input
+                    type="checkbox"
+                    checked={formData.published}
+                    onChange={(e) =>
+                      setFormData({ ...formData, published: e.target.checked })
+                    }
+                  />
+                  <span className="slider round"></span>
+                </label>
+                <span>{formData.published ? 'Published' : 'Draft'}</span>
+              </div>
+              <small style={{ color: '#666', display: 'block', marginTop: '5px' }}>
+                {formData.published 
+                  ? 'This event is visible to all users.' 
+                  : 'This event is hidden from regular users.'}
+              </small>
+            </div>
+          )}
+
           {error && <div className="error-message">{error}</div>}
           <div className="form-actions">
             <button

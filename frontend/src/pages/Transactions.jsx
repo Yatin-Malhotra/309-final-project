@@ -6,6 +6,7 @@ import { Link, useSearchParams } from 'react-router-dom';
 
 const Transactions = () => {
   const { user, hasRole } = useAuth();
+  const isCashierOnly = hasRole('cashier') && !hasRole('manager');
   const [searchParams, setSearchParams] = useSearchParams();
   const [transactions, setTransactions] = useState([]);
   const [count, setCount] = useState(0);
@@ -14,6 +15,7 @@ const Transactions = () => {
     type: searchParams.get('type') || '',
     page: parseInt(searchParams.get('page')) || 1,
     limit: parseInt(searchParams.get('limit')) || 10,
+    processed: searchParams.get('processed') || '',
   });
   const [error, setError] = useState('');
 
@@ -30,9 +32,15 @@ const Transactions = () => {
         if (!params[key]) delete params[key];
       });
 
-      const response = hasRole('manager')
-        ? await transactionAPI.getTransactions(params)
-        : await transactionAPI.getMyTransactions(params);
+      let response;
+      if (hasRole('manager')) {
+        response = await transactionAPI.getTransactions(params);
+      } else if (hasRole('cashier')) {
+        // Cashiers only see redemption transactions
+        response = await transactionAPI.getRedemptionTransactions(params);
+      } else {
+        response = await transactionAPI.getMyTransactions(params);
+      }
 
       setTransactions(response.data.results || []);
       setCount(response.data.count || 0);
@@ -83,7 +91,7 @@ const Transactions = () => {
   return (
     <div className="container">
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-        <h1>Transactions</h1>
+        <h1>{isCashierOnly ? 'Redemption Transactions' : 'Transactions'}</h1>
         {hasRole('cashier') && (
           <Link to="/transactions/create" className="btn btn-primary">
             Create Transaction
@@ -92,20 +100,35 @@ const Transactions = () => {
       </div>
 
       <div className="filters">
-        <div className="form-group">
-          <label>Type</label>
-          <select
-            value={filters.type}
-            onChange={(e) => handleFilterChange('type', e.target.value)}
-          >
-            <option value="">All</option>
-            <option value="purchase">Purchase</option>
-            <option value="redemption">Redemption</option>
-            <option value="adjustment">Adjustment</option>
-            <option value="event">Event</option>
-            <option value="transfer">Transfer</option>
-          </select>
-        </div>
+        {!isCashierOnly && (
+          <div className="form-group">
+            <label>Type</label>
+            <select
+              value={filters.type}
+              onChange={(e) => handleFilterChange('type', e.target.value)}
+            >
+              <option value="">All</option>
+              <option value="purchase">Purchase</option>
+              <option value="redemption">Redemption</option>
+              <option value="adjustment">Adjustment</option>
+              <option value="event">Event</option>
+              <option value="transfer">Transfer</option>
+            </select>
+          </div>
+        )}
+        {isCashierOnly && (
+          <div className="form-group">
+            <label>Status</label>
+            <select
+              value={filters.processed}
+              onChange={(e) => handleFilterChange('processed', e.target.value)}
+            >
+              <option value="">All</option>
+              <option value="false">Pending</option>
+              <option value="true">Processed</option>
+            </select>
+          </div>
+        )}
         <div className="form-group">
           <label>Limit</label>
           <select
@@ -138,9 +161,9 @@ const Transactions = () => {
               <thead>
                 <tr>
                   <th>ID</th>
-                  <th>Type</th>
+                  {!isCashierOnly && <th>Type</th>}
                   <th>Amount</th>
-                  {hasRole('manager') && <th>User</th>}
+                  {(hasRole('manager') || isCashierOnly) && <th>User</th>}
                   <th>Date</th>
                   <th>Status</th>
                   {hasRole('cashier') && <th>Actions</th>}
@@ -150,15 +173,19 @@ const Transactions = () => {
                 {transactions.map((tx) => (
                   <tr key={tx.id}>
                     <td>{tx.id}</td>
+                    {!isCashierOnly && (
+                      <td>
+                        <span className={`badge ${getTransactionTypeBadge(tx.type)}`}>
+                          {tx.type}
+                        </span>
+                      </td>
+                    )}
                     <td>
-                      <span className={`badge ${getTransactionTypeBadge(tx.type)}`}>
-                        {tx.type}
-                      </span>
+                      {isCashierOnly ? (tx.redeemed || Math.abs(tx.amount)) : tx.amount}
                     </td>
-                    <td>
-                      {tx.amount}
-                    </td>
-                    {hasRole('manager') && <td>{tx.utorid || tx.user?.utorid}</td>}
+                    {(hasRole('manager') || isCashierOnly) && (
+                      <td>{tx.userName || tx.utorid || tx.user?.utorid}</td>
+                    )}
                     <td>{tx.createdAt ? formatDate(tx.createdAt) : 'N/A'}</td>
                     <td>
                       {tx.processed ? (
@@ -167,7 +194,7 @@ const Transactions = () => {
                         <span className="badge badge-warning">Pending</span>
                       )}
                     </td>
-                    {hasRole('cashier') && tx.type === 'redemption' && !tx.processed && (
+                    {hasRole('cashier') && !tx.processed && (isCashierOnly || tx.type === 'redemption') && (
                       <td>
                         <button
                           onClick={() => handleProcessRedemption(tx.id)}
@@ -178,6 +205,7 @@ const Transactions = () => {
                         </button>
                       </td>
                     )}
+                    {hasRole('cashier') && tx.processed && <td>-</td>}
                   </tr>
                 ))}
               </tbody>
