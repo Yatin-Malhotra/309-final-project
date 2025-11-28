@@ -91,7 +91,7 @@ function App() {
               <Route
                 path="/events/:eventId/edit"
                 element={
-                  <ProtectedRoute requiredRole="manager">
+                  <ProtectedRoute>
                     <CreateEvent />
                   </ProtectedRoute>
                 }
