@@ -55,9 +55,10 @@ export const AuthProvider = ({ children }) => {
     setUser(null);
   };
 
-  const updateUser = (userData) => {
-    setUser(userData);
-    localStorage.setItem('user', JSON.stringify(userData));
+  const updateLocalUser = async () => {
+    const response = await userAPI.getMe();
+    setUser(response.data);
+    localStorage.setItem('user', JSON.stringify(response.data));
   };
 
   const hasRole = (requiredRole) => {
@@ -73,7 +74,7 @@ export const AuthProvider = ({ children }) => {
     loading,
     login,
     logout,
-    updateUser,
+    updateLocalUser,
     hasRole,
     isAuthenticated: !!user,
   };

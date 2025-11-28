@@ -66,7 +66,7 @@ function App() {
               <Route
                 path="/transactions/create"
                 element={
-                  <ProtectedRoute requiredRole="cashier">
+                  <ProtectedRoute>
                     <CreateTransaction />
                   </ProtectedRoute>
                 }

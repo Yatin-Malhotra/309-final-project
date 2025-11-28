@@ -22,6 +22,9 @@ const UserDetail = () => {
     limit: 10,
   });
 
+  const [editingEmail, setEditingEmail] = useState(false);
+  const [email, setEmail] = useState();
+
   useEffect(() => {
     loadUser();
   }, [userId]);
@@ -42,6 +45,7 @@ const UserDetail = () => {
       // Suspicious and verified fields may not be in GET response, so we'll update it when we toggle
       setSuspicious(response.data.suspicious ?? false);
       setVerified(response.data.verified ?? false);
+      setEmail(response.data.email)
     } catch (err) {
       setError(err.response?.data?.error || 'Failed to load user.');
     } finally {
@@ -62,6 +66,47 @@ const UserDetail = () => {
       console.error('Failed to load transactions:', err);
     } finally {
       setTransactionsLoading(false);
+    }
+  };
+
+  const cancelEditingEmail = () => {
+    setEditingEmail(false);
+    setEmail(user.email);
+  };
+
+  const handleSaveEmail = async () => {
+    setEditingEmail(false);
+
+    if (!confirm(`Are you sure you want to change the user's mail?`)) {
+        return;
+    }
+
+    setActionLoading(true)
+
+    try {
+        const _ = await userAPI.updateUser(user.id, { email } )
+        setUser({...user, email})
+      } catch (err) {
+        alert(err.response?.data?.error || 'Failed to modify email.');
+    } finally {
+       setActionLoading(false)
+    }
+  };
+
+  const handleRoleChange = async (userId, newRole) => {
+    if (!confirm(`Are you sure you want to change the user's role to ${newRole}`)) {
+        return;
+    }
+
+    setActionLoading(true)
+
+    try {
+      const _ = await userAPI.updateUser(user.id, { role : newRole })
+      setUser({...user, role : newRole})
+    } catch (err) {
+        alert(err.response?.data?.error || 'Failed to modify email.');
+    } finally {
+       setActionLoading(false)
     }
   };
 
@@ -197,7 +242,37 @@ const UserDetail = () => {
                 {user.email && (
                   <tr>
                     <td><strong>Email</strong></td>
-                    <td>{user.email}</td>
+                    <td>
+                      {editingEmail ? (
+                      <>
+                        <input
+                          type="text"
+                          value={email}
+                          onChange={(e) => setEmail(e.target.value)}
+                          disabled={loading}
+                        />
+
+                        <button
+                          onClick={handleSaveEmail}
+                          disabled={loading}
+                        >
+                          Save
+                        </button>
+
+                        <button
+                          onClick={cancelEditingEmail}
+                          disabled={loading}
+                        >
+                          Cancel
+                        </button>
+                      </>
+                      ) : (
+                        <>
+                          {user.email}
+                          <button onClick={() => setEditingEmail(true)}>Edit</button>
+                        </>
+                      )}
+                    </td>
                   </tr>
                 )}
                 {user.birthday && (
@@ -209,9 +284,21 @@ const UserDetail = () => {
                 <tr>
                   <td><strong>Role</strong></td>
                   <td>
-                    <span className={`badge ${getRoleBadge(user.role)}`}>
-                      {user.role}
-                    </span>
+                    <select
+                      value={user.role}
+                      onChange={(e) => handleRoleChange(user.id, e.target.value)}
+                      className={`badge ${getRoleBadge(user.role)}`}
+                      style={{border:'none'}}
+                    >
+                      <option value="regular">Regular</option>
+                      <option value="cashier">Cashier</option>
+                      {hasRole('superuser') &&  (
+                        <>
+                        <option value="manager">Manager</option>
+                        <option value="superuser">Superuser</option>
+                        </>
+                      )}
+                    </select>
                   </td>
                 </tr>
                 <tr>
@@ -354,8 +441,7 @@ const UserDetail = () => {
                           </span>
                         </td>
                         <td>
-                          {tx.type === 'redemption' ? '-' : '+'}
-                          {Math.abs(tx.amount || 0)}
+                          {tx.amount}
                         </td>
                         <td>{tx.createdAt ? formatDate(tx.createdAt) : 'N/A'}</td>
                         <td>
