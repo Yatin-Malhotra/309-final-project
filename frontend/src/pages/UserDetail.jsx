@@ -13,6 +13,7 @@ const UserDetail = () => {
   const [error, setError] = useState('');
   const [actionLoading, setActionLoading] = useState(false);
   const [suspicious, setSuspicious] = useState(false);
+  const [verified, setVerified] = useState(false);
   const [transactions, setTransactions] = useState([]);
   const [transactionCount, setTransactionCount] = useState(0);
   const [transactionsLoading, setTransactionsLoading] = useState(false);
@@ -38,8 +39,9 @@ const UserDetail = () => {
     try {
       const response = await userAPI.getUser(userId);
       setUser(response.data);
-      // Suspicious field may not be in GET response, so we'll update it when we toggle
+      // Suspicious and verified fields may not be in GET response, so we'll update it when we toggle
       setSuspicious(response.data.suspicious ?? false);
+      setVerified(response.data.verified ?? false);
     } catch (err) {
       setError(err.response?.data?.error || 'Failed to load user.');
     } finally {
@@ -87,6 +89,25 @@ const UserDetail = () => {
       setUser({ ...user, suspicious: updatedSuspicious });
     } catch (err) {
       alert(err.response?.data?.error || 'Failed to update suspicious status.');
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleToggleVerified = async () => {
+    if (verified) return;
+    
+    if (!confirm('Are you sure you want to verify this user? This action cannot be undone.')) {
+      return;
+    }
+
+    setActionLoading(true);
+    try {
+      const response = await userAPI.updateUser(userId, { verified: true });
+      setVerified(true);
+      setUser({ ...user, verified: true });
+    } catch (err) {
+      alert(err.response?.data?.error || 'Failed to verify user.');
     } finally {
       setActionLoading(false);
     }
@@ -200,25 +221,47 @@ const UserDetail = () => {
                 <tr>
                   <td><strong>Verified</strong></td>
                   <td>
-                    {user.verified ? (
-                      <span className="badge badge-success">Yes</span>
+                    {hasRole('manager') ? (
+                      <label className={`switch ${verified ? 'disabled' : ''}`}>
+                        <input
+                          type="checkbox"
+                          checked={verified}
+                          onChange={handleToggleVerified}
+                          disabled={verified || actionLoading}
+                        />
+                        <span className="slider round"></span>
+                      </label>
                     ) : (
-                      <span className="badge badge-warning">No</span>
+                      user.verified ? (
+                        <span className="badge badge-success">Yes</span>
+                      ) : (
+                        <span className="badge badge-warning">No</span>
+                      )
                     )}
                   </td>
                 </tr>
-                {user.suspicious !== undefined && (
-                  <tr>
-                    <td><strong>Suspicious</strong></td>
-                    <td>
-                      {user.suspicious ? (
+                <tr>
+                  <td><strong>Suspicious</strong></td>
+                  <td>
+                    {hasRole('manager') ? (
+                      <label className="switch">
+                        <input
+                          type="checkbox"
+                          checked={suspicious}
+                          onChange={handleToggleSuspicious}
+                          disabled={actionLoading}
+                        />
+                        <span className="slider round"></span>
+                      </label>
+                    ) : (
+                      user.suspicious ? (
                         <span className="badge badge-danger">Yes</span>
                       ) : (
                         <span className="badge badge-success">No</span>
-                      )}
-                    </td>
-                  </tr>
-                )}
+                      )
+                    )}
+                  </td>
+                </tr>
                 {user.createdAt && (
                   <tr>
                     <td><strong>Created At</strong></td>
@@ -236,27 +279,6 @@ const UserDetail = () => {
           </div>
         </div>
       </div>
-
-      {hasRole('manager') && (
-        <div className="card" style={{ marginTop: '20px' }}>
-          <div className="card-header">Manager Actions</div>
-          <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
-            <label style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer' }}>
-              <input
-                type="checkbox"
-                checked={suspicious}
-                onChange={handleToggleSuspicious}
-                disabled={actionLoading}
-              />
-              <span>Mark user as suspicious</span>
-            </label>
-            {actionLoading && <span style={{ color: '#666' }}>Updating...</span>}
-          </div>
-          <p style={{ marginTop: '10px', fontSize: '14px', color: '#666' }}>
-            Suspicious users cannot be promoted to cashier role. Transactions created by suspicious cashiers will be flagged.
-          </p>
-        </div>
-      )}
 
       {user.promotions && user.promotions.length > 0 && (
         <div className="card" style={{ marginTop: '20px' }}>
