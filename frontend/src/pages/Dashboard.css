@@ -1,0 +1,311 @@
+/* Winter Chill Color Palette */
+/* #B8E3E9 - Lightest icy blue */
+/* #93B1B5 - Light muted blue-gray */
+/* #4F7C82 - Medium desaturated teal */
+/* #0B2E33 - Darkest deep teal */
+
+.dashboard-page {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0;
+  padding-top: 24px;
+  padding-bottom: 32px;
+}
+
+.dashboard-page h1 {
+  font-size: 32px;
+  font-weight: 600;
+  color: #0B2E33;
+  margin-bottom: 32px;
+  letter-spacing: -0.5px;
+}
+
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 24px;
+  margin-bottom: 40px;
+}
+
+.dashboard-card {
+  background: linear-gradient(to bottom, #ffffff 0%, rgba(184, 227, 233, 0.15) 100%);
+  border-radius: 12px;
+  padding: 28px;
+  box-shadow: 0 2px 8px rgba(11, 46, 51, 0.08), 0 1px 2px rgba(11, 46, 51, 0.04);
+  border: 1px solid rgba(147, 177, 181, 0.25);
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.dashboard-card:hover {
+  background: linear-gradient(to bottom, #ffffff 0%, rgba(184, 227, 233, 0.25) 100%);
+  box-shadow: 0 6px 16px rgba(11, 46, 51, 0.15), 0 3px 6px rgba(11, 46, 51, 0.1);
+  transform: translateY(-3px);
+  border-color: rgba(79, 124, 130, 0.4);
+}
+
+.dashboard-card-title {
+  font-size: 14px;
+  color: white;
+  background: linear-gradient(135deg, #4F7C82 0%, #0B2E33 100%);
+  margin: -28px -28px 16px -28px;
+  padding: 12px 28px;
+  border-radius: 12px 12px 0 0;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: capitalize;
+  box-shadow: 0 2px 4px rgba(11, 46, 51, 0.1);
+}
+
+.dashboard-card-value {
+  font-size: 36px;
+  font-weight: 700;
+  color: #0B2E33;
+  margin-bottom: 16px;
+  line-height: 1.2;
+  text-shadow: 0 1px 2px rgba(11, 46, 51, 0.1);
+}
+
+.dashboard-card-actions {
+  margin-top: 16px;
+}
+
+.dashboard-card-actions .btn {
+  font-size: 14px;
+  padding: 10px 20px;
+  width: 100%;
+}
+
+.dashboard-section {
+  background: linear-gradient(to bottom, #ffffff 0%, rgba(184, 227, 233, 0.15) 100%);
+  border-radius: 12px;
+  padding: 32px;
+  box-shadow: 0 2px 8px rgba(11, 46, 51, 0.08), 0 1px 2px rgba(11, 46, 51, 0.04);
+  border: 1px solid rgba(147, 177, 181, 0.25);
+  margin-bottom: 32px;
+  transition: all 0.3s ease;
+}
+
+.dashboard-section:hover {
+  background: linear-gradient(to bottom, #ffffff 0%, rgba(184, 227, 233, 0.2) 100%);
+  box-shadow: 0 4px 12px rgba(11, 46, 51, 0.12), 0 2px 4px rgba(11, 46, 51, 0.08);
+  border-color: rgba(79, 124, 130, 0.35);
+}
+
+.dashboard-section-header {
+  font-size: 20px;
+  font-weight: 700;
+  color: white;
+  background: linear-gradient(135deg, #4F7C82 0%, #0B2E33 100%);
+  margin: -32px -32px 24px -32px;
+  padding: 20px 32px;
+  border-radius: 12px 12px 0 0;
+  letter-spacing: -0.3px;
+  box-shadow: 0 2px 4px rgba(11, 46, 51, 0.1);
+}
+
+.dashboard-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 20px;
+}
+
+.dashboard-table thead {
+  background-color: rgba(184, 227, 233, 0.1);
+}
+
+.dashboard-table th {
+  padding: 14px 16px;
+  text-align: left;
+  font-weight: 700;
+  color: #0B2E33;
+  font-size: 14px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-bottom: 2px solid rgba(79, 124, 130, 0.3);
+}
+
+.dashboard-table td {
+  padding: 16px;
+  border-bottom: 1px solid rgba(147, 177, 181, 0.15);
+  color: #0B2E33;
+  font-size: 15px;
+  font-weight: 500;
+}
+
+.dashboard-table tbody tr {
+  transition: background-color 0.2s ease;
+}
+
+.dashboard-table tbody tr:hover {
+  background-color: rgba(184, 227, 233, 0.15);
+  transform: scale(1.01);
+  transition: all 0.2s ease;
+}
+
+.dashboard-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.dashboard-badge {
+  display: inline-block;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  text-transform: capitalize;
+}
+
+.dashboard-badge-primary {
+  background-color: rgba(79, 124, 130, 0.2);
+  color: #0B2E33;
+  font-weight: 700;
+}
+
+.dashboard-badge-success {
+  background-color: rgba(40, 167, 69, 0.15);
+  color: #28a745;
+}
+
+.dashboard-badge-danger {
+  background-color: rgba(220, 53, 69, 0.15);
+  color: #dc3545;
+}
+
+.dashboard-badge-warning {
+  background-color: rgba(255, 193, 7, 0.15);
+  color: #ffc107;
+}
+
+.dashboard-badge-secondary {
+  background-color: rgba(147, 177, 181, 0.2);
+  color: #0B2E33;
+  font-weight: 700;
+}
+
+.dashboard-list-item {
+  padding: 20px 0;
+  border-bottom: 1px solid rgba(147, 177, 181, 0.15);
+  transition: background-color 0.2s ease;
+}
+
+.dashboard-list-item:last-child {
+  border-bottom: none;
+}
+
+.dashboard-list-item:hover {
+  background-color: rgba(184, 227, 233, 0.2);
+  margin: 0 -16px;
+  padding: 20px 16px;
+  border-radius: 8px;
+  border-left: 3px solid rgba(79, 124, 130, 0.5);
+  transition: all 0.2s ease;
+}
+
+.dashboard-list-item-title {
+  font-weight: 700;
+  color: #0B2E33;
+  font-size: 16px;
+  margin-bottom: 8px;
+}
+
+.dashboard-list-item-title a {
+  color: #0B2E33;
+  text-decoration: none;
+  transition: color 0.2s ease;
+  font-weight: 700;
+}
+
+.dashboard-list-item-title a:hover {
+  color: #4F7C82;
+  text-decoration: underline;
+}
+
+.dashboard-list-item-meta {
+  font-size: 13px;
+  color: #0B2E33;
+  margin-top: 6px;
+  opacity: 0.7;
+  font-weight: 500;
+}
+
+.dashboard-list-item-description {
+  font-size: 14px;
+  color: #0B2E33;
+  margin-top: 8px;
+  line-height: 1.6;
+  font-weight: 500;
+  opacity: 0.85;
+}
+
+.dashboard-list-item-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.dashboard-section-actions {
+  margin-top: 24px;
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.dashboard-empty-state {
+  text-align: center;
+  padding: 48px 20px;
+  color: #93B1B5;
+  font-size: 15px;
+}
+
+.dashboard-two-column {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+  gap: 24px;
+  margin-top: 24px;
+}
+
+.dashboard-loading {
+  text-align: center;
+  padding: 60px 20px;
+  color: #4F7C82;
+  font-size: 16px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .dashboard-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .dashboard-two-column {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .dashboard-section {
+    padding: 24px 20px;
+  }
+
+  .dashboard-card-value {
+    font-size: 28px;
+  }
+
+  .dashboard-page h1 {
+    font-size: 24px;
+    margin-bottom: 24px;
+  }
+
+  .dashboard-table {
+    font-size: 14px;
+  }
+
+  .dashboard-table th,
+  .dashboard-table td {
+    padding: 12px 8px;
+  }
+}
+
