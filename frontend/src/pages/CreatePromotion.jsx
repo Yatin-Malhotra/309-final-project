@@ -1,7 +1,8 @@
 // Create/Edit promotion page (for managers)
 import { useState, useEffect, useCallback } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, Link } from 'react-router-dom';
 import { promotionAPI } from '../services/api';
+import './CreatePromotion.css';
 
 const CreatePromotion = () => {
   const navigate = useNavigate();
@@ -124,16 +125,25 @@ const CreatePromotion = () => {
 
   if (loadingPromotion) {
     return (
-      <div className="container">
-        <div className="loading">Loading promotion...</div>
+      <div className="create-promotion-page">
+        <div className="create-promotion-loading">Loading promotion...</div>
       </div>
     );
   }
 
   return (
-    <div className="container">
-      <h1>{isEditMode ? 'Edit Promotion' : 'Create Promotion'}</h1>
-      <div className="card">
+    <div className="create-promotion-page">
+      <div className="create-promotion-page-header">
+        <div>
+          {isEditMode && (
+            <Link to="/promotions" className="btn btn-secondary create-promotion-back-btn">
+              ← Back to Promotions
+            </Link>
+          )}
+          <h1>{isEditMode ? 'Edit Promotion' : 'Create Promotion'}</h1>
+        </div>
+      </div>
+      <div className="create-promotion-card">
         <form onSubmit={handleSubmit}>
           <div className="form-group">
             <label htmlFor="name">Promotion Name *</label>
@@ -172,7 +182,7 @@ const CreatePromotion = () => {
               <option value="automatic">Automatic</option>
               <option value="onetime">One-time</option>
             </select>
-            <small style={{ color: '#666', fontSize: '12px', display: 'block', marginTop: '5px' }}>
+            <small>
               Automatic: Applied automatically to eligible transactions. One-time: Users receive a code to use.
             </small>
           </div>
@@ -216,7 +226,7 @@ const CreatePromotion = () => {
                 }
                 placeholder="e.g., 50.00"
               />
-              <small style={{ color: '#666', fontSize: '12px', display: 'block', marginTop: '5px' }}>
+              <small>
                 Required if rate is provided
               </small>
             </div>
@@ -233,7 +243,7 @@ const CreatePromotion = () => {
                 }
                 placeholder="e.g., 1.5"
               />
-              <small style={{ color: '#666', fontSize: '12px', display: 'block', marginTop: '5px' }}>
+              <small>
                 Points multiplier (required if minSpending is provided)
               </small>
             </div>
@@ -251,7 +261,7 @@ const CreatePromotion = () => {
               }
               placeholder="e.g., 100"
             />
-            <small style={{ color: '#666', fontSize: '12px', display: 'block', marginTop: '5px' }}>
+            <small>
               Provide either (minSpending + rate) OR fixed points. Cannot provide both.
             </small>
           </div>

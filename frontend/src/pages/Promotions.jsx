@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { promotionAPI } from '../services/api';
 import { Link } from 'react-router-dom';
+import './Promotions.css';
 
 const Promotions = () => {
   const { hasRole } = useAuth();
@@ -40,71 +41,72 @@ const Promotions = () => {
   };
 
   return (
-    <div className="container">
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+    <div className="promotions-page">
+      <div className="promotions-page-header">
         <h1>Promotions</h1>
         {hasRole('manager') && (
-          <Link to="/promotions/create" className="btn btn-primary">
+          <Link to="/promotions/create" className="btn btn-primary promotions-create-btn">
             Create Promotion
           </Link>
         )}
       </div>
 
-      {error && <div className="error-message">{error}</div>}
+      {error && <div className="promotions-error-message">{error}</div>}
 
       {loading ? (
-        <div className="loading">Loading promotions...</div>
+        <div className="promotions-loading">Loading promotions...</div>
       ) : promotions.length === 0 ? (
-        <div className="empty-state">No promotions found</div>
+        <div className="promotions-empty-state">No promotions found</div>
       ) : (
-        <div style={{ display: 'grid', gap: '20px' }}>
+        <div className="promotions-grid">
           {promotions.map((promo) => (
-            <div key={promo.id} className="card">
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start' }}>
-                <div style={{ flex: 1 }}>
-                  <h3 style={{ marginBottom: '10px' }}>{promo.name}</h3>
-                  <p style={{ color: '#666', marginBottom: '10px' }}>
+            <div key={promo.id} className="promotions-card">
+              <div className="promotions-card-content">
+                <div className="promotions-card-main">
+                  <h3 className="promotions-card-title">{promo.name}</h3>
+                  <p className="promotions-card-description">
                     {promo.description}
                   </p>
-                  <div style={{ marginTop: '10px' }}>
-                    <span className={`badge ${promo.type === 'automatic' ? 'badge-primary' : 'badge-secondary'}`}>
+                  <div className="promotions-card-badges">
+                    <span className={`promotions-badge ${promo.type === 'automatic' ? 'promotions-badge-primary' : 'promotions-badge-secondary'}`}>
                       {promo.type}
                     </span>
                     {isActive(promo) ? (
-                      <span className="badge badge-success" style={{ marginLeft: '10px' }}>
+                      <span className="promotions-badge promotions-badge-success">
                         Active
                       </span>
                     ) : (
-                      <span className="badge badge-secondary" style={{ marginLeft: '10px' }}>
+                      <span className={`promotions-badge ${new Date(promo.startTime) > new Date() ? 'promotions-badge-secondary' : 'promotions-badge-danger'}`}>
                         {new Date(promo.startTime) > new Date() ? 'Upcoming' : 'Expired'}
                       </span>
                     )}
                   </div>
-                  <p style={{ marginTop: '10px', fontSize: '14px', color: '#666' }}>
-                    Valid: {formatDate(promo.startTime)} - {formatDate(promo.endTime)}
-                  </p>
-                  {promo.minSpending && (
-                    <p style={{ fontSize: '14px', color: '#666' }}>
-                      Minimum spending: ${promo.minSpending}
+                  <div className="promotions-card-details">
+                    <p className="promotions-card-detail">
+                      Valid: {formatDate(promo.startTime)} - {formatDate(promo.endTime)}
                     </p>
-                  )}
-                  {promo.rate && (
-                    <p style={{ fontSize: '14px', color: '#666' }}>
-                      Rate: {promo.rate}x points
-                    </p>
-                  )}
-                  {promo.points !== undefined && promo.points !== null && (
-                    <p style={{ fontSize: '14px', color: '#666' }}>
-                      Points: {promo.points}
-                    </p>
-                  )}
+                    {promo.minSpending && (
+                      <p className="promotions-card-detail">
+                        Minimum spending: ${promo.minSpending}
+                      </p>
+                    )}
+                    {promo.rate && (
+                      <p className="promotions-card-detail">
+                        Rate: {promo.rate}x points
+                      </p>
+                    )}
+                    {promo.points !== undefined && promo.points !== null && (
+                      <p className="promotions-card-detail">
+                        Points: {promo.points}
+                      </p>
+                    )}
+                  </div>
                 </div>
                 {hasRole('manager') && (
-                  <div>
+                  <div className="promotions-card-actions">
                     <Link
                       to={`/promotions/${promo.id}/edit`}
-                      className="btn btn-primary"
-                      style={{ padding: '8px 16px', marginRight: '10px' }}
+                      className="btn btn-primary promotions-edit-btn"
                     >
                       Edit
                     </Link>
