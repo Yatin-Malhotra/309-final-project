@@ -10,6 +10,8 @@ const Transactions = () => {
   const isCashierOnly = hasRole('cashier') && !hasRole('manager');
   const [searchParams, setSearchParams] = useSearchParams();
   const [transactions, setTransactions] = useState([]);
+  const [allTransactions, setAllTransactions] = useState([]);
+  const [filteredTransactions, setFilteredTransactions] = useState([]);
   const [count, setCount] = useState(0);
   const [loading, setLoading] = useState(true);
   const [filters, setFilters] = useState({
@@ -18,20 +20,118 @@ const Transactions = () => {
     limit: parseInt(searchParams.get('limit')) || 10,
     processed: searchParams.get('processed') || '',
   });
+  const [clientFilters, setClientFilters] = useState({
+    idNameSearch: '',
+    status: '',
+  });
+  const [managerFilters, setManagerFilters] = useState({
+    idUtoridSearch: '',
+    status: '',
+  });
   const [error, setError] = useState('');
+
+  // Check if client-side filtering is active
+  const hasClientSideFilters = () => {
+    if (isCashierOnly) {
+      return clientFilters.idNameSearch !== '' || clientFilters.status !== '';
+    } else if (hasRole('manager')) {
+      return managerFilters.idUtoridSearch !== '' || managerFilters.status !== '';
+    }
+    return false;
+  };
 
   useEffect(() => {
     loadTransactions();
   }, [filters, user]);
+
+  // Reset to page 1 and reload when client-side filters change
+  useEffect(() => {
+    const hasFilters = hasClientSideFilters();
+    
+    // Reset to page 1 if filters are active and we're not already on page 1
+    if (hasFilters && filters.page !== 1) {
+      const newFilters = { ...filters, page: 1 };
+      setFilters(newFilters);
+      setSearchParams(newFilters);
+      // Don't reload here - the filters change will trigger the first useEffect
+    } else {
+      // Reload immediately if page is already 1 or filters were cleared
+      loadTransactions();
+    }
+  }, [clientFilters.idNameSearch, clientFilters.status, managerFilters.idUtoridSearch, managerFilters.status]);
+
+  // Client-side filtering
+  useEffect(() => {
+    let filtered = [...allTransactions];
+
+    if (isCashierOnly) {
+      // Filter by id/name search for cashiers
+      if (clientFilters.idNameSearch) {
+        const searchTerm = clientFilters.idNameSearch.toLowerCase();
+        filtered = filtered.filter((tx) => {
+          const idMatch = tx.id.toString().includes(searchTerm);
+          const nameMatch = (tx.userName || tx.utorid || tx.user?.utorid || '')
+            .toLowerCase()
+            .includes(searchTerm);
+          return idMatch || nameMatch;
+        });
+      }
+
+      // Filter by status for cashiers
+      if (clientFilters.status !== '') {
+        const statusFilter = clientFilters.status === 'true';
+        filtered = filtered.filter((tx) => tx.processed === statusFilter);
+      }
+    } else if (hasRole('manager')) {
+      // Filter by id/utorid search for managers
+      if (managerFilters.idUtoridSearch) {
+        const searchTerm = managerFilters.idUtoridSearch.toLowerCase();
+        filtered = filtered.filter((tx) => {
+          const idMatch = tx.id.toString().includes(searchTerm);
+          const utoridMatch = (tx.utorid || tx.user?.utorid || '')
+            .toLowerCase()
+            .includes(searchTerm);
+          return idMatch || utoridMatch;
+        });
+      }
+
+      // Filter by status for managers
+      if (managerFilters.status !== '') {
+        const statusFilter = managerFilters.status === 'true';
+        filtered = filtered.filter((tx) => tx.processed === statusFilter);
+      }
+    }
+
+    setFilteredTransactions(filtered);
+
+    // Apply client-side pagination if filters are active
+    if (hasClientSideFilters()) {
+      const startIndex = (filters.page - 1) * filters.limit;
+      const endIndex = startIndex + filters.limit;
+      setTransactions(filtered.slice(startIndex, endIndex));
+    } else {
+      // Use server-side paginated results
+      setTransactions(filtered);
+    }
+  }, [clientFilters, managerFilters, allTransactions, isCashierOnly, hasRole, filters.page, filters.limit]);
 
   const loadTransactions = async () => {
     setLoading(true);
     setError('');
     try {
       const params = { ...filters };
-      Object.keys(params).forEach((key) => {
-        if (!params[key]) delete params[key];
-      });
+      
+      // If client-side filters are active, fetch maximum results for client-side filtering
+      if (hasClientSideFilters()) {
+        // Remove page parameter and set limit to maximum (100) to get more results for client-side filtering
+        delete params.page;
+        params.limit = 100; // Maximum allowed by backend
+      } else {
+        // Keep server-side pagination when no client-side filters
+        Object.keys(params).forEach((key) => {
+          if (!params[key]) delete params[key];
+        });
+      }
 
       let response;
       if (hasRole('manager')) {
@@ -43,7 +143,8 @@ const Transactions = () => {
         response = await transactionAPI.getMyTransactions(params);
       }
 
-      setTransactions(response.data.results || []);
+      const fetchedTransactions = response.data.results || [];
+      setAllTransactions(fetchedTransactions);
       setCount(response.data.count || 0);
     } catch (err) {
       setError(err.response?.data?.error || 'Failed to load transactions.');
@@ -105,40 +206,107 @@ const Transactions = () => {
     <div className="transactions-page">
       <div className="transactions-page-header">
         <h1>{isCashierOnly ? 'Redemption Transactions' : 'Transactions'}</h1>
-        <Link to="/transactions/create" className="btn btn-primary">
-          Create Transaction
-        </Link>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', alignItems: 'flex-end' }}>
+          <Link to="/transactions/create" className="btn btn-primary">
+            Create Transaction
+          </Link>
+          {hasRole('manager') && (
+            <button
+              type="button"
+              onClick={() => {
+                if (managerFilters.idUtoridSearch === user?.utorid) {
+                  // If already searching for own utorid, clear the search
+                  setManagerFilters({ ...managerFilters, idUtoridSearch: '' });
+                } else {
+                  // Otherwise, set search to own utorid
+                  setManagerFilters({ ...managerFilters, idUtoridSearch: user?.utorid || '' });
+                }
+              }}
+              className={managerFilters.idUtoridSearch === user?.utorid ? "btn btn-secondary" : "btn btn-outline-secondary"}
+              title={managerFilters.idUtoridSearch === user?.utorid ? "Clear filter and show all transactions" : "Show only my transactions"}
+            >
+              My Transactions
+            </button>
+          )}
+        </div>
       </div>
 
       <div className="transactions-filters">
         {!isCashierOnly && (
-          <div className="form-group">
-            <label>Type</label>
-            <select
-              value={filters.type}
-              onChange={(e) => handleFilterChange('type', e.target.value)}
-            >
-              <option value="">All</option>
-              <option value="purchase">Purchase</option>
-              <option value="redemption">Redemption</option>
-              <option value="adjustment">Adjustment</option>
-              <option value="event">Event</option>
-              <option value="transfer">Transfer</option>
-            </select>
-          </div>
+          <>
+            {hasRole('manager') && (
+              <div className="form-group">
+                <label>Search</label>
+                <input
+                  type="text"
+                  placeholder="ID or UTORid"
+                  value={managerFilters.idUtoridSearch}
+                  onChange={(e) =>
+                    setManagerFilters({ ...managerFilters, idUtoridSearch: e.target.value })
+                  }
+                  className="transactions-search-input"
+                />
+              </div>
+            )}
+            <div className="form-group">
+              <label>Type</label>
+              <select
+                value={filters.type}
+                onChange={(e) => handleFilterChange('type', e.target.value)}
+              >
+                <option value="">All</option>
+                <option value="purchase">Purchase</option>
+                <option value="redemption">Redemption</option>
+                <option value="adjustment">Adjustment</option>
+                <option value="event">Event</option>
+                <option value="transfer">Transfer</option>
+              </select>
+            </div>
+            {hasRole('manager') && (
+              <div className="form-group">
+                <label>Status</label>
+                <select
+                  value={managerFilters.status}
+                  onChange={(e) =>
+                    setManagerFilters({ ...managerFilters, status: e.target.value })
+                  }
+                >
+                  <option value="">All</option>
+                  <option value="false">Pending</option>
+                  <option value="true">Processed</option>
+                </select>
+              </div>
+            )}
+          </>
         )}
         {isCashierOnly && (
-          <div className="form-group">
-            <label>Status</label>
-            <select
-              value={filters.processed}
-              onChange={(e) => handleFilterChange('processed', e.target.value)}
-            >
-              <option value="">All</option>
-              <option value="false">Pending</option>
-              <option value="true">Processed</option>
-            </select>
-          </div>
+          <>
+            <div className="form-group">
+              <label>Search</label>
+              <input
+                type="text"
+                placeholder="Name or ID"
+                value={clientFilters.idNameSearch}
+                onChange={(e) =>
+                  setClientFilters({ ...clientFilters, idNameSearch: e.target.value })
+                }
+                className="transactions-search-input"
+              />
+            </div>
+            <div className="form-group">
+              <label>Status</label>
+              <select
+                value={clientFilters.status}
+                onChange={(e) =>
+                  setClientFilters({ ...clientFilters, status: e.target.value })
+                }
+              >
+                <option value="">All</option>
+                <option value="false">Pending</option>
+                <option value="true">Processed</option>
+              </select>
+            </div>
+          </>
         )}
         <div className="form-group">
           <label>Limit</label>
@@ -254,21 +422,31 @@ const Transactions = () => {
           </div>
 
           <div className="transactions-pagination">
-            <button
-              onClick={() => handleFilterChange('page', filters.page - 1)}
-              disabled={filters.page <= 1}
-            >
-              Previous
-            </button>
-            <span>
-              Page {filters.page} of {Math.ceil(count / filters.limit)}
-            </span>
-            <button
-              onClick={() => handleFilterChange('page', filters.page + 1)}
-              disabled={filters.page >= Math.ceil(count / filters.limit)}
-            >
-              Next
-            </button>
+            {(() => {
+              const isClientFiltering = hasClientSideFilters();
+              const totalCount = isClientFiltering ? filteredTransactions.length : count;
+              const totalPages = Math.ceil(totalCount / filters.limit);
+              
+              return (
+                <>
+                  <button
+                    onClick={() => handleFilterChange('page', filters.page - 1)}
+                    disabled={filters.page <= 1}
+                  >
+                    Previous
+                  </button>
+                  <span>
+                    Page {filters.page} of {totalPages || 1}
+                  </span>
+                  <button
+                    onClick={() => handleFilterChange('page', filters.page + 1)}
+                    disabled={filters.page >= totalPages}
+                  >
+                    Next
+                  </button>
+                </>
+              );
+            })()}
           </div>
         </>
       )}
