@@ -377,6 +377,85 @@
   font-size: 16px;
 }
 
+/* Analytics specific styles */
+.analytics-chart-container {
+  margin-top: 24px;
+  padding: 16px;
+  background: var(--bg-tertiary);
+  border-radius: 8px;
+}
+
+.analytics-chart-caption {
+  margin-top: 16px;
+  text-align: center;
+  font-size: 13px;
+  color: var(--text-primary);
+  opacity: 0.7;
+  font-style: italic;
+}
+
+.analytics-card-wide {
+  grid-column: 1 / -1;
+}
+
+/* Transaction Analytics specific layout */
+.transaction-analytics-layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  margin-top: 24px;
+}
+
+.transaction-analytics-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.transaction-analytics-chart {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-tertiary);
+  border-radius: 8px;
+  padding: 16px;
+}
+
+@media (max-width: 968px) {
+  .transaction-analytics-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* System Overview specific layout */
+.system-overview-layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  margin-top: 24px;
+}
+
+.system-overview-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.system-overview-chart {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-tertiary);
+  border-radius: 8px;
+  padding: 16px;
+}
+
+@media (max-width: 968px) {
+  .system-overview-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
 /* Responsive adjustments */
 @media (max-width: 768px) {
   .dashboard-header-with-action {

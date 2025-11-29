@@ -133,5 +133,19 @@ export const promotionAPI = {
   deletePromotion: (promotionId) => api.delete(`/promotions/${promotionId}`),
 };
 
+// Analytics endpoints
+export const analyticsAPI = {
+  // Cashier analytics
+  getCashierStats: () => api.get('/analytics/cashier/stats'),
+  
+  // Manager analytics
+  getOverview: () => api.get('/analytics/overview'),
+  getUserAnalytics: () => api.get('/analytics/users'),
+  getTransactionAnalytics: () => api.get('/analytics/transactions'),
+  getEventAnalytics: () => api.get('/analytics/events'),
+  getPromotionAnalytics: () => api.get('/analytics/promotions'),
+  getFinancialAnalytics: () => api.get('/analytics/financial'),
+};
+
 export default api;
 

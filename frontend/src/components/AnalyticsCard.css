@@ -1,0 +1,57 @@
+.analytics-card {
+  background: var(--bg-card);
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 2px 8px var(--shadow), 0 1px 2px var(--shadow);
+  border: 1px solid var(--border-color);
+  transition: all 0.3s ease;
+}
+
+.analytics-card:hover {
+  background: var(--bg-card-hover);
+  box-shadow: 0 6px 16px rgba(11, 46, 51, 0.15), 0 3px 6px rgba(11, 46, 51, 0.1);
+  transform: translateY(-2px);
+  border-color: rgba(79, 124, 130, 0.4);
+}
+
+.analytics-card-title {
+  font-size: 14px;
+  color: white;
+  background: var(--navbar-gradient);
+  margin: -24px -24px 16px -24px;
+  padding: 12px 24px;
+  border-radius: 12px 12px 0 0;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  box-shadow: 0 2px 4px rgba(11, 46, 51, 0.1);
+}
+
+.analytics-card-value {
+  font-size: 32px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 8px;
+  line-height: 1.2;
+}
+
+.analytics-card-subtitle {
+  font-size: 13px;
+  color: var(--text-primary);
+  opacity: 0.7;
+  font-weight: 500;
+  margin-bottom: 8px;
+}
+
+.analytics-card-description {
+  font-size: 14px;
+  color: var(--text-primary);
+  opacity: 0.85;
+  line-height: 1.5;
+  margin-top: 8px;
+}
+
+.analytics-card-content {
+  margin-top: 16px;
+}
+

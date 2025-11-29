@@ -2754,6 +2754,33 @@ app.delete('/promotions/:promotionId', requireRole('manager'), async (req, res, 
 });
 
 // ============================================
+// ANALYTICS ROUTES
+// ============================================
+
+const analyticsRoutes = require('./routes/analytics');
+
+// GET /analytics/cashier/stats - Cashier analytics
+app.get('/analytics/cashier/stats', requireRole('cashier'), analyticsRoutes.getCashierStats);
+
+// GET /analytics/overview - System overview (Manager)
+app.get('/analytics/overview', requireRole('manager'), analyticsRoutes.getOverview);
+
+// GET /analytics/users - User analytics (Manager)
+app.get('/analytics/users', requireRole('manager'), analyticsRoutes.getUserAnalytics);
+
+// GET /analytics/transactions - Transaction analytics (Manager)
+app.get('/analytics/transactions', requireRole('manager'), analyticsRoutes.getTransactionAnalytics);
+
+// GET /analytics/events - Event analytics (Manager)
+app.get('/analytics/events', requireRole('manager'), analyticsRoutes.getEventAnalytics);
+
+// GET /analytics/promotions - Promotion analytics (Manager)
+app.get('/analytics/promotions', requireRole('manager'), analyticsRoutes.getPromotionAnalytics);
+
+// GET /analytics/financial - Financial insights (Manager)
+app.get('/analytics/financial', requireRole('manager'), analyticsRoutes.getFinancialAnalytics);
+
+// ============================================
 // ERROR HANDLERS
 // ============================================
 
