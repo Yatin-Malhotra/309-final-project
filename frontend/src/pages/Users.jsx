@@ -2,10 +2,12 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { userAPI } from '../services/api';
-import { Link, useSearchParams } from 'react-router-dom';
+import { Link, useSearchParams, useNavigate } from 'react-router-dom';
+import './Users.css';
 
 const Users = () => {
   const { hasRole } = useAuth();
+  const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const [users, setUsers] = useState([]);
   const [count, setCount] = useState(0);
@@ -54,26 +56,26 @@ const Users = () => {
 
   const getRoleBadge = (role) => {
     const colors = {
-      regular: 'badge-secondary',
-      cashier: 'badge-primary',
-      manager: 'badge-success',
-      superuser: 'badge-danger',
+      regular: 'users-badge-secondary',
+      cashier: 'users-badge-blue',
+      manager: 'users-badge-success',
+      superuser: 'users-badge-danger',
     };
-    return colors[role] || 'badge-secondary';
+    return colors[role] || 'users-badge-secondary';
   };
 
   return (
-    <div className="container">
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+    <div className="users-page">
+      <div className="users-page-header">
         <h1>Users</h1>
         {hasRole('cashier') && (
-          <Link to="/users/create" className="btn btn-primary">
+          <Link to="/users/create" className="btn btn-primary users-create-btn">
             Create User
           </Link>
         )}
       </div>
 
-      <div className="filters">
+      <div className="users-filters">
         <div className="form-group">
           <label>Search</label>
           <input
@@ -120,16 +122,16 @@ const Users = () => {
         </div>
       </div>
 
-      {error && <div className="error-message">{error}</div>}
+      {error && <div className="users-error-message">{error}</div>}
 
       {loading ? (
-        <div className="loading">Loading users...</div>
+        <div className="users-loading">Loading users...</div>
       ) : users.length === 0 ? (
-        <div className="empty-state">No users found</div>
+        <div className="users-empty-state">No users found</div>
       ) : (
         <>
-          <div className="card">
-            <table className="table">
+          <div className="users-section">
+            <table className="users-table">
               <thead>
                 <tr>
                   <th>ID</th>
@@ -139,37 +141,31 @@ const Users = () => {
                   <th>Role</th>
                   <th>Points</th>
                   <th>Verified</th>
-                  <th>Actions</th>
                 </tr>
               </thead>
               <tbody>
                 {users.map((user) => (
-                  <tr key={user.id}>
+                  <tr 
+                    key={user.id}
+                    onClick={() => navigate(`/users/${user.id}`)}
+                    className="users-table-row-clickable"
+                  >
                     <td>{user.id}</td>
                     <td>{user.utorid}</td>
                     <td>{user.name}</td>
                     <td>{user.email}</td>
                     <td>
-                      <span className={`badge ${getRoleBadge(user.role)}`}>
+                      <span className={`users-badge ${getRoleBadge(user.role)}`}>
                         {user.role}
                       </span>
                     </td>
                     <td>{user.points || 0}</td>
                     <td>
                       {user.verified ? (
-                        <span className="badge badge-success">Yes</span>
+                        <span className="users-badge users-badge-success">Yes</span>
                       ) : (
-                        <span className="badge badge-warning">No</span>
+                        <span className="users-badge users-badge-warning">No</span>
                       )}
-                    </td>
-                    <td>
-                      <Link
-                        to={`/users/${user.id}`}
-                        className="btn btn-primary"
-                        style={{ padding: '5px 10px', fontSize: '12px' }}
-                      >
-                        View
-                      </Link>
                     </td>
                   </tr>
                 ))}
@@ -177,7 +173,7 @@ const Users = () => {
             </table>
           </div>
 
-          <div className="pagination">
+          <div className="users-pagination">
             <button
               onClick={() => handleFilterChange('page', filters.page - 1)}
               disabled={filters.page <= 1}

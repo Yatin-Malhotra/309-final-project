@@ -1,0 +1,154 @@
+/* Winter Chill Color Palette */
+/* #B8E3E9 - Lightest icy blue */
+/* #93B1B5 - Light muted blue-gray */
+/* #4F7C82 - Medium desaturated teal */
+/* #0B2E33 - Darkest deep teal */
+
+.create-user-page {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0;
+  padding-top: 24px;
+  padding-bottom: 32px;
+}
+
+.create-user-page-header {
+  margin-bottom: 32px;
+}
+
+.create-user-page-header h1 {
+  font-size: 32px;
+  font-weight: 600;
+  color: #0B2E33;
+  letter-spacing: -0.5px;
+  margin: 0;
+}
+
+.create-user-card {
+  background: linear-gradient(to bottom, #ffffff 0%, rgba(184, 227, 233, 0.15) 100%);
+  border-radius: 12px;
+  padding: 32px;
+  box-shadow: 0 2px 8px rgba(11, 46, 51, 0.08), 0 1px 2px rgba(11, 46, 51, 0.04);
+  border: 1px solid rgba(147, 177, 181, 0.25);
+  transition: all 0.3s ease;
+}
+
+.create-user-card:hover {
+  background: linear-gradient(to bottom, #ffffff 0%, rgba(184, 227, 233, 0.2) 100%);
+  box-shadow: 0 4px 12px rgba(11, 46, 51, 0.12), 0 2px 4px rgba(11, 46, 51, 0.08);
+  border-color: rgba(79, 124, 130, 0.35);
+}
+
+.create-user-page .form-group {
+  margin-bottom: 24px;
+}
+
+.create-user-page .form-group label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 600;
+  color: #0B2E33;
+  font-size: 14px;
+}
+
+.create-user-page .form-group input,
+.create-user-page .form-group select,
+.create-user-page .form-group textarea {
+  width: 100%;
+  padding: 12px 16px;
+  border: 1.5px solid rgba(147, 177, 181, 0.3);
+  border-radius: 8px;
+  font-size: 15px;
+  color: #0B2E33;
+  background-color: white;
+  transition: all 0.2s ease;
+  font-family: inherit;
+  font-weight: 500;
+}
+
+.create-user-page .form-group input:focus,
+.create-user-page .form-group select:focus,
+.create-user-page .form-group textarea:focus {
+  outline: none;
+  border-color: #4F7C82;
+  box-shadow: 0 0 0 3px rgba(79, 124, 130, 0.1);
+}
+
+.create-user-page .form-group input:hover:not(:focus),
+.create-user-page .form-group select:hover:not(:focus),
+.create-user-page .form-group textarea:hover:not(:focus) {
+  border-color: #4F7C82;
+}
+
+.create-user-page .error-message {
+  color: #dc3545;
+  font-size: 15px;
+  margin-top: 16px;
+  padding: 12px 16px;
+  background-color: #fff5f5;
+  border-left: 3px solid #dc3545;
+  border-radius: 4px;
+}
+
+.create-user-page .success-message {
+  color: #28a745;
+  font-size: 15px;
+  margin-top: 16px;
+  padding: 12px 16px;
+  background-color: #f0fff4;
+  border-left: 3px solid #28a745;
+  border-radius: 4px;
+}
+
+.create-user-page .form-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  margin-top: 32px;
+  padding-top: 24px;
+  border-top: 1px solid rgba(147, 177, 181, 0.2);
+}
+
+.create-user-page .form-actions .btn {
+  padding: 12px 24px;
+  font-size: 15px;
+  font-weight: 600;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+.create-user-page .form-actions .btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(11, 46, 51, 0.15);
+}
+
+.create-user-page .form-actions .btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .create-user-page {
+    padding: 16px;
+    padding-top: 24px;
+  }
+
+  .create-user-card {
+    padding: 24px;
+  }
+
+  .create-user-page-header h1 {
+    font-size: 24px;
+  }
+
+  .create-user-page .form-actions {
+    flex-direction: column;
+  }
+
+  .create-user-page .form-actions .btn {
+    width: 100%;
+  }
+}
+

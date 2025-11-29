@@ -169,6 +169,12 @@ code {
   color: white;
 }
 
+.badge-blue {
+  background-color: rgba(33, 150, 243, 0.2);
+  color: #1565C0;
+  font-weight: 700;
+}
+
 .badge-success {
   background-color: #28a745;
   color: white;
