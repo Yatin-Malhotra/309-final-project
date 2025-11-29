@@ -10,6 +10,7 @@ const Transactions = () => {
   const isCashierOnly = hasRole('cashier') && !hasRole('manager');
   const [searchParams, setSearchParams] = useSearchParams();
   const [transactions, setTransactions] = useState([]);
+  const [allTransactions, setAllTransactions] = useState([]);
   const [count, setCount] = useState(0);
   const [loading, setLoading] = useState(true);
   const [filters, setFilters] = useState({
@@ -18,11 +19,64 @@ const Transactions = () => {
     limit: parseInt(searchParams.get('limit')) || 10,
     processed: searchParams.get('processed') || '',
   });
+  const [clientFilters, setClientFilters] = useState({
+    idNameSearch: '',
+    status: '',
+  });
+  const [managerFilters, setManagerFilters] = useState({
+    idUtoridSearch: '',
+    status: '',
+  });
   const [error, setError] = useState('');
 
   useEffect(() => {
     loadTransactions();
   }, [filters, user]);
+
+  // Client-side filtering
+  useEffect(() => {
+    let filtered = [...allTransactions];
+
+    if (isCashierOnly) {
+      // Filter by id/name search for cashiers
+      if (clientFilters.idNameSearch) {
+        const searchTerm = clientFilters.idNameSearch.toLowerCase();
+        filtered = filtered.filter((tx) => {
+          const idMatch = tx.id.toString().includes(searchTerm);
+          const nameMatch = (tx.userName || tx.utorid || tx.user?.utorid || '')
+            .toLowerCase()
+            .includes(searchTerm);
+          return idMatch || nameMatch;
+        });
+      }
+
+      // Filter by status for cashiers
+      if (clientFilters.status !== '') {
+        const statusFilter = clientFilters.status === 'true';
+        filtered = filtered.filter((tx) => tx.processed === statusFilter);
+      }
+    } else if (hasRole('manager')) {
+      // Filter by id/utorid search for managers
+      if (managerFilters.idUtoridSearch) {
+        const searchTerm = managerFilters.idUtoridSearch.toLowerCase();
+        filtered = filtered.filter((tx) => {
+          const idMatch = tx.id.toString().includes(searchTerm);
+          const utoridMatch = (tx.utorid || tx.user?.utorid || '')
+            .toLowerCase()
+            .includes(searchTerm);
+          return idMatch || utoridMatch;
+        });
+      }
+
+      // Filter by status for managers
+      if (managerFilters.status !== '') {
+        const statusFilter = managerFilters.status === 'true';
+        filtered = filtered.filter((tx) => tx.processed === statusFilter);
+      }
+    }
+
+    setTransactions(filtered);
+  }, [clientFilters, managerFilters, allTransactions, isCashierOnly, hasRole]);
 
   const loadTransactions = async () => {
     setLoading(true);
@@ -43,7 +97,8 @@ const Transactions = () => {
         response = await transactionAPI.getMyTransactions(params);
       }
 
-      setTransactions(response.data.results || []);
+      const fetchedTransactions = response.data.results || [];
+      setAllTransactions(fetchedTransactions);
       setCount(response.data.count || 0);
     } catch (err) {
       setError(err.response?.data?.error || 'Failed to load transactions.');
@@ -112,33 +167,80 @@ const Transactions = () => {
 
       <div className="transactions-filters">
         {!isCashierOnly && (
-          <div className="form-group">
-            <label>Type</label>
-            <select
-              value={filters.type}
-              onChange={(e) => handleFilterChange('type', e.target.value)}
-            >
-              <option value="">All</option>
-              <option value="purchase">Purchase</option>
-              <option value="redemption">Redemption</option>
-              <option value="adjustment">Adjustment</option>
-              <option value="event">Event</option>
-              <option value="transfer">Transfer</option>
-            </select>
-          </div>
+          <>
+            {hasRole('manager') && (
+              <div className="form-group">
+                <label>Search</label>
+                <input
+                  type="text"
+                  placeholder="ID or UTORid"
+                  value={managerFilters.idUtoridSearch}
+                  onChange={(e) =>
+                    setManagerFilters({ ...managerFilters, idUtoridSearch: e.target.value })
+                  }
+                  className="transactions-search-input"
+                />
+              </div>
+            )}
+            <div className="form-group">
+              <label>Type</label>
+              <select
+                value={filters.type}
+                onChange={(e) => handleFilterChange('type', e.target.value)}
+              >
+                <option value="">All</option>
+                <option value="purchase">Purchase</option>
+                <option value="redemption">Redemption</option>
+                <option value="adjustment">Adjustment</option>
+                <option value="event">Event</option>
+                <option value="transfer">Transfer</option>
+              </select>
+            </div>
+            {hasRole('manager') && (
+              <div className="form-group">
+                <label>Status</label>
+                <select
+                  value={managerFilters.status}
+                  onChange={(e) =>
+                    setManagerFilters({ ...managerFilters, status: e.target.value })
+                  }
+                >
+                  <option value="">All</option>
+                  <option value="false">Pending</option>
+                  <option value="true">Processed</option>
+                </select>
+              </div>
+            )}
+          </>
         )}
         {isCashierOnly && (
-          <div className="form-group">
-            <label>Status</label>
-            <select
-              value={filters.processed}
-              onChange={(e) => handleFilterChange('processed', e.target.value)}
-            >
-              <option value="">All</option>
-              <option value="false">Pending</option>
-              <option value="true">Processed</option>
-            </select>
-          </div>
+          <>
+            <div className="form-group">
+              <label>Search</label>
+              <input
+                type="text"
+                placeholder="Name or ID"
+                value={clientFilters.idNameSearch}
+                onChange={(e) =>
+                  setClientFilters({ ...clientFilters, idNameSearch: e.target.value })
+                }
+                className="transactions-search-input"
+              />
+            </div>
+            <div className="form-group">
+              <label>Status</label>
+              <select
+                value={clientFilters.status}
+                onChange={(e) =>
+                  setClientFilters({ ...clientFilters, status: e.target.value })
+                }
+              >
+                <option value="">All</option>
+                <option value="false">Pending</option>
+                <option value="true">Processed</option>
+              </select>
+            </div>
+          </>
         )}
         <div className="form-group">
           <label>Limit</label>
