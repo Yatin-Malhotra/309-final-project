@@ -206,9 +206,29 @@ const Transactions = () => {
     <div className="transactions-page">
       <div className="transactions-page-header">
         <h1>{isCashierOnly ? 'Redemption Transactions' : 'Transactions'}</h1>
-        <Link to="/transactions/create" className="btn btn-primary">
-          Create Transaction
-        </Link>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', alignItems: 'flex-end' }}>
+          <Link to="/transactions/create" className="btn btn-primary">
+            Create Transaction
+          </Link>
+          {hasRole('manager') && (
+            <button
+              type="button"
+              onClick={() => {
+                if (managerFilters.idUtoridSearch === user?.utorid) {
+                  // If already searching for own utorid, clear the search
+                  setManagerFilters({ ...managerFilters, idUtoridSearch: '' });
+                } else {
+                  // Otherwise, set search to own utorid
+                  setManagerFilters({ ...managerFilters, idUtoridSearch: user?.utorid || '' });
+                }
+              }}
+              className={managerFilters.idUtoridSearch === user?.utorid ? "btn btn-secondary" : "btn btn-outline-secondary"}
+              title={managerFilters.idUtoridSearch === user?.utorid ? "Clear filter and show all transactions" : "Show only my transactions"}
+            >
+              My Transactions
+            </button>
+          )}
+        </div>
       </div>
 
       <div className="transactions-filters">
