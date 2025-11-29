@@ -14,6 +14,7 @@ const Dashboard = () => {
     totalEvents: 0,
     totalPromotions: 0,
     totalUsers: 0,
+    totalTransactions: 0,
     recentEvents: [],
     recentPromotions: [],
   });
@@ -72,6 +73,9 @@ const Dashboard = () => {
             
             // Get users overview
             const usersResponse = await userAPI.getUsers({ limit: 1 });
+            
+            // Get transactions overview
+            const transactionsResponse = await transactionAPI.getTransactions({ limit: 1 });
 
             setStats({
               totalPoints: user.points || 0,
@@ -80,6 +84,7 @@ const Dashboard = () => {
               totalEvents: allEventsResponse.data.count || 0,
               totalPromotions: promotionsResponse.data.results?.length || 0,
               totalUsers: usersResponse.data.count || 0,
+              totalTransactions: transactionsResponse.data.count || 0,
               recentEvents: eventsResponse.data.results || [],
               recentPromotions: promotionsResponse.data.results?.slice(0, 5) || [],
             });
@@ -299,6 +304,15 @@ const Dashboard = () => {
               </Link>
             </div>
           </div>
+          <div className="dashboard-card">
+            <div className="dashboard-card-title">Total Transactions</div>
+            <div className="dashboard-card-value">{stats.totalTransactions}</div>
+            <div style={{ marginTop: '10px' }}>
+              <Link to="/transactions" className="btn btn-primary" style={{ fontSize: '14px', padding: '8px 16px' }}>
+                View Transactions
+              </Link>
+            </div>
+          </div>
         </div>
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '20px', marginTop: '20px' }}>
@@ -386,16 +400,6 @@ const Dashboard = () => {
               <Link to="/promotions" className="btn btn-secondary">View All Promotions</Link>
               <Link to="/promotions/create" className="btn btn-primary" style={{ marginLeft: '10px' }}>Create Promotion</Link>
             </div>
-          </div>
-        </div>
-
-        <div className="card" style={{ marginTop: '20px' }}>
-          <div className="card-header">Quick Actions</div>
-          <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
-            <Link to="/events/create" className="btn btn-primary">Create Event</Link>
-            <Link to="/promotions/create" className="btn btn-primary">Create Promotion</Link>
-            <Link to="/users" className="btn btn-primary">Manage Users</Link>
-            <Link to="/transactions" className="btn btn-secondary">View Transactions</Link>
           </div>
         </div>
       </div>
