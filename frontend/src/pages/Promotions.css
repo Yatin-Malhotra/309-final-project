@@ -24,7 +24,7 @@
 .promotions-page-header h1 {
   font-size: 32px;
   font-weight: 600;
-  color: #0B2E33;
+  color: var(--text-primary);
   letter-spacing: -0.5px;
   margin: 0;
 }
@@ -36,16 +36,16 @@
 }
 
 .promotions-card {
-  background: linear-gradient(to bottom, #ffffff 0%, rgba(184, 227, 233, 0.15) 100%);
+  background: var(--bg-card);
   border-radius: 12px;
   padding: 28px;
   box-shadow: 0 2px 8px rgba(11, 46, 51, 0.08), 0 1px 2px rgba(11, 46, 51, 0.04);
-  border: 1px solid rgba(147, 177, 181, 0.25);
+  border: 1px solid var(--border-color);
   transition: all 0.3s ease;
 }
 
 .promotions-card:hover {
-  background: linear-gradient(to bottom, #ffffff 0%, rgba(184, 227, 233, 0.2) 100%);
+  background: var(--bg-card-hover);
   box-shadow: 0 4px 12px rgba(11, 46, 51, 0.12), 0 2px 4px rgba(11, 46, 51, 0.08);
   border-color: rgba(79, 124, 130, 0.35);
   transform: translateY(-2px);
@@ -65,13 +65,13 @@
 .promotions-card-title {
   font-size: 22px;
   font-weight: 700;
-  color: #0B2E33;
+  color: var(--text-primary);
   margin-bottom: 12px;
   letter-spacing: -0.3px;
 }
 
 .promotions-card-description {
-  color: #0B2E33;
+  color: var(--text-primary);
   opacity: 0.8;
   font-size: 15px;
   font-weight: 500;
@@ -92,7 +92,7 @@
 
 .promotions-card-detail {
   font-size: 14px;
-  color: #0B2E33;
+  color: var(--text-primary);
   opacity: 0.75;
   margin-bottom: 6px;
   font-weight: 500;
@@ -109,32 +109,32 @@
 }
 
 .promotions-badge-primary {
-  background-color: rgba(79, 124, 130, 0.2);
-  color: #0B2E33;
+  background-color: var(--badge-primary-bg);
+  color: var(--badge-primary-color);
   font-weight: 700;
 }
 
 .promotions-badge-success {
-  background-color: rgba(40, 167, 69, 0.15);
-  color: #28a745;
+  background-color: var(--badge-success-bg);
+  color: var(--badge-success-color);
   font-weight: 700;
 }
 
 .promotions-badge-danger {
-  background-color: rgba(220, 53, 69, 0.15);
-  color: #dc3545;
+  background-color: var(--badge-danger-bg);
+  color: var(--badge-danger-color);
   font-weight: 700;
 }
 
 .promotions-badge-warning {
-  background-color: rgba(255, 152, 0, 0.2);
-  color: #E65100;
+  background-color: var(--badge-warning-bg);
+  color: var(--badge-warning-color);
   font-weight: 700;
 }
 
 .promotions-badge-secondary {
-  background-color: rgba(147, 177, 181, 0.2);
-  color: #0B2E33;
+  background-color: var(--badge-secondary-bg);
+  color: var(--badge-secondary-color);
   font-weight: 700;
 }
 
@@ -176,7 +176,7 @@
   font-size: 15px;
   margin-bottom: 20px;
   padding: 12px 16px;
-  background-color: #fff5f5;
+  background-color: var(--error-bg);
   border-left: 3px solid #dc3545;
   border-radius: 4px;
 }

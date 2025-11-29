@@ -7,16 +7,18 @@
 .app-content {
   flex: 1;
   padding: 20px;
-  background-color: #f0f7f8;
+  background-color: var(--bg-primary);
   min-height: calc(100vh - 80px);
+  transition: background-color 0.3s ease;
 }
 
 /* Navigation */
 .navbar {
-  background: linear-gradient(135deg, #4F7C82 0%, #0B2E33 100%);
-  box-shadow: 0 2px 8px rgba(11, 46, 51, 0.15);
+  background: var(--navbar-gradient);
+  box-shadow: 0 2px 8px var(--shadow-hover);
   padding: 16px 0;
   margin-bottom: 20px;
+  transition: background 0.3s ease;
 }
 
 .navbar-content {
@@ -90,10 +92,11 @@
 }
 
 .auth-card {
-  background: white;
+  background: var(--bg-secondary);
   border-radius: 8px;
   padding: 30px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 8px var(--shadow);
+  transition: background-color 0.3s ease, box-shadow 0.3s ease;
 }
 
 .auth-header {
@@ -107,7 +110,7 @@
 }
 
 .auth-header p {
-  color: #666;
+  color: var(--text-secondary);
   font-size: 14px;
 }
 
@@ -129,7 +132,7 @@
 
 /* Filters */
 .filters {
-  background: white;
+  background: var(--bg-secondary);
   padding: 20px;
   border-radius: 8px;
   margin-bottom: 20px;
@@ -137,6 +140,7 @@
   flex-wrap: wrap;
   gap: 15px;
   align-items: flex-end;
+  transition: background-color 0.3s ease;
 }
 
 .filters .form-group {

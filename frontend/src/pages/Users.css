@@ -24,17 +24,17 @@
 .users-page-header h1 {
   font-size: 32px;
   font-weight: 600;
-  color: #0B2E33;
+  color: var(--text-primary);
   letter-spacing: -0.5px;
   margin: 0;
 }
 
 .users-filters {
-  background: linear-gradient(to bottom, #ffffff 0%, rgba(184, 227, 233, 0.15) 100%);
+  background: var(--bg-card);
   border-radius: 12px;
   padding: 24px;
   box-shadow: 0 2px 8px rgba(11, 46, 51, 0.08), 0 1px 2px rgba(11, 46, 51, 0.04);
-  border: 1px solid rgba(147, 177, 181, 0.25);
+  border: 1px solid var(--border-color);
   margin-bottom: 24px;
   display: flex;
   flex-wrap: wrap;
@@ -52,7 +52,7 @@
   display: block;
   margin-bottom: 8px;
   font-weight: 600;
-  color: #0B2E33;
+  color: var(--text-primary);
   font-size: 14px;
 }
 
@@ -63,8 +63,8 @@
   border: 1.5px solid rgba(147, 177, 181, 0.3);
   border-radius: 8px;
   font-size: 15px;
-  color: #0B2E33;
-  background-color: white;
+  color: var(--text-primary);
+  background-color: var(--bg-secondary);
   transition: all 0.2s ease;
   font-family: inherit;
   font-weight: 500;
@@ -73,27 +73,27 @@
 .users-filters .form-group input:focus,
 .users-filters .form-group select:focus {
   outline: none;
-  border-color: #4F7C82;
+  border-color: var(--primary);
   box-shadow: 0 0 0 3px rgba(79, 124, 130, 0.1);
 }
 
 .users-filters .form-group input:hover:not(:focus),
 .users-filters .form-group select:hover:not(:focus) {
-  border-color: #4F7C82;
+  border-color: var(--primary);
 }
 
 .users-section {
-  background: linear-gradient(to bottom, #ffffff 0%, rgba(184, 227, 233, 0.15) 100%);
+  background: var(--bg-card);
   border-radius: 12px;
   padding: 32px;
   box-shadow: 0 2px 8px rgba(11, 46, 51, 0.08), 0 1px 2px rgba(11, 46, 51, 0.04);
-  border: 1px solid rgba(147, 177, 181, 0.25);
+  border: 1px solid var(--border-color);
   margin-bottom: 24px;
   transition: all 0.3s ease;
 }
 
 .users-section:hover {
-  background: linear-gradient(to bottom, #ffffff 0%, rgba(184, 227, 233, 0.2) 100%);
+  background: var(--bg-card-hover);
   box-shadow: 0 4px 12px rgba(11, 46, 51, 0.12), 0 2px 4px rgba(11, 46, 51, 0.08);
   border-color: rgba(79, 124, 130, 0.35);
 }
@@ -112,7 +112,7 @@
   padding: 14px 16px;
   text-align: left;
   font-weight: 700;
-  color: #0B2E33;
+  color: var(--text-primary);
   font-size: 14px;
   text-transform: uppercase;
   letter-spacing: 0.5px;
@@ -122,7 +122,7 @@
 .users-table td {
   padding: 16px;
   border-bottom: 1px solid rgba(147, 177, 181, 0.15);
-  color: #0B2E33;
+  color: var(--text-primary);
   font-size: 15px;
   font-weight: 500;
 }
@@ -155,38 +155,38 @@
 }
 
 .users-badge-primary {
-  background-color: rgba(79, 124, 130, 0.2);
-  color: #0B2E33;
+  background-color: var(--badge-primary-bg);
+  color: var(--badge-primary-color);
   font-weight: 700;
 }
 
 .users-badge-blue {
-  background-color: rgba(33, 150, 243, 0.2);
-  color: #1565C0;
+  background-color: var(--badge-blue-bg);
+  color: var(--badge-blue-color);
   font-weight: 700;
 }
 
 .users-badge-success {
-  background-color: rgba(40, 167, 69, 0.15);
-  color: #28a745;
+  background-color: var(--badge-success-bg);
+  color: var(--badge-success-color);
   font-weight: 700;
 }
 
 .users-badge-danger {
-  background-color: rgba(220, 53, 69, 0.15);
-  color: #dc3545;
+  background-color: var(--badge-danger-bg);
+  color: var(--badge-danger-color);
   font-weight: 700;
 }
 
 .users-badge-warning {
-  background-color: rgba(255, 152, 0, 0.2);
-  color: #E65100;
+  background-color: var(--badge-warning-bg);
+  color: var(--badge-warning-color);
   font-weight: 700;
 }
 
 .users-badge-secondary {
-  background-color: rgba(147, 177, 181, 0.2);
-  color: #0B2E33;
+  background-color: var(--badge-secondary-bg);
+  color: var(--badge-secondary-color);
   font-weight: 700;
 }
 
@@ -195,7 +195,7 @@
   font-size: 15px;
   margin-bottom: 20px;
   padding: 12px 16px;
-  background-color: #fff5f5;
+  background-color: var(--error-bg);
   border-left: 3px solid #dc3545;
   border-radius: 4px;
 }
@@ -222,17 +222,17 @@
   gap: 16px;
   margin-top: 24px;
   padding: 20px;
-  background: linear-gradient(to bottom, #ffffff 0%, rgba(184, 227, 233, 0.15) 100%);
+  background: var(--bg-card);
   border-radius: 12px;
   box-shadow: 0 2px 8px rgba(11, 46, 51, 0.08), 0 1px 2px rgba(11, 46, 51, 0.04);
-  border: 1px solid rgba(147, 177, 181, 0.25);
+  border: 1px solid var(--border-color);
 }
 
 .users-pagination button {
   padding: 10px 20px;
   border: 1.5px solid rgba(147, 177, 181, 0.3);
-  background: white;
-  color: #0B2E33;
+  background: var(--bg-secondary);
+  color: var(--text-primary);
   cursor: pointer;
   border-radius: 8px;
   font-weight: 600;
@@ -243,7 +243,7 @@
 .users-pagination button:hover:not(:disabled) {
   background-color: #4F7C82;
   color: white;
-  border-color: #4F7C82;
+  border-color: var(--primary);
   transform: translateY(-1px);
   box-shadow: 0 2px 4px rgba(11, 46, 51, 0.2);
 }
@@ -255,7 +255,7 @@
 }
 
 .users-pagination span {
-  color: #0B2E33;
+  color: var(--text-primary);
   font-weight: 600;
   font-size: 15px;
 }
