@@ -1,7 +1,8 @@
 // User profile page
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { userAPI } from '../services/api';
+import './Profile.css';
 
 const Profile = () => {
   const { user, updateLocalUser } = useAuth();
@@ -11,6 +12,8 @@ const Profile = () => {
     birthday: '',
     avatar: null,
   });
+  const [avatarPreview, setAvatarPreview] = useState(null);
+  const fileInputRef = useRef(null);
   const [passwordData, setPasswordData] = useState({
     old: '',
     new: '',
@@ -29,6 +32,7 @@ const Profile = () => {
         birthday: user.birthday || '',
         avatar: null,
       });
+      setAvatarPreview(user.avatarUrl || null);
     }
   }, [user]);
 
@@ -88,18 +92,30 @@ const Profile = () => {
     }
   };
 
+  const getRoleBadge = (role) => {
+    const colors = {
+      regular: 'profile-badge-secondary',
+      cashier: 'profile-badge-blue',
+      manager: 'profile-badge-success',
+      superuser: 'profile-badge-warning',
+    };
+    return colors[role] || 'profile-badge-secondary';
+  };
+
   return (
-    <div className="container">
-      <h1>My Profile</h1>
-      <div style={{ display: 'flex', gap: '10px', marginBottom: '20px' }}>
+    <div className="profile-page">
+      <div className="profile-page-header">
+        <h1>My Profile</h1>
+      </div>
+      <div className="profile-tabs">
         <button
-          className={`btn ${activeTab === 'profile' ? 'btn-primary' : 'btn-secondary'}`}
+          className={`profile-tab ${activeTab === 'profile' ? 'active' : ''}`}
           onClick={() => setActiveTab('profile')}
         >
           Profile
         </button>
         <button
-          className={`btn ${activeTab === 'password' ? 'btn-primary' : 'btn-secondary'}`}
+          className={`profile-tab ${activeTab === 'password' ? 'active' : ''}`}
           onClick={() => setActiveTab('password')}
         >
           Change Password
@@ -107,9 +123,55 @@ const Profile = () => {
       </div>
 
       {activeTab === 'profile' && (
-        <div className="card">
-          <div className="card-header">Profile Information</div>
+        <div className="profile-section">
+          <div className="profile-section-header">Profile Information</div>
           <form onSubmit={handleProfileUpdate}>
+          <div className="form-group">
+              <label>Avatar</label>
+              <div className="profile-avatar-container">
+                <div 
+                  className="profile-avatar-wrapper"
+                  onClick={() => fileInputRef.current?.click()}
+                >
+                  {avatarPreview ? (
+                    <img 
+                      src={avatarPreview} 
+                      alt="Avatar" 
+                      className="profile-avatar-image"
+                    />
+                  ) : (
+                    <div className="profile-avatar-placeholder">
+                      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="12" cy="7" r="4"></circle>
+                      </svg>
+                    </div>
+                  )}
+                  <div className="profile-avatar-overlay">
+                    <span>Click to change</span>
+                  </div>
+                </div>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  id="avatar"
+                  accept="image/*"
+                  style={{ display: 'none' }}
+                  onChange={(e) => {
+                    const file = e.target.files[0];
+                    if (file) {
+                      setFormData({ ...formData, avatar: file });
+                      const reader = new FileReader();
+                      reader.onloadend = () => {
+                        setAvatarPreview(reader.result);
+                      };
+                      reader.readAsDataURL(file);
+                    }
+                  }}
+                />
+              </div>
+            </div>
+            
             <div className="form-group">
               <label htmlFor="name">Name</label>
               <input
@@ -145,17 +207,7 @@ const Profile = () => {
                 }
               />
             </div>
-            <div className="form-group">
-              <label htmlFor="avatar">Avatar</label>
-              <input
-                type="file"
-                id="avatar"
-                accept="image/*"
-                onChange={(e) =>
-                  setFormData({ ...formData, avatar: e.target.files[0] })
-                }
-              />
-            </div>
+            
             {error && <div className="error-message">{error}</div>}
             {success && <div className="success-message">{success}</div>}
             <div className="form-actions">
@@ -172,8 +224,8 @@ const Profile = () => {
       )}
 
       {activeTab === 'password' && (
-        <div className="card">
-          <div className="card-header">Change Password</div>
+        <div className="profile-section">
+          <div className="profile-section-header">Change Password</div>
           <form onSubmit={handlePasswordChange}>
             <div className="form-group">
               <label htmlFor="oldPassword">Current Password</label>
@@ -198,7 +250,7 @@ const Profile = () => {
                 }
                 required
               />
-              <small style={{ color: '#666', fontSize: '12px' }}>
+              <small>
                 8-20 characters, must include uppercase, lowercase, digit, and
                 special character
               </small>
@@ -230,9 +282,9 @@ const Profile = () => {
         </div>
       )}
 
-      <div className="card">
-        <div className="card-header">Account Information</div>
-        <table className="table">
+      <div className="profile-section">
+        <div className="profile-section-header">Account Information</div>
+        <table className="profile-info-table">
           <tbody>
             <tr>
               <td><strong>UTORid</strong></td>
@@ -240,7 +292,11 @@ const Profile = () => {
             </tr>
             <tr>
               <td><strong>Role</strong></td>
-              <td>{user?.role}</td>
+              <td>
+                <span className={`profile-badge ${getRoleBadge(user?.role)}`}>
+                  {user?.role}
+                </span>
+              </td>
             </tr>
             <tr>
               <td><strong>Points</strong></td>
@@ -250,9 +306,9 @@ const Profile = () => {
               <td><strong>Verified</strong></td>
               <td>
                 {user?.verified ? (
-                  <span className="badge badge-success">Yes</span>
+                  <span className="profile-badge profile-badge-success">Yes</span>
                 ) : (
-                  <span className="badge badge-warning">No</span>
+                  <span className="profile-badge profile-badge-warning">No</span>
                 )}
               </td>
             </tr>
