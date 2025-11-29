@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { promotionAPI, transactionAPI } from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
 import PromotionSelector from './PromotionSelector';
+import '../pages/CreateTransaction.css';
 
 const CashierCreateTx = () => {
   const { hasRole } = useAuth();
@@ -66,9 +67,11 @@ const CashierCreateTx = () => {
   };
 
   return (
-    <div className="container">
-      <h1>Create Transaction</h1>
-      <div className="card">
+    <div className="create-transaction-page">
+      <div className="create-transaction-page-header">
+        <h1>Create Transaction</h1>
+      </div>
+      <div className="create-transaction-card">
         <form onSubmit={handleSubmit}>
           <div className="form-group">
             <label htmlFor="utorid">UTORid *</label>

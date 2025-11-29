@@ -111,21 +111,18 @@ const Dashboard = () => {
   if (userRole === 'regular') {
     return (
       <div className="dashboard-page">
-        <h1>Welcome, {user?.name}!</h1>
-        <div className="dashboard-grid">
-          <div className="dashboard-card">
+        <div className="dashboard-header-with-badge">
+          <h1>Welcome, {user?.name}!</h1>
+          {user?.verified ? (
+            <span className="dashboard-badge dashboard-badge-success dashboard-header-badge">Verified</span>
+          ) : (
+            <span className="dashboard-badge dashboard-badge-warning dashboard-header-badge">Unverified</span>
+          )}
+        </div>
+        <div className="dashboard-grid dashboard-grid-single">
+          <div className="dashboard-card dashboard-card-narrow">
             <div className="dashboard-card-title">Your Points Balance</div>
             <div className="dashboard-card-value">{stats.totalPoints}</div>
-          </div>
-          <div className="dashboard-card">
-            <div className="dashboard-card-title">Account Status</div>
-            <div className="dashboard-card-value">
-              {user?.verified ? (
-                <span className="dashboard-badge dashboard-badge-success">Verified</span>
-              ) : (
-                <span className="dashboard-badge dashboard-badge-warning">Unverified</span>
-              )}
-            </div>
           </div>
         </div>
 
@@ -189,9 +186,14 @@ const Dashboard = () => {
   if (userRole === 'cashier') {
     return (
       <div className="dashboard-page">
-        <h1>Welcome, {user?.name}!</h1>
-        <div className="dashboard-grid">
-          <div className="dashboard-card">
+        <div className="dashboard-header-with-action">
+          <h1>Welcome, {user?.name}!</h1>
+          <Link to="/transactions/create" className="btn btn-primary dashboard-create-btn">
+            Create Transaction
+          </Link>
+        </div>
+        <div className="dashboard-grid dashboard-grid-single">
+          <div className="dashboard-card dashboard-card-narrow">
             <div className="dashboard-card-title">Pending Redemptions</div>
             <div className="dashboard-card-value">
               {stats.pendingRedemptions}
@@ -199,14 +201,6 @@ const Dashboard = () => {
             <div className="dashboard-card-actions">
               <Link to="/transactions" className="btn btn-primary">
                 View Redemptions
-              </Link>
-            </div>
-          </div>
-          <div className="dashboard-card">
-            <div className="dashboard-card-title">Quick Actions</div>
-            <div className="dashboard-card-actions">
-              <Link to="/transactions/create" className="btn btn-primary">
-                Create Transaction
               </Link>
             </div>
           </div>
