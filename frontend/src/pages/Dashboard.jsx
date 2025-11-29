@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { transactionAPI, eventAPI, promotionAPI, userAPI } from '../services/api';
 import { Link } from 'react-router-dom';
+import './Dashboard.css';
 
 const Dashboard = () => {
   const { user, hasRole } = useAuth();
@@ -101,7 +102,7 @@ const Dashboard = () => {
   }, [user, hasRole]);
 
   if (loading) {
-    return <div className="loading">Loading dashboard...</div>;
+    return <div className="dashboard-loading">Loading dashboard...</div>;
   }
 
   const userRole = user?.role;
@@ -109,74 +110,73 @@ const Dashboard = () => {
   // Regular User Dashboard: Points balance and recent transactions
   if (userRole === 'regular') {
     return (
-      <div className="container">
-        <h1>Welcome, {user?.name}!</h1>
-        <div className="dashboard-grid">
-          <div className="dashboard-card">
+      <div className="dashboard-page">
+        <div className="dashboard-header-with-badge">
+          <h1>Welcome, {user?.name}!</h1>
+          {user?.verified ? (
+            <span className="dashboard-badge dashboard-badge-success dashboard-header-badge">Verified</span>
+          ) : (
+            <span className="dashboard-badge dashboard-badge-warning dashboard-header-badge">Unverified</span>
+          )}
+        </div>
+        <div className="dashboard-grid dashboard-grid-single">
+          <div className="dashboard-card dashboard-card-narrow">
             <div className="dashboard-card-title">Your Points Balance</div>
             <div className="dashboard-card-value">{stats.totalPoints}</div>
           </div>
-          <div className="dashboard-card">
-            <div className="dashboard-card-title">Account Status</div>
-            <div className="dashboard-card-value">
-              {user?.verified ? (
-                <span className="badge badge-success">Verified</span>
-              ) : (
-                <span className="badge badge-warning">Unverified</span>
-              )}
-            </div>
-          </div>
         </div>
 
-        <div className="card">
-          <div className="card-header">Recent Transactions</div>
+        <div className="dashboard-section">
+          <div className="dashboard-section-header">Recent Transactions</div>
           {stats.recentTransactions.length === 0 ? (
-            <div className="empty-state">No recent transactions</div>
+            <div className="dashboard-empty-state">No recent transactions</div>
           ) : (
-            <table className="table">
-              <thead>
-                <tr>
-                  <th>Type</th>
-                  <th>Amount</th>
-                  <th>Date</th>
-                  <th>Status</th>
-                </tr>
-              </thead>
-              <tbody>
-                {stats.recentTransactions.map((tx) => (
-                  <tr key={tx.id}>
-                    <td>
-                      <span className={`badge ${
-                        tx.type === 'purchase' ? 'badge-primary' :
-                        tx.type === 'redemption' ? 'badge-danger' :
-                        tx.type === 'event' ? 'badge-success' :
-                        'badge-secondary'
-                      }`}>
-                        {tx.type}
-                      </span>
-                    </td>
-                    <td>
-                      {tx.type === 'redemption' ? '-' : '+'}
-                      {Math.abs(tx.amount)} points
-                    </td>
-                    <td>{tx.createdAt ? new Date(tx.createdAt).toLocaleDateString() : 'N/A'}</td>
-                    <td>
-                      {tx.processed ? (
-                        <span className="badge badge-success">Processed</span>
-                      ) : (
-                        <span className="badge badge-warning">Pending</span>
-                      )}
-                    </td>
+            <>
+              <table className="dashboard-table">
+                <thead>
+                  <tr>
+                    <th>Type</th>
+                    <th>Amount</th>
+                    <th>Date</th>
+                    <th>Status</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {stats.recentTransactions.map((tx) => (
+                    <tr key={tx.id}>
+                      <td>
+                        <span className={`dashboard-badge ${
+                          tx.type === 'purchase' ? 'dashboard-badge-primary' :
+                          tx.type === 'redemption' ? 'dashboard-badge-danger' :
+                          tx.type === 'event' ? 'dashboard-badge-success' :
+                          'dashboard-badge-secondary'
+                        }`}>
+                          {tx.type}
+                        </span>
+                      </td>
+                      <td>
+                        {tx.type === 'redemption' ? '-' : '+'}
+                        {Math.abs(tx.amount)} points
+                      </td>
+                      <td>{tx.createdAt ? new Date(tx.createdAt).toLocaleDateString() : 'N/A'}</td>
+                      <td>
+                        {tx.processed ? (
+                          <span className="dashboard-badge dashboard-badge-success">Processed</span>
+                        ) : (
+                          <span className="dashboard-badge dashboard-badge-warning">Pending</span>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              <div className="dashboard-section-actions">
+                <Link to="/transactions" className="btn btn-secondary">
+                  View All Transactions
+                </Link>
+              </div>
+            </>
           )}
-          <div style={{ marginTop: '15px' }}>
-            <Link to="/transactions" className="btn btn-secondary">
-              View All Transactions
-            </Link>
-          </div>
         </div>
       </div>
     );
@@ -185,82 +185,77 @@ const Dashboard = () => {
   // Cashier Dashboard: Quick access to transaction creation and redemption processing
   if (userRole === 'cashier') {
     return (
-      <div className="container">
-        <h1>Welcome, {user?.name}!</h1>
-        <div className="dashboard-grid">
-          <div className="dashboard-card">
+      <div className="dashboard-page">
+        <div className="dashboard-header-with-action">
+          <h1>Welcome, {user?.name}!</h1>
+          <Link to="/transactions/create" className="btn btn-primary dashboard-create-btn">
+            Create Transaction
+          </Link>
+        </div>
+        <div className="dashboard-grid dashboard-grid-single">
+          <div className="dashboard-card dashboard-card-narrow">
             <div className="dashboard-card-title">Pending Redemptions</div>
             <div className="dashboard-card-value">
               {stats.pendingRedemptions}
             </div>
-            <div style={{ marginTop: '10px' }}>
-              <Link 
-                to="/transactions" 
-                className="btn btn-primary"
-                style={{ fontSize: '14px', padding: '8px 16px' }}
-              >
+            <div className="dashboard-card-actions">
+              <Link to="/transactions" className="btn btn-primary">
                 View Redemptions
-              </Link>
-            </div>
-          </div>
-          <div className="dashboard-card">
-            <div className="dashboard-card-title">Quick Actions</div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginTop: '10px' }}>
-              <Link to="/transactions/create" className="btn btn-primary">
-                Create Transaction
               </Link>
             </div>
           </div>
         </div>
 
-        <div className="card">
-          <div className="card-header">Recent Transactions</div>
+        <div className="dashboard-section">
+          <div className="dashboard-section-header">Recent Transactions</div>
           {stats.recentTransactions.length === 0 ? (
-            <div className="empty-state">No recent transactions</div>
+            <div className="dashboard-empty-state">No recent transactions</div>
           ) : (
-            <table className="table">
-              <thead>
-                <tr>
-                  <th>Type</th>
-                  <th>Amount</th>
-                  <th>Date</th>
-                  <th>Status</th>
-                </tr>
-              </thead>
-              <tbody>
-                {stats.recentTransactions.map((tx) => (
-                  <tr key={tx.id}>
-                    <td>
-                      <span className={`badge ${
-                        tx.type === 'purchase' ? 'badge-primary' :
-                        tx.type === 'redemption' ? 'badge-danger' :
-                        'badge-secondary'
-                      }`}>
-                        {tx.type}
-                      </span>
-                    </td>
-                    <td>
-                      {tx.type === 'redemption' ? '-' : '+'}
-                      {Math.abs(tx.amount)} points
-                    </td>
-                    <td>{tx.createdAt ? new Date(tx.createdAt).toLocaleDateString() : 'N/A'}</td>
-                    <td>
-                      {tx.processed ? (
-                        <span className="badge badge-success">Processed</span>
-                      ) : (
-                        <span className="badge badge-warning">Pending</span>
-                      )}
-                    </td>
+            <>
+              <table className="dashboard-table">
+                <thead>
+                  <tr>
+                    <th>Type</th>
+                    <th>Amount</th>
+                    <th>Date</th>
+                    <th>Status</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {stats.recentTransactions.map((tx) => (
+                    <tr key={tx.id}>
+                      <td>
+                        <span className={`dashboard-badge ${
+                          tx.type === 'purchase' ? 'dashboard-badge-primary' :
+                          tx.type === 'redemption' ? 'dashboard-badge-danger' :
+                          'dashboard-badge-secondary'
+                        }`}>
+                          {tx.type}
+                        </span>
+                      </td>
+                      <td>
+                        {tx.type === 'redemption' ? '-' : '+'}
+                        {Math.abs(tx.amount)} points
+                      </td>
+                      <td>{tx.createdAt ? new Date(tx.createdAt).toLocaleDateString() : 'N/A'}</td>
+                      <td>
+                        {tx.processed ? (
+                          <span className="dashboard-badge dashboard-badge-success">Processed</span>
+                        ) : (
+                          <span className="dashboard-badge dashboard-badge-warning">Pending</span>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              <div className="dashboard-section-actions">
+                <Link to="/transactions" className="btn btn-secondary">
+                  View All Transactions
+                </Link>
+              </div>
+            </>
           )}
-          <div style={{ marginTop: '15px' }}>
-            <Link to="/transactions" className="btn btn-secondary">
-              View All Transactions
-            </Link>
-          </div>
         </div>
       </div>
     );
@@ -274,32 +269,14 @@ const Dashboard = () => {
     };
 
     return (
-      <div className="container">
+      <div className="dashboard-page">
         <h1>Welcome, {user?.name}!</h1>
         <div className="dashboard-grid">
           <div className="dashboard-card">
-            <div className="dashboard-card-title">Total Events</div>
-            <div className="dashboard-card-value">{stats.totalEvents}</div>
-            <div style={{ marginTop: '10px' }}>
-              <Link to="/events" className="btn btn-primary" style={{ fontSize: '14px', padding: '8px 16px' }}>
-                Manage Events
-              </Link>
-            </div>
-          </div>
-          <div className="dashboard-card">
-            <div className="dashboard-card-title">Total Promotions</div>
-            <div className="dashboard-card-value">{stats.totalPromotions}</div>
-            <div style={{ marginTop: '10px' }}>
-              <Link to="/promotions" className="btn btn-primary" style={{ fontSize: '14px', padding: '8px 16px' }}>
-                Manage Promotions
-              </Link>
-            </div>
-          </div>
-          <div className="dashboard-card">
             <div className="dashboard-card-title">Total Users</div>
             <div className="dashboard-card-value">{stats.totalUsers}</div>
-            <div style={{ marginTop: '10px' }}>
-              <Link to="/users" className="btn btn-primary" style={{ fontSize: '14px', padding: '8px 16px' }}>
+            <div className="dashboard-card-actions">
+              <Link to="/users" className="btn btn-primary">
                 Manage Users
               </Link>
             </div>
@@ -307,99 +284,110 @@ const Dashboard = () => {
           <div className="dashboard-card">
             <div className="dashboard-card-title">Total Transactions</div>
             <div className="dashboard-card-value">{stats.totalTransactions}</div>
-            <div style={{ marginTop: '10px' }}>
-              <Link to="/transactions" className="btn btn-primary" style={{ fontSize: '14px', padding: '8px 16px' }}>
+            <div className="dashboard-card-actions">
+              <Link to="/transactions" className="btn btn-primary">
                 View Transactions
+              </Link>
+            </div>
+          </div>
+          <div className="dashboard-card">
+            <div className="dashboard-card-title">Total Events</div>
+            <div className="dashboard-card-value">{stats.totalEvents}</div>
+            <div className="dashboard-card-actions">
+              <Link to="/events" className="btn btn-primary">
+                Manage Events
+              </Link>
+            </div>
+          </div>
+          <div className="dashboard-card">
+            <div className="dashboard-card-title">Total Promotions</div>
+            <div className="dashboard-card-value">{stats.totalPromotions}</div>
+            <div className="dashboard-card-actions">
+              <Link to="/promotions" className="btn btn-primary">
+                Manage Promotions
               </Link>
             </div>
           </div>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '20px', marginTop: '20px' }}>
-          <div className="card">
-            <div className="card-header">Recent Events</div>
+        <div className="dashboard-two-column">
+          <div className="dashboard-section">
+            <div className="dashboard-section-header">Recent Events</div>
             {stats.recentEvents.length === 0 ? (
-              <div className="empty-state">No events found</div>
+              <div className="dashboard-empty-state">No events found</div>
             ) : (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                {stats.recentEvents.map((event) => (
-                  <div key={event.id} style={{ padding: '10px', borderBottom: '1px solid #eee' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start' }}>
-                      <div>
-                        <Link to={`/events/${event.id}`} style={{ fontWeight: '600', color: '#007bff', textDecoration: 'none' }}>
+              <>
+                <div>
+                  {stats.recentEvents.map((event) => (
+                    <div key={event.id} className="dashboard-list-item">
+                      <div className="dashboard-list-item-title">
+                        <Link to={`/events/${event.id}`}>
                           {event.name}
                         </Link>
-                        <p style={{ fontSize: '12px', color: '#666', marginTop: '5px' }}>
-                          {formatDate(event.startTime)}
-                        </p>
-                        <div style={{ marginTop: '5px' }}>
-                          <span className="badge badge-secondary" style={{ fontSize: '11px' }}>
-                            {event.numGuests} / {event.capacity || '∞'} guests
+                      </div>
+                      <div className="dashboard-list-item-meta">
+                        {formatDate(event.startTime)}
+                      </div>
+                      <div className="dashboard-list-item-badges">
+                        {!event.published && (
+                          <span className="dashboard-badge dashboard-badge-warning">
+                            Unpublished
                           </span>
-                          {!event.published && (
-                            <span className="badge badge-warning" style={{ marginLeft: '5px', fontSize: '11px' }}>
-                              Unpublished
-                            </span>
-                          )}
-                        </div>
+                        )}
                       </div>
                     </div>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+                <div className="dashboard-section-actions">
+                  <Link to="/events" className="btn btn-secondary">View All Events</Link>
+                  <Link to="/events/create" className="btn btn-primary">Create Event</Link>
+                </div>
+              </>
             )}
-            <div style={{ marginTop: '15px' }}>
-              <Link to="/events" className="btn btn-secondary">View All Events</Link>
-              <Link to="/events/create" className="btn btn-primary" style={{ marginLeft: '10px' }}>Create Event</Link>
-            </div>
           </div>
 
-          <div className="card">
-            <div className="card-header">Recent Promotions</div>
+          <div className="dashboard-section">
+            <div className="dashboard-section-header">Recent Promotions</div>
             {stats.recentPromotions.length === 0 ? (
-              <div className="empty-state">No promotions found</div>
+              <div className="dashboard-empty-state">No promotions found</div>
             ) : (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                {stats.recentPromotions.map((promo) => {
-                  const isActive = () => {
-                    const now = new Date();
-                    const start = new Date(promo.startTime);
-                    const end = new Date(promo.endTime);
-                    return now >= start && now <= end;
-                  };
-                  return (
-                    <div key={promo.id} style={{ padding: '10px', borderBottom: '1px solid #eee' }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start' }}>
-                        <div style={{ flex: 1 }}>
-                          <div style={{ fontWeight: '600' }}>{promo.name}</div>
-                          <p style={{ fontSize: '12px', color: '#666', marginTop: '5px' }}>
-                            {promo.description}
-                          </p>
-                          <div style={{ marginTop: '5px' }}>
-                            <span className={`badge ${promo.type === 'automatic' ? 'badge-primary' : 'badge-secondary'}`} style={{ fontSize: '11px' }}>
-                              {promo.type}
-                            </span>
+              <>
+                <div>
+                  {stats.recentPromotions.map((promo) => {
+                    const isActive = () => {
+                      const now = new Date();
+                      const start = new Date(promo.startTime);
+                      const end = new Date(promo.endTime);
+                      return now >= start && now <= end;
+                    };
+                    return (
+                      <div key={promo.id} className="dashboard-list-item">
+                        <div className="dashboard-list-item-title">{promo.name}</div>
+                        <div className="dashboard-list-item-description">{promo.description}</div>
+                        <div className="dashboard-list-item-badges">
+                          <span className={`dashboard-badge ${promo.type === 'automatic' ? 'dashboard-badge-primary' : 'dashboard-badge-secondary'}`}>
+                            {promo.type}
+                          </span>
                             {isActive() ? (
-                              <span className="badge badge-success" style={{ marginLeft: '5px', fontSize: '11px' }}>
+                              <span className="dashboard-badge dashboard-badge-success">
                                 Active
                               </span>
                             ) : (
-                              <span className="badge badge-secondary" style={{ marginLeft: '5px', fontSize: '11px' }}>
+                              <span className={`dashboard-badge ${new Date(promo.startTime) > new Date() ? 'dashboard-badge-secondary' : 'dashboard-badge-danger'}`}>
                                 {new Date(promo.startTime) > new Date() ? 'Upcoming' : 'Expired'}
                               </span>
                             )}
-                          </div>
                         </div>
                       </div>
-                    </div>
-                  );
-                })}
-              </div>
+                    );
+                  })}
+                </div>
+                <div className="dashboard-section-actions">
+                  <Link to="/promotions" className="btn btn-secondary">View All Promotions</Link>
+                  <Link to="/promotions/create" className="btn btn-primary">Create Promotion</Link>
+                </div>
+              </>
             )}
-            <div style={{ marginTop: '15px' }}>
-              <Link to="/promotions" className="btn btn-secondary">View All Promotions</Link>
-              <Link to="/promotions/create" className="btn btn-primary" style={{ marginLeft: '10px' }}>Create Promotion</Link>
-            </div>
           </div>
         </div>
       </div>
@@ -408,7 +396,7 @@ const Dashboard = () => {
 
   // Fallback (shouldn't reach here)
   return (
-    <div className="container">
+    <div className="dashboard-page">
       <h1>Welcome, {user?.name}!</h1>
       <p>Loading dashboard...</p>
     </div>

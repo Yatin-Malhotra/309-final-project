@@ -24,7 +24,8 @@ const PromotionSelector = ({ promotions, value, onChange,
     if (!value.includes(selected)) {
       onChange([...value, selected]);
     }
-    setSelected(""); 
+    setSelected("");
+    setPromoError('');
   };
 
   const remove = (id) => {
@@ -35,10 +36,11 @@ const PromotionSelector = ({ promotions, value, onChange,
     <div className="form-group">
       <label>Add Promotion</label>
 
-      <div style={{ display: "flex", gap: "10px", marginBottom: "10px" }}>
+      <div className="promotion-selector-controls">
         <select
           value={selected}
           onChange={(e) => setSelected(e.target.value)}
+          className="promotion-select"
         >
           <option value="">Select promotion...</option>
           {promotions.map((p) => (
@@ -48,36 +50,30 @@ const PromotionSelector = ({ promotions, value, onChange,
           ))}
         </select>
 
-        <button type="button" onClick={handleAdd} className="btn btn-primary">
+        <button type="button" onClick={handleAdd} className="btn btn-primary promotion-add-btn">
           Add
         </button>
       </div>
 
-      <div>
-        {value.map((id) => {
-          const promo = promotions.find((p) => p.id === parseInt(id));
-          return (
-            <div
-              key={id}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "8px",
-                marginBottom: "4px",
-              }}
-            >
-              <span>{promo?.name || `#${id}`}</span>
-              <button
-                type="button"
-                className="btn btn-secondary"
-                onClick={() => remove(id)}
-              >
-                Remove
-              </button>
-            </div>
-          );
-        })}
-      </div>
+      {value.length > 0 && (
+        <div className="promotion-list">
+          {value.map((id) => {
+            const promo = promotions.find((p) => p.id === parseInt(id));
+            return (
+              <div key={id} className="promotion-item">
+                <span className="promotion-name">{promo?.name || `#${id}`}</span>
+                <button
+                  type="button"
+                  className="btn btn-secondary promotion-remove-btn"
+                  onClick={() => remove(id)}
+                >
+                  Remove
+                </button>
+              </div>
+            );
+          })}
+        </div>
+      )}
       {promoError && <div className="error-message">{promoError}</div>}
 
       <input

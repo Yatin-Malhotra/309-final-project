@@ -1,6 +1,7 @@
 // Main App component with routing
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
+import { ThemeProvider } from './contexts/ThemeContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import Navbar from './components/Navbar';
 
@@ -22,13 +23,14 @@ import UserDetail from './pages/UserDetail';
 
 import './App.css';
 
-function App() {
+function AppContent() {
+  const location = useLocation();
+  const hideNavbar = location.pathname === '/login' || location.pathname.startsWith('/reset-password');
+
   return (
-    <AuthProvider>
-      <BrowserRouter>
-        <div className="app">
-          <Navbar />
-          <div className="app-content">
+    <div className="app">
+      {!hideNavbar && <Navbar />}
+      <div className="app-content">
             <Routes>
               <Route path="/login" element={<Login />} />
               <Route path="/reset-password" element={<ResetPassword />} />
@@ -160,8 +162,18 @@ function App() {
             </Routes>
           </div>
         </div>
-      </BrowserRouter>
-    </AuthProvider>
+  );
+}
+
+function App() {
+  return (
+    <ThemeProvider>
+      <AuthProvider>
+        <BrowserRouter>
+          <AppContent />
+        </BrowserRouter>
+      </AuthProvider>
+    </ThemeProvider>
   );
 }
 

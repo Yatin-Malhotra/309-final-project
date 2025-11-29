@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { userAPI } from '../services/api';
+import './UserDetail.css';
 
 const UserDetail = () => {
   const { userId } = useParams();
@@ -165,38 +166,38 @@ const UserDetail = () => {
 
   const getRoleBadge = (role) => {
     const colors = {
-      regular: 'badge-secondary',
-      cashier: 'badge-primary',
-      manager: 'badge-success',
-      superuser: 'badge-danger',
+      regular: 'user-detail-badge-secondary',
+      cashier: 'user-detail-badge-blue',
+      manager: 'user-detail-badge-success',
+      superuser: 'user-detail-badge-danger',
     };
-    return colors[role] || 'badge-secondary';
+    return colors[role] || 'user-detail-badge-secondary';
   };
 
   const getTransactionTypeBadge = (type) => {
     const colors = {
-      purchase: 'badge-primary',
-      redemption: 'badge-danger',
-      adjustment: 'badge-warning',
-      event: 'badge-success',
-      transfer: 'badge-secondary',
+      purchase: 'user-detail-badge-primary',
+      redemption: 'user-detail-badge-danger',
+      adjustment: 'user-detail-badge-warning',
+      event: 'user-detail-badge-success',
+      transfer: 'user-detail-badge-secondary',
     };
-    return colors[type] || 'badge-secondary';
+    return colors[type] || 'user-detail-badge-secondary';
   };
 
   if (loading) {
     return (
-      <div className="container">
-        <div className="loading">Loading user...</div>
+      <div className="user-detail-page">
+        <div className="user-detail-loading">Loading user...</div>
       </div>
     );
   }
 
   if (error || !user) {
     return (
-      <div className="container">
-        <div className="error-message">{error || 'User not found'}</div>
-        <Link to="/users" className="btn btn-secondary" style={{ marginTop: '20px' }}>
+      <div className="user-detail-page">
+        <div className="user-detail-error-message">{error || 'User not found'}</div>
+        <Link to="/users" className="btn btn-secondary user-detail-back-btn" style={{ marginTop: '20px' }}>
           Back to Users
         </Link>
       </div>
@@ -204,28 +205,27 @@ const UserDetail = () => {
   }
 
   return (
-    <div className="container">
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+    <div className="user-detail-page">
+      <div className="user-detail-page-header">
         <h1>User Profile</h1>
-        <Link to="/users" className="btn btn-secondary">
+        <Link to="/users" className="btn btn-secondary user-detail-back-btn">
           Back to Users
         </Link>
       </div>
 
-      <div className="card">
-        <div className="card-header">User Information</div>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+      <div className="user-detail-section">
+        <div className="user-detail-section-header">User Information</div>
+        <div className="user-detail-info-grid">
           <div>
             {user.avatarUrl && (
-              <div style={{ marginBottom: '20px' }}>
+              <div className="user-detail-avatar">
                 <img
                   src={user.avatarUrl}
                   alt={`${user.name}'s avatar`}
-                  style={{ width: '150px', height: '150px', borderRadius: '50%', objectFit: 'cover' }}
                 />
               </div>
             )}
-            <table className="table">
+            <table className="user-detail-info-table">
               <tbody>
                 <tr>
                   <td><strong>ID</strong></td>
@@ -250,11 +250,13 @@ const UserDetail = () => {
                           value={email}
                           onChange={(e) => setEmail(e.target.value)}
                           disabled={loading}
+                          className="user-detail-edit-input"
                         />
 
                         <button
                           onClick={handleSaveEmail}
                           disabled={loading}
+                          className="btn btn-primary user-detail-edit-btn"
                         >
                           Save
                         </button>
@@ -262,6 +264,7 @@ const UserDetail = () => {
                         <button
                           onClick={cancelEditingEmail}
                           disabled={loading}
+                          className="btn btn-secondary user-detail-edit-btn"
                         >
                           Cancel
                         </button>
@@ -269,7 +272,7 @@ const UserDetail = () => {
                       ) : (
                         <>
                           {user.email}
-                          <button onClick={() => setEditingEmail(true)}>Edit</button>
+                          <button onClick={() => setEditingEmail(true)} className="btn btn-secondary user-detail-edit-btn">Edit</button>
                         </>
                       )}
                     </td>
@@ -287,8 +290,7 @@ const UserDetail = () => {
                     <select
                       value={user.role}
                       onChange={(e) => handleRoleChange(user.id, e.target.value)}
-                      className={`badge ${getRoleBadge(user.role)}`}
-                      style={{border:'none'}}
+                      className={`user-detail-badge user-detail-role-select ${getRoleBadge(user.role)}`}
                     >
                       <option value="regular">Regular</option>
                       <option value="cashier">Cashier</option>
@@ -320,9 +322,9 @@ const UserDetail = () => {
                       </label>
                     ) : (
                       user.verified ? (
-                        <span className="badge badge-success">Yes</span>
+                        <span className="user-detail-badge user-detail-badge-success">Yes</span>
                       ) : (
-                        <span className="badge badge-warning">No</span>
+                        <span className="user-detail-badge user-detail-badge-warning">No</span>
                       )
                     )}
                   </td>
@@ -342,9 +344,9 @@ const UserDetail = () => {
                       </label>
                     ) : (
                       user.suspicious ? (
-                        <span className="badge badge-danger">Yes</span>
+                        <span className="user-detail-badge user-detail-badge-danger">Yes</span>
                       ) : (
-                        <span className="badge badge-success">No</span>
+                        <span className="user-detail-badge user-detail-badge-success">No</span>
                       )
                     )}
                   </td>
@@ -368,24 +370,24 @@ const UserDetail = () => {
       </div>
 
       {user.promotions && user.promotions.length > 0 && (
-        <div className="card" style={{ marginTop: '20px' }}>
-          <div className="card-header">Active Promotions</div>
-          <div style={{ display: 'grid', gap: '10px' }}>
+        <div className="user-detail-section">
+          <div className="user-detail-section-header">Active Promotions</div>
+          <div className="user-detail-promotions-grid">
             {user.promotions.map((promotion) => (
-              <div key={promotion.id} style={{ padding: '10px', border: '1px solid #ddd', borderRadius: '4px' }}>
-                <strong>{promotion.name}</strong>
+              <div key={promotion.id} className="user-detail-promotion-item">
+                <div className="user-detail-promotion-name">{promotion.name}</div>
                 {promotion.minSpending && (
-                  <div style={{ fontSize: '14px', color: '#666' }}>
+                  <div className="user-detail-promotion-detail">
                     Min Spending: ${promotion.minSpending}
                   </div>
                 )}
                 {promotion.rate && (
-                  <div style={{ fontSize: '14px', color: '#666' }}>
+                  <div className="user-detail-promotion-detail">
                     Rate: {promotion.rate}x
                   </div>
                 )}
                 {promotion.points && (
-                  <div style={{ fontSize: '14px', color: '#666' }}>
+                  <div className="user-detail-promotion-detail">
                     Points: {promotion.points}
                   </div>
                 )}
@@ -396,10 +398,10 @@ const UserDetail = () => {
       )}
 
       {hasRole('manager') && (
-        <div className="card" style={{ marginTop: '20px' }}>
-          <div className="card-header">User Transactions</div>
+        <div className="user-detail-section">
+          <div className="user-detail-section-header">User Transactions</div>
           
-          <div className="filters" style={{ marginBottom: '20px' }}>
+          <div className="user-detail-filters">
             <div className="form-group">
               <label>Limit</label>
               <select
@@ -415,12 +417,12 @@ const UserDetail = () => {
           </div>
 
           {transactionsLoading ? (
-            <div className="loading">Loading transactions...</div>
+            <div className="user-detail-loading">Loading transactions...</div>
           ) : transactions.length === 0 ? (
-            <div className="empty-state">No transactions found</div>
+            <div className="user-detail-empty-state">No transactions found</div>
           ) : (
             <>
-              <table className="table">
+              <table className="user-detail-table">
                   <thead>
                     <tr>
                       <th>ID</th>
@@ -428,6 +430,7 @@ const UserDetail = () => {
                       <th>Amount</th>
                       <th>Date</th>
                       <th>Status</th>
+                      <th>Suspicious</th>
                       <th>Created By</th>
                     </tr>
                   </thead>
@@ -436,7 +439,7 @@ const UserDetail = () => {
                       <tr key={tx.id}>
                         <td>{tx.id}</td>
                         <td>
-                          <span className={`badge ${getTransactionTypeBadge(tx.type)}`}>
+                          <span className={`user-detail-badge ${getTransactionTypeBadge(tx.type)}`}>
                             {tx.type}
                           </span>
                         </td>
@@ -447,14 +450,19 @@ const UserDetail = () => {
                         <td>
                           {tx.type === 'redemption' ? (
                             tx.processed ? (
-                              <span className="badge badge-success">Processed</span>
+                              <span className="user-detail-badge user-detail-badge-success">Processed</span>
                             ) : (
-                              <span className="badge badge-warning">Pending</span>
+                              <span className="user-detail-badge user-detail-badge-warning">Pending</span>
                             )
-                          ) : tx.suspicious ? (
-                            <span className="badge badge-danger">Suspicious</span>
                           ) : (
-                            <span className="badge badge-success">Normal</span>
+                            <span className="user-detail-badge user-detail-badge-success">Processed</span>
+                          )}
+                        </td>
+                        <td>
+                          {tx.suspicious ? (
+                            <span className="user-detail-badge user-detail-badge-danger">Yes</span>
+                          ) : (
+                            <span className="user-detail-badge user-detail-badge-success">No</span>
                           )}
                         </td>
                         <td>{tx.createdBy || 'N/A'}</td>
@@ -463,7 +471,7 @@ const UserDetail = () => {
                   </tbody>
                 </table>
 
-              <div className="pagination" style={{ marginTop: '20px' }}>
+              <div className="user-detail-pagination">
                 <button
                   onClick={() => handleTransactionFilterChange('page', transactionFilters.page - 1)}
                   disabled={transactionFilters.page <= 1}

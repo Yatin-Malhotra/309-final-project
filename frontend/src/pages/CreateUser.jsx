@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { userAPI } from '../services/api';
+import './CreateUser.css';
 
 const CreateUser = () => {
   const navigate = useNavigate();
@@ -34,9 +35,11 @@ const CreateUser = () => {
   };
 
   return (
-    <div className="container">
-      <h1>Create User</h1>
-      <div className="card">
+    <div className="create-user-page">
+      <div className="create-user-page-header">
+        <h1>Create User</h1>
+      </div>
+      <div className="create-user-card">
         <form onSubmit={handleSubmit}>
           <div className="form-group">
             <label htmlFor="utorid">UTORid *</label>

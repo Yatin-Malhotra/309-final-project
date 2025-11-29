@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { transactionAPI } from "../services/api";
 import { useAuth } from "../contexts/AuthContext";
+import '../pages/CreateTransaction.css';
 
 const UserCreateTx = () => {
   const { user, updateLocalUser } = useAuth()
@@ -39,9 +40,11 @@ const UserCreateTx = () => {
   };
 
   return (
-    <div className="container">
-      <h1>Create Transaction</h1>
-      <div className="card">
+    <div className="create-transaction-page">
+      <div className="create-transaction-page-header">
+        <h1>Create Transaction</h1>
+      </div>
+      <div className="create-transaction-card">
         <form onSubmit={handleSubmit}>
           <div className="form-group">
             <label htmlFor="type">Type *</label>

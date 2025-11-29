@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { eventAPI } from '../services/api';
 import { Link, useSearchParams } from 'react-router-dom';
+import './Events.css';
 
 const Events = () => {
   const { user, hasRole } = useAuth();
@@ -65,28 +66,28 @@ const Events = () => {
   };
 
   return (
-    <div className="container">
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+    <div className="events-page">
+      <div className="events-page-header">
         <h1>Events</h1>
         {hasRole('manager') && (
-          <Link to="/events/create" className="btn btn-primary">
+          <Link to="/events/create" className="btn btn-primary events-create-btn">
             Create Event
           </Link>
         )}
       </div>
 
-      {(
-        <div className="filters">
+      <div className="events-filters">
+        <div className="form-group">
+          <label>Name</label>
+          <input
+            type="text"
+            value={filters.name}
+            onChange={(e) => handleFilterChange('name', e.target.value)}
+            placeholder="Search by name..."
+          />
+        </div>
+        {hasRole('manager') && (
           <div className="form-group">
-            <label>Name</label>
-            <input
-              type="text"
-              value={filters.name}
-              onChange={(e) => handleFilterChange('name', e.target.value)}
-              placeholder="Search by name..."
-            />
-          </div>
-          {hasRole('manager') && (<div className="form-group">
             <label>Published</label>
             <select
               value={filters.published}
@@ -96,77 +97,78 @@ const Events = () => {
               <option value="true">Published</option>
               <option value="false">Unpublished</option>
             </select>
-          </div>)}
-          <div className="form-group">
-            <label>Limit</label>
-            <select
-              value={filters.limit}
-              onChange={(e) => handleFilterChange('limit', parseInt(e.target.value))}
-            >
-              <option value="10">10</option>
-              <option value="25">25</option>
-              <option value="50">50</option>
-            </select>
           </div>
+        )}
+        <div className="form-group">
+          <label>Limit</label>
+          <select
+            value={filters.limit}
+            onChange={(e) => handleFilterChange('limit', parseInt(e.target.value))}
+          >
+            <option value="10">10</option>
+            <option value="25">25</option>
+            <option value="50">50</option>
+          </select>
         </div>
-      )}
+      </div>
 
-      {error && <div className="error-message">{error}</div>}
+      {error && <div className="events-error-message">{error}</div>}
 
       {loading ? (
-        <div className="loading">Loading events...</div>
+        <div className="events-loading">Loading events...</div>
       ) : events.length === 0 ? (
-        <div className="empty-state">No events found</div>
+        <div className="events-empty-state">No events found</div>
       ) : (
         <>
-          <div style={{ display: 'grid', gap: '20px' }}>
+          <div className="events-grid">
             {events.map((event) => (
-              <div key={event.id} className="card">
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start' }}>
-                  <div style={{ flex: 1 }}>
-                    <h3 style={{ marginBottom: '10px' }}>{event.name}</h3>
-                    <p style={{ color: '#666', marginBottom: '10px' }}>
+              <div key={event.id} className="events-card">
+                <div className="events-card-content">
+                  <div className="events-card-main">
+                    <h3 className="events-card-title">{event.name}</h3>
+                    <p className="events-card-meta">
                       {formatDate(event.startTime)} - {formatDate(event.endTime)}
                     </p>
-                    <p style={{ color: '#666' }}>Location: {event.location}</p>
-                    {hasRole('manager') && (
-                      <div style={{ marginTop: '10px' }}>
-                        <span className="badge badge-secondary">
-                          {event.numGuests} / {event.capacity || '∞'} guests
-                        </span>
-                        <span className="badge badge-primary" style={{ marginLeft: '10px' }}>
-                          {event.pointsRemain} points remaining
-                        </span>
-                        {!event.published && (
-                          <span className="badge badge-warning" style={{ marginLeft: '10px' }}>
-                            Unpublished
+                    <p className="events-card-location">Location: {event.location}</p>
+                    <div className="events-card-badges">
+                      {hasRole('manager') && (
+                        <>
+                          <span className="events-badge events-badge-secondary">
+                            {event.numGuests} / {event.capacity || '∞'} guests
                           </span>
-                        )}
-                      </div>
-                    )}
-                    {!hasRole('manager') && (
-                      <div style={{ marginTop: '10px' }}>
-                        <span className="badge badge-secondary">
-                          {event.numGuests} / {event.capacity || '∞'} guests
-                        </span>
-                        {isEventFull(event) && (
-                          <span className="badge badge-danger" style={{ marginLeft: '10px' }}>
-                            Full
+                          <span className="events-badge events-badge-primary">
+                            {event.pointsRemain} points remaining
                           </span>
-                        )}
-                        {isEventPast(event) && (
-                          <span className="badge badge-secondary" style={{ marginLeft: '10px' }}>
-                            Past
+                          {!event.published && (
+                            <span className="events-badge events-badge-warning">
+                              Unpublished
+                            </span>
+                          )}
+                        </>
+                      )}
+                      {!hasRole('manager') && (
+                        <>
+                          <span className="events-badge events-badge-secondary">
+                            {event.numGuests} / {event.capacity || '∞'} guests
                           </span>
-                        )}
-                      </div>
-                    )}
+                          {isEventFull(event) && (
+                            <span className="events-badge events-badge-danger">
+                              Full
+                            </span>
+                          )}
+                          {isEventPast(event) && (
+                            <span className="events-badge events-badge-secondary">
+                              Past
+                            </span>
+                          )}
+                        </>
+                      )}
+                    </div>
                   </div>
-                  <div>
+                  <div className="events-card-actions">
                     <Link
                       to={`/events/${event.id}`}
-                      className="btn btn-primary"
-                      style={{ padding: '8px 16px' }}
+                      className="btn btn-primary events-view-btn"
                     >
                       View Details
                     </Link>
@@ -176,7 +178,7 @@ const Events = () => {
             ))}
           </div>
 
-          <div className="pagination">
+          <div className="events-pagination">
             <button
               onClick={() => handleFilterChange('page', filters.page - 1)}
               disabled={filters.page <= 1}

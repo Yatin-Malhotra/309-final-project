@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import { useNavigate, useParams, Link } from 'react-router-dom';
 import { authAPI } from '../services/api';
+import './ResetPassword.css';
 
 const ResetPassword = () => {
   const { resetToken } = useParams();
@@ -66,19 +67,23 @@ const ResetPassword = () => {
   if (resetToken) {
     // Reset password form
     return (
-      <div className="auth-container">
-        <div className="auth-card">
-          <div className="auth-header">
+      <div className="reset-password-container">
+        <div className="reset-password-stripes"></div>
+        <div className="reset-password-welcome">
+          <h2>Reset Password</h2>
+        </div>
+        <div className="reset-password-card">
+          <div className="reset-password-header">
             <h1>Reset Password</h1>
             <p>Enter your UTORid and new password</p>
           </div>
           {success ? (
-            <div className="success-message">
+            <div className="reset-password-success-message">
               Password reset successful! Redirecting to login...
             </div>
           ) : (
             <form onSubmit={handleReset}>
-              <div className="form-group">
+              <div className="reset-password-form-group">
                 <label htmlFor="utorid">UTORid</label>
                 <input
                   type="text"
@@ -88,7 +93,7 @@ const ResetPassword = () => {
                   required
                 />
               </div>
-              <div className="form-group">
+              <div className="reset-password-form-group">
                 <label htmlFor="password">New Password</label>
                 <input
                   type="password"
@@ -97,11 +102,11 @@ const ResetPassword = () => {
                   onChange={(e) => setPassword(e.target.value)}
                   required
                 />
-                <small style={{ color: '#666', fontSize: '12px' }}>
+                <small>
                   8-20 characters, must include uppercase, lowercase, digit, and special character
                 </small>
               </div>
-              <div className="form-group">
+              <div className="reset-password-form-group">
                 <label htmlFor="confirmPassword">Confirm Password</label>
                 <input
                   type="password"
@@ -111,9 +116,9 @@ const ResetPassword = () => {
                   required
                 />
               </div>
-              {error && <div className="error-message">{error}</div>}
-              <div className="form-actions">
-                <button type="submit" className="btn btn-primary" disabled={loading}>
+              {error && <div className="reset-password-error-message">{error}</div>}
+              <div className="reset-password-form-actions">
+                <button type="submit" className="reset-password-btn-primary" disabled={loading}>
                   {loading ? 'Resetting...' : 'Reset Password'}
                 </button>
               </div>
@@ -126,19 +131,20 @@ const ResetPassword = () => {
 
   // Request reset form
   return (
-    <div className="auth-container">
-      <div className="auth-card">
-        <div className="auth-header">
+    <div className="reset-password-container">
+      <div className="reset-password-stripes"></div>
+      <div className="reset-password-card">
+        <div className="reset-password-header">
           <h1>Reset Password</h1>
           <p>Enter your UTORid to receive a reset link</p>
         </div>
         {success ? (
-          <div className="success-message">
+          <div className="reset-password-success-message">
             Reset token has been sent. Please check your email or contact support.
           </div>
         ) : (
           <form onSubmit={handleRequestReset}>
-            <div className="form-group">
+            <div className="reset-password-form-group">
               <label htmlFor="utorid">UTORid</label>
               <input
                 type="text"
@@ -149,14 +155,14 @@ const ResetPassword = () => {
                 autoFocus
               />
             </div>
-            {error && <div className="error-message">{error}</div>}
-            <div className="form-actions">
-              <button type="submit" className="btn btn-primary" disabled={loading}>
+            {error && <div className="reset-password-error-message">{error}</div>}
+            <div className="reset-password-form-actions">
+              <button type="submit" className="reset-password-btn-primary" disabled={loading}>
                 {loading ? 'Sending...' : 'Request Reset'}
               </button>
             </div>
-            <div style={{ marginTop: '15px', textAlign: 'center' }}>
-              <Link to="/login" style={{ color: '#007bff', textDecoration: 'none' }}>
+            <div className="reset-password-link-container">
+              <Link to="/login" className="reset-password-link">
                 Back to Login
               </Link>
             </div>

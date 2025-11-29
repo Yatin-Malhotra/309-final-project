@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { authAPI, userAPI } from '../services/api';
+import './Login.css';
 
 const Login = () => {
   const [utorid, setUtorid] = useState('');
@@ -36,14 +37,18 @@ const Login = () => {
   };
 
   return (
-    <div className="auth-container">
-      <div className="auth-card">
-        <div className="auth-header">
+    <div className="login-container">
+      <div className="login-stripes"></div>
+      <div className="login-welcome">
+        <h2>Welcome Back!</h2>
+      </div>
+      <div className="login-card">
+        <div className="login-header">
           <h1>Login</h1>
           <p>Sign in to your CSSU Rewards account</p>
         </div>
         <form onSubmit={handleSubmit}>
-          <div className="form-group">
+          <div className="login-form-group">
             <label htmlFor="utorid">UTORid</label>
             <input
               type="text"
@@ -54,7 +59,7 @@ const Login = () => {
               autoFocus
             />
           </div>
-          <div className="form-group">
+          <div className="login-form-group">
             <label htmlFor="password">Password</label>
             <input
               type="password"
@@ -64,14 +69,14 @@ const Login = () => {
               required
             />
           </div>
-          {error && <div className="error-message">{error}</div>}
-          <div className="form-actions">
-            <button type="submit" className="btn btn-primary" disabled={loading}>
+          {error && <div className="login-error-message">{error}</div>}
+          <div className="login-form-actions">
+            <button type="submit" className="login-btn-primary" disabled={loading}>
               {loading ? 'Logging in...' : 'Login'}
             </button>
           </div>
-          <div style={{ marginTop: '15px', textAlign: 'center' }}>
-            <Link to="/reset-password" style={{ color: '#007bff', textDecoration: 'none' }}>
+          <div className="login-link-container">
+            <Link to="/reset-password" className="login-link">
               Forgot password?
             </Link>
           </div>

@@ -1,3 +1,100 @@
+/* CSS Variables for Theme */
+:root {
+  /* Light Theme Colors */
+  --bg-primary: #f0f7f8;
+  --bg-secondary: #ffffff;
+  --bg-tertiary: rgba(184, 227, 233, 0.15);
+  --bg-hover: rgba(184, 227, 233, 0.2);
+  --bg-card: linear-gradient(to bottom, #ffffff 0%, rgba(184, 227, 233, 0.15) 100%);
+  --bg-card-hover: linear-gradient(to bottom, #ffffff 0%, rgba(184, 227, 233, 0.25) 100%);
+  
+  --text-primary: #0B2E33;
+  --text-secondary: #555;
+  --text-muted: rgba(11, 46, 51, 0.7);
+  
+  --border-color: rgba(147, 177, 181, 0.25);
+  --border-light: rgba(147, 177, 181, 0.15);
+  --border-hover: rgba(79, 124, 130, 0.35);
+  
+  --primary: #4F7C82;
+  --primary-dark: #0B2E33;
+  --secondary: #93B1B5;
+  --accent: #B8E3E9;
+  
+  --shadow: rgba(11, 46, 51, 0.08);
+  --shadow-hover: rgba(11, 46, 51, 0.15);
+  
+  --error: #dc3545;
+  --error-bg: #fff5f5;
+  --success: #28a745;
+  --success-bg: #f0fff4;
+  --warning: #ffc107;
+  
+  --badge-success-bg: rgba(40, 167, 69, 0.15);
+  --badge-success-color: #28a745;
+  --badge-danger-bg: rgba(220, 53, 69, 0.15);
+  --badge-danger-color: #dc3545;
+  --badge-warning-bg: rgba(255, 152, 0, 0.2);
+  --badge-warning-color: #E65100;
+  --badge-primary-bg: rgba(79, 124, 130, 0.2);
+  --badge-primary-color: var(--text-primary);
+  --badge-blue-bg: rgba(33, 150, 243, 0.2);
+  --badge-blue-color: #1565C0;
+  --badge-secondary-bg: rgba(147, 177, 181, 0.2);
+  --badge-secondary-color: var(--text-primary);
+  
+  --navbar-gradient: linear-gradient(135deg, #4F7C82 0%, #0B2E33 100%);
+  --login-gradient: linear-gradient(135deg, #4F7C82 0%, #93B1B5 100%);
+}
+
+[data-theme="dark"] {
+  /* Dark Theme Colors */
+  --bg-primary: #0d1a1c;
+  --bg-secondary: #1a2d31;
+  --bg-tertiary: rgba(79, 124, 130, 0.15);
+  --bg-hover: rgba(79, 124, 130, 0.25);
+  --bg-card: linear-gradient(to bottom, #1a2d31 0%, rgba(79, 124, 130, 0.1) 100%);
+  --bg-card-hover: linear-gradient(to bottom, #1a2d31 0%, rgba(79, 124, 130, 0.2) 100%);
+  
+  --text-primary: #e8f4f6;
+  --text-secondary: #b8d4d9;
+  --text-muted: rgba(232, 244, 246, 0.6);
+  
+  --border-color: rgba(79, 124, 130, 0.3);
+  --border-light: rgba(79, 124, 130, 0.2);
+  --border-hover: rgba(79, 124, 130, 0.5);
+  
+  --primary: #5a8a90;
+  --primary-dark: #2d5a61;
+  --secondary: #6a8d91;
+  --accent: #4F7C82;
+  
+  --shadow: rgba(0, 0, 0, 0.3);
+  --shadow-hover: rgba(0, 0, 0, 0.4);
+  
+  --error: #ff6b7a;
+  --error-bg: rgba(255, 107, 122, 0.1);
+  --success: #4ade80;
+  --success-bg: rgba(74, 222, 128, 0.1);
+  --warning: #fbbf24;
+  
+  --badge-success-bg: rgba(74, 222, 128, 0.25);
+  --badge-success-color: #4ade80;
+  --badge-danger-bg: rgba(255, 107, 122, 0.25);
+  --badge-danger-color: #ff6b7a;
+  --badge-warning-bg: rgba(251, 191, 36, 0.25);
+  --badge-warning-color: #fbbf24;
+  --badge-primary-bg: rgba(90, 138, 144, 0.25);
+  --badge-primary-color: #a8d4db;
+  --badge-blue-bg: rgba(96, 165, 250, 0.25);
+  --badge-blue-color: #60a5fa;
+  --badge-secondary-bg: rgba(106, 141, 145, 0.25);
+  --badge-secondary-color: #b8d4d9;
+  
+  --navbar-gradient: linear-gradient(135deg, #2d5a61 0%, #0B2E33 100%);
+  --login-gradient: linear-gradient(135deg, #2d5a61 0%, #4F7C82 100%);
+}
+
 * {
   margin: 0;
   padding: 0;
@@ -10,8 +107,9 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background-color: #f5f5f5;
-  color: #333;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 code {
@@ -37,39 +135,43 @@ code {
 }
 
 .btn-primary {
-  background-color: #007bff;
+  background-color: var(--primary);
   color: white;
+  transition: background-color 0.2s ease;
 }
 
 .btn-primary:hover {
-  background-color: #0056b3;
+  background-color: var(--primary-dark);
 }
 
 .btn-secondary {
-  background-color: #6c757d;
+  background-color: var(--secondary);
   color: white;
+  transition: background-color 0.2s ease;
 }
 
 .btn-secondary:hover {
-  background-color: #545b62;
+  background-color: var(--primary);
 }
 
 .btn-danger {
-  background-color: #dc3545;
+  background-color: var(--error);
   color: white;
+  transition: background-color 0.2s ease;
 }
 
 .btn-danger:hover {
-  background-color: #c82333;
+  opacity: 0.9;
 }
 
 .btn-success {
-  background-color: #28a745;
+  background-color: var(--success);
   color: white;
+  transition: background-color 0.2s ease;
 }
 
 .btn-success:hover {
-  background-color: #218838;
+  opacity: 0.9;
 }
 
 .btn:disabled {
@@ -85,7 +187,7 @@ code {
   display: block;
   margin-bottom: 5px;
   font-weight: 500;
-  color: #555;
+  color: var(--text-secondary);
 }
 
 .form-group input,
@@ -93,36 +195,41 @@ code {
 .form-group textarea {
   width: 100%;
   padding: 10px;
-  border: 1px solid #ddd;
+  border: 1px solid var(--border-light);
   border-radius: 4px;
   font-size: 14px;
+  background-color: var(--bg-secondary);
+  color: var(--text-primary);
+  transition: border-color 0.2s ease, background-color 0.3s ease, color 0.3s ease;
 }
 
 .form-group input:focus,
 .form-group select:focus,
 .form-group textarea:focus {
   outline: none;
-  border-color: #007bff;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(79, 124, 130, 0.1);
 }
 
 .error-message {
-  color: #dc3545;
+  color: var(--error);
   font-size: 14px;
   margin-top: 5px;
 }
 
 .success-message {
-  color: #28a745;
+  color: var(--success);
   font-size: 14px;
   margin-top: 5px;
 }
 
 .card {
-  background: white;
+  background: var(--bg-secondary);
   border-radius: 8px;
   padding: 20px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 4px var(--shadow);
   margin-bottom: 20px;
+  transition: background-color 0.3s ease, box-shadow 0.3s ease;
 }
 
 .card-header {
@@ -130,7 +237,8 @@ code {
   font-weight: 600;
   margin-bottom: 15px;
   padding-bottom: 10px;
-  border-bottom: 1px solid #eee;
+  border-bottom: 1px solid var(--border-light);
+  color: var(--text-primary);
 }
 
 .table {
@@ -142,17 +250,19 @@ code {
 .table td {
   padding: 12px;
   text-align: left;
-  border-bottom: 1px solid #eee;
+  border-bottom: 1px solid var(--border-light);
+  color: var(--text-primary);
+  transition: background-color 0.2s ease, color 0.3s ease;
 }
 
 .table th {
-  background-color: #f8f9fa;
+  background-color: var(--bg-tertiary);
   font-weight: 600;
-  color: #555;
+  color: var(--text-secondary);
 }
 
 .table tr:hover {
-  background-color: #f8f9fa;
+  background-color: var(--bg-hover);
 }
 
 .badge {
@@ -164,40 +274,46 @@ code {
 }
 
 .badge-primary {
-  background-color: #007bff;
-  color: white;
+  background-color: var(--badge-primary-bg);
+  color: var(--badge-primary-color);
+}
+
+.badge-blue {
+  background-color: var(--badge-blue-bg);
+  color: var(--badge-blue-color);
+  font-weight: 700;
 }
 
 .badge-success {
-  background-color: #28a745;
-  color: white;
+  background-color: var(--badge-success-bg);
+  color: var(--badge-success-color);
 }
 
 .badge-danger {
-  background-color: #dc3545;
-  color: white;
+  background-color: var(--badge-danger-bg);
+  color: var(--badge-danger-color);
 }
 
 .badge-warning {
-  background-color: #ffc107;
-  color: #333;
+  background-color: var(--badge-warning-bg);
+  color: var(--badge-warning-color);
 }
 
 .badge-secondary {
-  background-color: #6c757d;
-  color: white;
+  background-color: var(--badge-secondary-bg);
+  color: var(--badge-secondary-color);
 }
 
 .loading {
   text-align: center;
   padding: 40px;
-  color: #666;
+  color: var(--text-secondary);
 }
 
 .empty-state {
   text-align: center;
   padding: 40px;
-  color: #999;
+  color: var(--text-muted);
 }
 
 .pagination {
@@ -210,14 +326,16 @@ code {
 
 .pagination button {
   padding: 8px 12px;
-  border: 1px solid #ddd;
-  background: white;
+  border: 1px solid var(--border-light);
+  background: var(--bg-secondary);
+  color: var(--text-primary);
   cursor: pointer;
   border-radius: 4px;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
 }
 
 .pagination button:hover:not(:disabled) {
-  background-color: #f8f9fa;
+  background-color: var(--bg-hover);
 }
 
 .pagination button:disabled {
@@ -253,7 +371,7 @@ code {
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: #ccc;
+  background-color: var(--secondary);
   -webkit-transition: .4s;
   transition: .4s;
   border-radius: 34px;

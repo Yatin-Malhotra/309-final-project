@@ -1,0 +1,251 @@
+/* Winter Chill Color Palette */
+/* #B8E3E9 - Lightest icy blue */
+/* #93B1B5 - Light muted blue-gray */
+/* #4F7C82 - Medium desaturated teal */
+/* #0B2E33 - Darkest deep teal */
+
+.create-transaction-page {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0;
+  padding-top: 24px;
+  padding-bottom: 32px;
+}
+
+.create-transaction-page-header {
+  margin-bottom: 32px;
+}
+
+.create-transaction-page-header h1 {
+  font-size: 32px;
+  font-weight: 600;
+  color: var(--text-primary);
+  letter-spacing: -0.5px;
+  margin: 0;
+}
+
+.create-transaction-card {
+  background: var(--bg-card);
+  border-radius: 12px;
+  padding: 32px;
+  box-shadow: 0 2px 8px rgba(11, 46, 51, 0.08), 0 1px 2px rgba(11, 46, 51, 0.04);
+  border: 1px solid var(--border-color);
+  transition: all 0.3s ease;
+}
+
+.create-transaction-card:hover {
+  background: var(--bg-card-hover);
+  box-shadow: 0 4px 12px rgba(11, 46, 51, 0.12), 0 2px 4px rgba(11, 46, 51, 0.08);
+  border-color: rgba(79, 124, 130, 0.35);
+}
+
+.create-transaction-page .form-group {
+  margin-bottom: 24px;
+}
+
+.create-transaction-page .form-group label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 600;
+  color: var(--text-primary);
+  font-size: 14px;
+}
+
+.create-transaction-page .form-group input,
+.create-transaction-page .form-group select,
+.create-transaction-page .form-group textarea {
+  width: 100%;
+  padding: 12px 16px;
+  border: 1.5px solid rgba(147, 177, 181, 0.3);
+  border-radius: 8px;
+  font-size: 15px;
+  color: var(--text-primary);
+  background-color: var(--bg-secondary);
+  transition: all 0.2s ease;
+  font-family: inherit;
+  font-weight: 500;
+}
+
+.create-transaction-page .form-group input:focus,
+.create-transaction-page .form-group select:focus,
+.create-transaction-page .form-group textarea:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(79, 124, 130, 0.1);
+}
+
+.create-transaction-page .form-group input:hover:not(:focus),
+.create-transaction-page .form-group select:hover:not(:focus),
+.create-transaction-page .form-group textarea:hover:not(:focus) {
+  border-color: var(--primary);
+}
+
+.create-transaction-page .form-group textarea {
+  resize: vertical;
+  min-height: 100px;
+  font-family: inherit;
+}
+
+.create-transaction-page .error-message {
+  color: #dc3545;
+  font-size: 15px;
+  margin-top: 16px;
+  padding: 12px 16px;
+  background-color: var(--error-bg);
+  border-left: 3px solid #dc3545;
+  border-radius: 4px;
+}
+
+.create-transaction-page .form-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  margin-top: 32px;
+  padding-top: 24px;
+  border-top: 1px solid rgba(147, 177, 181, 0.2);
+}
+
+.create-transaction-page .form-actions .btn {
+  padding: 12px 24px;
+  font-size: 15px;
+  font-weight: 600;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+.create-transaction-page .form-actions .btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(11, 46, 51, 0.15);
+}
+
+.create-transaction-page .form-actions .btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Promotion Selector Styles */
+.promotion-selector-controls {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.promotion-select {
+  flex: 1;
+  padding: 12px 16px;
+  border: 1.5px solid rgba(147, 177, 181, 0.3);
+  border-radius: 8px;
+  font-size: 15px;
+  color: var(--text-primary);
+  background-color: var(--bg-secondary);
+  transition: all 0.2s ease;
+  font-family: inherit;
+  font-weight: 500;
+}
+
+.promotion-select:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(79, 124, 130, 0.1);
+}
+
+.promotion-select:hover:not(:focus) {
+  border-color: var(--primary);
+}
+
+.promotion-add-btn {
+  padding: 12px 20px;
+  font-size: 15px;
+  font-weight: 600;
+  border-radius: 8px;
+  white-space: nowrap;
+}
+
+.promotion-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.promotion-item {
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 10px 14px;
+  background-color: rgba(184, 227, 233, 0.1);
+  border: 1px solid rgba(147, 177, 181, 0.2);
+  border-radius: 8px;
+  transition: all 0.2s ease;
+  width: fit-content;
+  max-width: 100%;
+}
+
+.promotion-item:hover {
+  background-color: rgba(184, 227, 233, 0.15);
+  border-color: rgba(79, 124, 130, 0.3);
+}
+
+.promotion-name {
+  flex: 1;
+  font-weight: 500;
+  color: var(--text-primary);
+  font-size: 14px;
+}
+
+.promotion-remove-btn {
+  padding: 6px 14px;
+  font-size: 13px;
+  font-weight: 600;
+  border-radius: 6px;
+  white-space: nowrap;
+  background-color: #4F7C82 !important;
+}
+
+.promotion-remove-btn:hover {
+  background-color: var(--text-primary) !important;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .create-transaction-page {
+    padding: 16px;
+    padding-top: 24px;
+  }
+
+  .create-transaction-card {
+    padding: 24px;
+  }
+
+  .create-transaction-page-header h1 {
+    font-size: 24px;
+  }
+
+  .create-transaction-page .form-actions {
+    flex-direction: column;
+  }
+
+  .create-transaction-page .form-actions .btn {
+    width: 100%;
+  }
+
+  .promotion-selector-controls {
+    flex-direction: column;
+  }
+
+  .promotion-add-btn {
+    width: 100%;
+  }
+
+  .promotion-item {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .promotion-remove-btn {
+    width: 100%;
+  }
+}
+

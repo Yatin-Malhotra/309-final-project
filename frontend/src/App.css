@@ -7,14 +7,18 @@
 .app-content {
   flex: 1;
   padding: 20px;
+  background-color: var(--bg-primary);
+  min-height: calc(100vh - 80px);
+  transition: background-color 0.3s ease;
 }
 
 /* Navigation */
 .navbar {
-  background-color: #fff;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  padding: 15px 0;
+  background: var(--navbar-gradient);
+  box-shadow: 0 2px 8px var(--shadow-hover);
+  padding: 16px 0;
   margin-bottom: 20px;
+  transition: background 0.3s ease;
 }
 
 .navbar-content {
@@ -24,27 +28,37 @@
 }
 
 .navbar-brand {
-  font-size: 20px;
-  font-weight: 600;
-  color: #007bff;
+  font-size: 22px;
+  font-weight: 700;
+  color: white;
   text-decoration: none;
+  letter-spacing: -0.3px;
+  transition: opacity 0.2s ease;
+}
+
+.navbar-brand:hover {
+  opacity: 0.9;
 }
 
 .navbar-links {
   display: flex;
-  gap: 20px;
+  gap: 24px;
   align-items: center;
 }
 
 .navbar-links a {
-  color: #333;
+  color: rgba(255, 255, 255, 0.9);
   text-decoration: none;
-  font-weight: 500;
-  transition: color 0.2s;
+  font-weight: 600;
+  font-size: 15px;
+  transition: all 0.2s ease;
+  padding: 6px 0;
+  border-bottom: 2px solid transparent;
 }
 
 .navbar-links a:hover {
-  color: #007bff;
+  color: white;
+  border-bottom-color: rgba(255, 255, 255, 0.5);
 }
 
 .navbar-user {
@@ -78,10 +92,11 @@
 }
 
 .auth-card {
-  background: white;
+  background: var(--bg-secondary);
   border-radius: 8px;
   padding: 30px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 8px var(--shadow);
+  transition: background-color 0.3s ease, box-shadow 0.3s ease;
 }
 
 .auth-header {
@@ -95,49 +110,11 @@
 }
 
 .auth-header p {
-  color: #666;
+  color: var(--text-secondary);
   font-size: 14px;
 }
 
-/* Dashboard */
-.dashboard-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 20px;
-  margin-bottom: 30px;
-}
-
-.dashboard-card {
-  background: white;
-  border-radius: 8px;
-  padding: 20px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-.dashboard-card-title {
-  font-size: 14px;
-  color: #666;
-  margin-bottom: 10px;
-}
-
-.dashboard-card-value {
-  font-size: 32px;
-  font-weight: 600;
-  color: #333;
-}
-
-.dashboard-card-change {
-  font-size: 14px;
-  margin-top: 5px;
-}
-
-.dashboard-card-change.positive {
-  color: #28a745;
-}
-
-.dashboard-card-change.negative {
-  color: #dc3545;
-}
+/* Dashboard styles moved to Dashboard.css */
 
 /* Forms */
 .form-actions {
@@ -155,7 +132,7 @@
 
 /* Filters */
 .filters {
-  background: white;
+  background: var(--bg-secondary);
   padding: 20px;
   border-radius: 8px;
   margin-bottom: 20px;
@@ -163,6 +140,7 @@
   flex-wrap: wrap;
   gap: 15px;
   align-items: flex-end;
+  transition: background-color 0.3s ease;
 }
 
 .filters .form-group {
@@ -188,9 +166,6 @@
     gap: 10px;
   }
 
-  .dashboard-grid {
-    grid-template-columns: 1fr;
-  }
 
   .form-row {
     grid-template-columns: 1fr;

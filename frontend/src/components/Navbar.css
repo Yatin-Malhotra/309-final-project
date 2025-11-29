@@ -1,26 +1,41 @@
 .navbar-user {
-  display: flex;
-  align-items: center;
-  gap: 15px;
+  position: relative;
 }
 
-.user-info {
+.user-info-clickable {
   display: flex;
   align-items: center;
   gap: 10px;
+  cursor: pointer;
+  padding: 6px 12px;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+.user-info-clickable:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.user-info-clickable span {
+  color: rgba(255, 255, 255, 0.9);
+  font-weight: 500;
+  font-size: 14px;
 }
 
 .user-avatar {
-  width: 32px;
-  height: 32px;
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
-  background-color: #007bff;
+  background-color: rgba(255, 255, 255, 0.2);
   color: white;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-weight: 600;
-  font-size: 12px;
+  font-weight: 700;
+  font-size: 13px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  transition: all 0.2s ease;
+  flex-shrink: 0;
 }
 
 .user-avatar img {
@@ -30,8 +45,149 @@
   object-fit: cover;
 }
 
-.user-role {
-  color: #666;
-  font-size: 14px;
+.navbar-dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  background: var(--bg-secondary);
+  border-radius: 8px;
+  box-shadow: 0 4px 12px var(--shadow-hover), 0 2px 4px var(--shadow);
+  min-width: 200px;
+  overflow: hidden;
+  z-index: 1000;
+  border: 1px solid var(--border-light);
+  transition: background-color 0.3s ease;
+}
+
+.navbar-dropdown-item {
+  display: flex !important;
+  align-items: center !important;
+  gap: 12px !important;
+  padding: 12px 16px !important;
+  color: var(--text-primary) !important;
+  text-decoration: none !important;
+  font-size: 14px !important;
+  font-weight: 500 !important;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  border: none !important;
+  background: none !important;
+  width: 100% !important;
+  text-align: left !important;
+  font-family: inherit;
+  margin: 0 !important;
+  box-sizing: border-box;
+}
+
+.navbar-dropdown-item:hover {
+  background-color: var(--bg-hover) !important;
+  color: var(--text-primary) !important;
+  border-bottom: none !important;
+}
+
+.navbar-dropdown-item svg {
+  flex-shrink: 0;
+  color: var(--primary);
+  stroke-width: 2;
+  width: 16px;
+  height: 16px;
+  display: block;
+}
+
+.navbar-dropdown-item span {
+  flex: 1;
+  color: var(--text-primary) !important;
+  white-space: nowrap;
+  display: block;
+  line-height: 1.5;
+}
+
+.navbar-dropdown-item-disabled {
+  opacity: 0.7;
+  cursor: default;
+}
+
+.navbar-dropdown-item-disabled:hover {
+  background-color: transparent;
+}
+
+.navbar-dropdown-item-logout {
+  color: var(--error);
+  border-top: 1px solid var(--border-light);
+}
+
+.navbar-dropdown-item-logout:hover {
+  background-color: var(--error-bg);
+}
+
+.navbar-dropdown-item-logout svg {
+  color: var(--error);
+}
+
+.navbar-dropdown-item-theme {
+  border-top: 1px solid var(--border-light);
+  border-bottom: 1px solid var(--border-light);
+  justify-content: space-between !important;
+  cursor: default !important;
+}
+
+.navbar-dropdown-item-theme:hover {
+  background-color: var(--bg-hover) !important;
+}
+
+.navbar-dropdown-item-theme span {
+  flex: 1;
+}
+
+.theme-switch {
+  position: relative;
+  display: inline-block;
+  width: 44px;
+  height: 24px;
+  flex-shrink: 0;
+  margin-left: auto;
+}
+
+.theme-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.theme-slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: var(--secondary);
+  transition: 0.3s;
+  border-radius: 24px;
+}
+
+.theme-slider:before {
+  position: absolute;
+  content: "";
+  height: 18px;
+  width: 18px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  transition: 0.3s;
+  border-radius: 50%;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.theme-switch input:checked + .theme-slider {
+  background-color: var(--primary);
+}
+
+.theme-switch input:focus + .theme-slider {
+  box-shadow: 0 0 0 3px rgba(79, 124, 130, 0.2);
+}
+
+.theme-switch input:checked + .theme-slider:before {
+  transform: translateX(20px);
 }
 

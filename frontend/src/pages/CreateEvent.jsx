@@ -1,8 +1,9 @@
 // Create/Edit event page (for managers)
 import { useState, useEffect, useCallback } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { eventAPI } from '../services/api';
+import './CreateEvent.css';
 
 const CreateEvent = () => {
   const navigate = useNavigate();
@@ -112,16 +113,25 @@ const CreateEvent = () => {
 
   if (loadingEvent) {
     return (
-      <div className="container">
-        <div className="loading">Loading event...</div>
+      <div className="create-event-page">
+        <div className="create-event-loading">Loading event...</div>
       </div>
     );
   }
 
   return (
-    <div className="container">
-      <h1>{isEditMode ? 'Edit Event' : 'Create Event'}</h1>
-      <div className="card">
+    <div className="create-event-page">
+      <div className="create-event-page-header">
+        <div>
+          {isEditMode && (
+            <Link to={`/events/${eventId}`} className="btn btn-secondary create-event-back-btn" style={{ marginBottom: '16px', display: 'inline-block' }}>
+              ← Back to Event
+            </Link>
+          )}
+          <h1>{isEditMode ? 'Edit Event' : 'Create Event'}</h1>
+        </div>
+      </div>
+      <div className="create-event-card">
         <form onSubmit={handleSubmit}>
           <div className="form-group">
             <label htmlFor="name">Event Name *</label>
@@ -216,7 +226,7 @@ const CreateEvent = () => {
           {(hasRole('manager') || isOrganizer) && (
             <div className="form-group">
               <label>Published Status</label>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <div className="switch-container">
                 <label className="switch">
                   <input
                     type="checkbox"
@@ -227,9 +237,9 @@ const CreateEvent = () => {
                   />
                   <span className="slider round"></span>
                 </label>
-                <span>{formData.published ? 'Published' : 'Draft'}</span>
+                <span className="switch-label">{formData.published ? 'Published' : 'Draft'}</span>
               </div>
-              <small style={{ color: '#666', display: 'block', marginTop: '5px' }}>
+              <small>
                 {formData.published 
                   ? 'This event is visible to all users.' 
                   : 'This event is hidden from regular users.'}

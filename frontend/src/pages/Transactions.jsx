@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { transactionAPI } from '../services/api';
 import { Link, useSearchParams } from 'react-router-dom';
+import './Transactions.css';
 
 const Transactions = () => {
   const { user, hasRole } = useAuth();
@@ -72,6 +73,18 @@ const Transactions = () => {
     }
   };
 
+  const handleToggleSuspicious = async (transactionId, currentSuspicious) => {
+    const action = currentSuspicious ? 'unmark' : 'mark';
+    if (!confirm(`Are you sure you want to ${action} this transaction as suspicious?`)) return;
+
+    try {
+      await transactionAPI.markSuspicious(transactionId, !currentSuspicious);
+      loadTransactions();
+    } catch (err) {
+      alert(err.response?.data?.error || 'Failed to update suspicious status.');
+    }
+  };
+
   const formatDate = (dateString) => {
     if (!dateString) return '';
     return new Date(dateString).toLocaleString();
@@ -79,25 +92,25 @@ const Transactions = () => {
 
   const getTransactionTypeBadge = (type) => {
     const colors = {
-      purchase: 'badge-primary',
-      redemption: 'badge-danger',
-      adjustment: 'badge-warning',
-      event: 'badge-success',
-      transfer: 'badge-secondary',
+      purchase: 'transactions-badge-primary',
+      redemption: 'transactions-badge-danger',
+      adjustment: 'transactions-badge-warning',
+      event: 'transactions-badge-success',
+      transfer: 'transactions-badge-secondary',
     };
-    return colors[type] || 'badge-secondary';
+    return colors[type] || 'transactions-badge-secondary';
   };
 
   return (
-    <div className="container">
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+    <div className="transactions-page">
+      <div className="transactions-page-header">
         <h1>{isCashierOnly ? 'Redemption Transactions' : 'Transactions'}</h1>
         <Link to="/transactions/create" className="btn btn-primary">
           Create Transaction
         </Link>
       </div>
 
-      <div className="filters">
+      <div className="transactions-filters">
         {!isCashierOnly && (
           <div className="form-group">
             <label>Type</label>
@@ -139,41 +152,44 @@ const Transactions = () => {
             <option value="100">100</option>
           </select>
         </div>
-        <div className="filters-actions">
-          <button onClick={loadTransactions} className="btn btn-secondary">
+        <div className="transactions-filters-actions">
+          <button onClick={loadTransactions} className="btn btn-secondary transactions-refresh-btn" title="Refresh">
             Refresh
           </button>
         </div>
       </div>
 
-      {error && <div className="error-message">{error}</div>}
+      {error && <div className="transactions-error-message">{error}</div>}
 
       {loading ? (
-        <div className="loading">Loading transactions...</div>
+        <div className="transactions-loading">Loading transactions...</div>
       ) : transactions.length === 0 ? (
-        <div className="empty-state">No transactions found</div>
+        <div className="transactions-empty-state">No transactions found</div>
       ) : (
         <>
-          <div className="card">
-            <table className="table">
+          <div className="transactions-section">
+            <table className="transactions-table">
               <thead>
                 <tr>
                   <th>ID</th>
+                  {(hasRole('manager') || isCashierOnly) && <th>User</th>}
                   {!isCashierOnly && <th>Type</th>}
                   <th>Amount</th>
-                  {(hasRole('manager') || isCashierOnly) && <th>User</th>}
                   <th>Date</th>
                   <th>Status</th>
-                  {hasRole('cashier') && <th>Actions</th>}
+                  {(hasRole('manager') || hasRole('cashier')) && <th>Actions</th>}
                 </tr>
               </thead>
               <tbody>
                 {transactions.map((tx) => (
                   <tr key={tx.id}>
                     <td>{tx.id}</td>
+                    {(hasRole('manager') || isCashierOnly) && (
+                      <td>{tx.userName || tx.utorid || tx.user?.utorid}</td>
+                    )}
                     {!isCashierOnly && (
                       <td>
-                        <span className={`badge ${getTransactionTypeBadge(tx.type)}`}>
+                        <span className={`transactions-badge ${getTransactionTypeBadge(tx.type)}`}>
                           {tx.type}
                         </span>
                       </td>
@@ -181,36 +197,63 @@ const Transactions = () => {
                     <td>
                       {isCashierOnly ? (tx.redeemed || Math.abs(tx.amount)) : tx.amount}
                     </td>
-                    {(hasRole('manager') || isCashierOnly) && (
-                      <td>{tx.userName || tx.utorid || tx.user?.utorid}</td>
-                    )}
                     <td>{tx.createdAt ? formatDate(tx.createdAt) : 'N/A'}</td>
                     <td>
                       {tx.processed ? (
-                        <span className="badge badge-success">Processed</span>
+                        <span className="transactions-badge transactions-badge-success">Processed</span>
                       ) : (
-                        <span className="badge badge-warning">Pending</span>
+                        <span className="transactions-badge transactions-badge-warning">Pending</span>
                       )}
                     </td>
-                    {hasRole('cashier') && !tx.processed && (isCashierOnly || tx.type === 'redemption') && (
+                    {(hasRole('manager') || hasRole('cashier')) && (
                       <td>
-                        <button
-                          onClick={() => handleProcessRedemption(tx.id)}
-                          className="btn btn-success"
-                          style={{ padding: '5px 10px', fontSize: '12px' }}
-                        >
-                          Process
-                        </button>
+                        <div className="transactions-actions-container">
+                          {hasRole('cashier') && !tx.processed && (isCashierOnly || tx.type === 'redemption') && (
+                            <button
+                              onClick={() => handleProcessRedemption(tx.id)}
+                              className="btn btn-success transactions-action-btn"
+                            >
+                              Process
+                            </button>
+                          )}
+                          {hasRole('manager') && (tx.type === 'purchase' || tx.type === 'adjustment') && (
+                            <>
+                              {tx.suspicious ? (
+                                <>
+                                  <span className="transactions-badge transactions-badge-danger">Suspicious</span>
+                                  <button
+                                    onClick={() => handleToggleSuspicious(tx.id, true)}
+                                    className="btn btn-outline-secondary transactions-suspicious-btn"
+                                    title="Unmark as suspicious"
+                                  >
+                                    Clear
+                                  </button>
+                                </>
+                              ) : (
+                                <button
+                                  onClick={() => handleToggleSuspicious(tx.id, false)}
+                                  className="btn btn-outline-danger transactions-suspicious-btn"
+                                  title="Mark as suspicious"
+                                >
+                                  Mark Suspicious
+                                </button>
+                              )}
+                            </>
+                          )}
+                          {!(hasRole('cashier') && !tx.processed && (isCashierOnly || tx.type === 'redemption')) && 
+                           !(hasRole('manager') && (tx.type === 'purchase' || tx.type === 'adjustment')) && (
+                            <span>-</span>
+                          )}
+                        </div>
                       </td>
                     )}
-                    {hasRole('cashier') && tx.processed && <td>-</td>}
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
 
-          <div className="pagination">
+          <div className="transactions-pagination">
             <button
               onClick={() => handleFilterChange('page', filters.page - 1)}
               disabled={filters.page <= 1}
