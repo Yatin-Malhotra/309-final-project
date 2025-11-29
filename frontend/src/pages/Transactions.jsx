@@ -11,6 +11,7 @@ const Transactions = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const [transactions, setTransactions] = useState([]);
   const [allTransactions, setAllTransactions] = useState([]);
+  const [filteredTransactions, setFilteredTransactions] = useState([]);
   const [count, setCount] = useState(0);
   const [loading, setLoading] = useState(true);
   const [filters, setFilters] = useState({
@@ -29,9 +30,35 @@ const Transactions = () => {
   });
   const [error, setError] = useState('');
 
+  // Check if client-side filtering is active
+  const hasClientSideFilters = () => {
+    if (isCashierOnly) {
+      return clientFilters.idNameSearch !== '' || clientFilters.status !== '';
+    } else if (hasRole('manager')) {
+      return managerFilters.idUtoridSearch !== '' || managerFilters.status !== '';
+    }
+    return false;
+  };
+
   useEffect(() => {
     loadTransactions();
   }, [filters, user]);
+
+  // Reset to page 1 and reload when client-side filters change
+  useEffect(() => {
+    const hasFilters = hasClientSideFilters();
+    
+    // Reset to page 1 if filters are active and we're not already on page 1
+    if (hasFilters && filters.page !== 1) {
+      const newFilters = { ...filters, page: 1 };
+      setFilters(newFilters);
+      setSearchParams(newFilters);
+      // Don't reload here - the filters change will trigger the first useEffect
+    } else {
+      // Reload immediately if page is already 1 or filters were cleared
+      loadTransactions();
+    }
+  }, [clientFilters.idNameSearch, clientFilters.status, managerFilters.idUtoridSearch, managerFilters.status]);
 
   // Client-side filtering
   useEffect(() => {
@@ -75,17 +102,36 @@ const Transactions = () => {
       }
     }
 
-    setTransactions(filtered);
-  }, [clientFilters, managerFilters, allTransactions, isCashierOnly, hasRole]);
+    setFilteredTransactions(filtered);
+
+    // Apply client-side pagination if filters are active
+    if (hasClientSideFilters()) {
+      const startIndex = (filters.page - 1) * filters.limit;
+      const endIndex = startIndex + filters.limit;
+      setTransactions(filtered.slice(startIndex, endIndex));
+    } else {
+      // Use server-side paginated results
+      setTransactions(filtered);
+    }
+  }, [clientFilters, managerFilters, allTransactions, isCashierOnly, hasRole, filters.page, filters.limit]);
 
   const loadTransactions = async () => {
     setLoading(true);
     setError('');
     try {
       const params = { ...filters };
-      Object.keys(params).forEach((key) => {
-        if (!params[key]) delete params[key];
-      });
+      
+      // If client-side filters are active, fetch maximum results for client-side filtering
+      if (hasClientSideFilters()) {
+        // Remove page parameter and set limit to maximum (100) to get more results for client-side filtering
+        delete params.page;
+        params.limit = 100; // Maximum allowed by backend
+      } else {
+        // Keep server-side pagination when no client-side filters
+        Object.keys(params).forEach((key) => {
+          if (!params[key]) delete params[key];
+        });
+      }
 
       let response;
       if (hasRole('manager')) {
@@ -356,21 +402,31 @@ const Transactions = () => {
           </div>
 
           <div className="transactions-pagination">
-            <button
-              onClick={() => handleFilterChange('page', filters.page - 1)}
-              disabled={filters.page <= 1}
-            >
-              Previous
-            </button>
-            <span>
-              Page {filters.page} of {Math.ceil(count / filters.limit)}
-            </span>
-            <button
-              onClick={() => handleFilterChange('page', filters.page + 1)}
-              disabled={filters.page >= Math.ceil(count / filters.limit)}
-            >
-              Next
-            </button>
+            {(() => {
+              const isClientFiltering = hasClientSideFilters();
+              const totalCount = isClientFiltering ? filteredTransactions.length : count;
+              const totalPages = Math.ceil(totalCount / filters.limit);
+              
+              return (
+                <>
+                  <button
+                    onClick={() => handleFilterChange('page', filters.page - 1)}
+                    disabled={filters.page <= 1}
+                  >
+                    Previous
+                  </button>
+                  <span>
+                    Page {filters.page} of {totalPages || 1}
+                  </span>
+                  <button
+                    onClick={() => handleFilterChange('page', filters.page + 1)}
+                    disabled={filters.page >= totalPages}
+                  >
+                    Next
+                  </button>
+                </>
+              );
+            })()}
           </div>
         </>
       )}
