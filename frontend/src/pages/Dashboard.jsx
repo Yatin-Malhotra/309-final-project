@@ -194,7 +194,7 @@ const Dashboard = () => {
                 className="btn btn-primary"
                 style={{ fontSize: '14px', padding: '8px 16px' }}
               >
-                Process Redemptions
+                View Redemptions
               </Link>
             </div>
           </div>
@@ -203,9 +203,6 @@ const Dashboard = () => {
             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginTop: '10px' }}>
               <Link to="/transactions/create" className="btn btn-primary">
                 Create Transaction
-              </Link>
-              <Link to="/transactions?type=redemption&processed=false" className="btn btn-secondary">
-                View Pending Redemptions
               </Link>
             </div>
           </div>
