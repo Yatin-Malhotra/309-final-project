@@ -179,6 +179,11 @@ const Events = () => {
                               Registered
                             </span>
                           )}
+                          {event.isOrganizer && (
+                            <span className="events-badge events-badge-blue">
+                              Event Organizer
+                            </span>
+                          )}
                           {!event.published && (
                             <span className="events-badge events-badge-warning">
                               Unpublished
@@ -194,6 +199,11 @@ const Events = () => {
                           {event.isRegistered && (
                             <span className="events-badge events-badge-success">
                               Registered
+                            </span>
+                          )}
+                          {event.isOrganizer && (
+                            <span className="events-badge events-badge-blue">
+                              Event Organizer
                             </span>
                           )}
                           {isEventFull(event) && (

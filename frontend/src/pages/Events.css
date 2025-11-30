@@ -203,6 +203,12 @@
   font-weight: 700;
 }
 
+.events-badge-blue {
+  background-color: var(--badge-blue-bg);
+  color: var(--badge-blue-color);
+  font-weight: 700;
+}
+
 
 .events-create-btn {
   padding: 12px 24px;

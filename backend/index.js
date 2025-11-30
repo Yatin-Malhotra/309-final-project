@@ -2020,11 +2020,15 @@ app.get('/events', optionalAuth, validateQuery(z.object({
         // Need to include user data for registered user name filtering or registered status filtering
         const includeGuests = (registeredUserName || registered) ? { include: { user: { select: { id: true, name: true, utorid: true } } } } : true;
         
+        // Always include organizer userId to check if current user is organizer
+        // But only include full user details for managers
         let events = await prisma.event.findMany({
             where,
             include: {
                 guests: includeGuests,
-                organizers: isManagerOrAbove ? { include: { user: true } } : false
+                organizers: isManagerOrAbove 
+                    ? { include: { user: true } } 
+                    : true  // Include basic organizer info (with userId) for all users
             }
         });
         
@@ -2113,6 +2117,22 @@ app.get('/events', optionalAuth, validateQuery(z.object({
                 });
             } else {
                 result.isRegistered = false;
+            }
+            // Check if current user is an organizer for this event
+            // Always include isOrganizer field (false if not logged in or not organizer)
+            if (req.user && req.user.id) {
+                const userId = Number(req.user.id);
+                if (e.organizers && e.organizers.length > 0) {
+                    result.isOrganizer = e.organizers.some(o => {
+                        // Handle both cases: with full user object (o.user.id) or just userId field
+                        const organizerUserId = (o.user && o.user.id) ? o.user.id : o.userId;
+                        return organizerUserId !== undefined && Number(organizerUserId) === userId;
+                    });
+                } else {
+                    result.isOrganizer = false;
+                }
+            } else {
+                result.isOrganizer = false;
             }
             return result;
         });
