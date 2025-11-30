@@ -559,8 +559,49 @@ const Dashboard = () => {
   if (userRole === 'cashier') {
     return (
       <div className="dashboard-page">
-        <h1>Welcome, {user?.name}!</h1>
+        <div className="dashboard-header-with-badge">
+          <h1>Welcome, {user?.name}!</h1>
+          <button 
+            onClick={() => setShowQRScanner(true)} 
+            className="dashboard-header-badge"
+            style={{ 
+              background: 'var(--primary)', 
+              color: 'white', 
+              border: 'none', 
+              cursor: 'pointer',
+              padding: '6px 14px',
+              fontSize: '13px',
+              fontWeight: 600,
+              borderRadius: '6px',
+              transition: 'all 0.2s ease',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px'
+            }}
+            onMouseEnter={(e) => {
+              e.target.style.opacity = '0.9';
+              e.target.style.transform = 'translateY(-1px)';
+            }}
+            onMouseLeave={(e) => {
+              e.target.style.opacity = '1';
+              e.target.style.transform = 'translateY(0)';
+            }}
+          >
+            <span>📷</span>
+            <span>Scan QR Code</span>
+          </button>
+        </div>
         <div className="dashboard-grid">
+        <Link to="/transactions" className="dashboard-card dashboard-quick-access-card" style={{ textDecoration: 'none', color: 'inherit' }}>
+            <div className="dashboard-quick-access-value">
+              <AnimatedNumber value={stats.pendingRedemptions} />
+            </div>
+            <div className="dashboard-quick-access-content">
+              <div className="dashboard-quick-access-title">Pending Redemptions</div>
+              <div className="dashboard-quick-access-description">Awaiting processing</div>
+            </div>
+            <div className="dashboard-quick-access-arrow">→</div>
+          </Link>
           <Link to="/transactions/create" className="dashboard-card dashboard-quick-access-card" style={{ textDecoration: 'none', color: 'inherit' }}>
             <div className="dashboard-quick-access-icon">➕</div>
             <div className="dashboard-quick-access-content">
@@ -569,13 +610,11 @@ const Dashboard = () => {
             </div>
             <div className="dashboard-quick-access-arrow">→</div>
           </Link>
-          <Link to="/transactions" className="dashboard-card dashboard-quick-access-card" style={{ textDecoration: 'none', color: 'inherit' }}>
-            <div className="dashboard-quick-access-value">
-              <AnimatedNumber value={stats.pendingRedemptions} />
-            </div>
+          <Link to="/users/create" className="dashboard-card dashboard-quick-access-card" style={{ textDecoration: 'none', color: 'inherit' }}>
+            <div className="dashboard-quick-access-icon">👤</div>
             <div className="dashboard-quick-access-content">
-              <div className="dashboard-quick-access-title">Pending Redemptions</div>
-              <div className="dashboard-quick-access-description">Awaiting processing</div>
+              <div className="dashboard-quick-access-title">Create User</div>
+              <div className="dashboard-quick-access-description">Register a new user</div>
             </div>
             <div className="dashboard-quick-access-arrow">→</div>
           </Link>
@@ -587,18 +626,6 @@ const Dashboard = () => {
             </div>
             <div className="dashboard-quick-access-arrow">→</div>
           </Link>
-          <button 
-            onClick={() => setShowQRScanner(true)} 
-            className="dashboard-card dashboard-quick-access-card" 
-            style={{ textDecoration: 'none', color: 'inherit', border: 'none', cursor: 'pointer', background: 'var(--bg-card)' }}
-          >
-            <div className="dashboard-quick-access-icon">📷</div>
-            <div className="dashboard-quick-access-content">
-              <div className="dashboard-quick-access-title">Scan QR Code</div>
-              <div className="dashboard-quick-access-description">Scan customer QR code</div>
-            </div>
-            <div className="dashboard-quick-access-arrow">→</div>
-          </button>
         </div>
 
         <QRScannerModal isOpen={showQRScanner} onClose={() => setShowQRScanner(false)} />
