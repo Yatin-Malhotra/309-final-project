@@ -327,6 +327,24 @@ const EventDetail = () => {
     return (hasRole('manager') || hasRole('superuser')) && !isEventPast();
   };
 
+  const handleDeleteEvent = async () => {
+    if (!confirm(`Are you sure you want to delete "${event.name}"? This action cannot be undone.`)) return;
+    
+    setActionLoading(true);
+    try {
+      await eventAPI.deleteEvent(eventId);
+      navigate('/events');
+    } catch (err) {
+      alert(err.response?.data?.error || 'Failed to delete event.');
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const canDeleteEvent = () => {
+    return (hasRole('manager') || hasRole('superuser')) && !event?.published;
+  };
+
   const canManageGuests = () => {
     return (hasRole('manager') || hasRole('superuser') || isOrganizer()) && !isEventPast();
   };
@@ -476,6 +494,15 @@ const EventDetail = () => {
             <Link to={`/events/${eventId}/edit`} className="btn btn-primary">
               Edit Event
             </Link>
+          )}
+          {canDeleteEvent() && (
+            <button
+              onClick={handleDeleteEvent}
+              className="btn btn-danger"
+              disabled={actionLoading}
+            >
+              {actionLoading ? 'Deleting...' : 'Delete Event'}
+            </button>
           )}
         </div>
       </div>

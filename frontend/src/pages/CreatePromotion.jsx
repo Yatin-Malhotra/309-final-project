@@ -22,6 +22,7 @@ const CreatePromotion = () => {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [loadingPromotion, setLoadingPromotion] = useState(isEditMode);
+  const [deleting, setDeleting] = useState(false);
 
   const loadPromotion = useCallback(async () => {
     if (!promotionId) return;
@@ -267,6 +268,27 @@ const CreatePromotion = () => {
           </div>
           {error && <div className="error-message">{error}</div>}
           <div className="form-actions">
+            {isEditMode && (
+              <button
+                type="button"
+                onClick={async () => {
+                  if (!confirm('Are you sure you want to delete this promotion? This action cannot be undone.')) return;
+                  setDeleting(true);
+                  try {
+                    await promotionAPI.deletePromotion(promotionId);
+                    navigate('/promotions');
+                  } catch (err) {
+                    setError(err.response?.data?.error || 'Failed to delete promotion.');
+                    setDeleting(false);
+                  }
+                }}
+                className="btn btn-danger"
+                disabled={loading || deleting}
+                style={{ marginRight: 'auto' }}
+              >
+                {deleting ? 'Deleting...' : 'Delete Promotion'}
+              </button>
+            )}
             <button
               type="button"
               onClick={() => navigate('/promotions')}
@@ -274,7 +296,7 @@ const CreatePromotion = () => {
             >
               Cancel
             </button>
-            <button type="submit" className="btn btn-primary" disabled={loading}>
+            <button type="submit" className="btn btn-primary" disabled={loading || deleting}>
               {loading ? (isEditMode ? 'Updating...' : 'Creating...') : (isEditMode ? 'Update Promotion' : 'Create Promotion')}
             </button>
           </div>

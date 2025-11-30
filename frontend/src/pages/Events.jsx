@@ -25,6 +25,7 @@ const Events = () => {
   });
   const [error, setError] = useState('');
   const [showMyEvents, setShowMyEvents] = useState(false);
+  const [deletingEventId, setDeletingEventId] = useState(null);
 
   useEffect(() => {
     loadEvents();
@@ -109,6 +110,24 @@ const Events = () => {
     }
     // For others, show if they have any organized events
     return hasAnyOrganizedEvents();
+  };
+
+  const canDeleteEvent = (event) => {
+    return (hasRole('manager') || hasRole('superuser')) && !event.published;
+  };
+
+  const handleDeleteEvent = async (eventId, eventName) => {
+    if (!confirm(`Are you sure you want to delete "${eventName}"? This action cannot be undone.`)) return;
+    
+    setDeletingEventId(eventId);
+    try {
+      await eventAPI.deleteEvent(eventId);
+      loadEvents(); // Reload the list
+    } catch (err) {
+      alert(err.response?.data?.error || 'Failed to delete event.');
+    } finally {
+      setDeletingEventId(null);
+    }
   };
 
   return (
@@ -211,12 +230,8 @@ const Events = () => {
       ) : (
         <>
           <div className="events-grid">
-            {events.map((event) => (
-              <Link
-                key={event.id}
-                to={`/events/${event.id}`}
-                className="events-card events-card-link"
-              >
+            {events.map((event) => {
+              const CardContent = () => (
                 <div className="events-card-content">
                   <div className="events-card-main">
                     <h3 className="events-card-title">{event.name}</h3>
@@ -280,8 +295,57 @@ const Events = () => {
                     </div>
                   </div>
                 </div>
-              </Link>
-            ))}
+              );
+
+              if (hasRole('manager') || hasRole('superuser')) {
+                return (
+                  <div key={event.id} className="events-card">
+                    <Link
+                      to={`/events/${event.id}`}
+                      className="events-card-link"
+                      style={{ textDecoration: 'none', color: 'inherit', display: 'flex', alignItems: 'center' }}
+                    >
+                      <div style={{ flex: 1 }}>
+                        <CardContent />
+                      </div>
+                      {canDeleteEvent(event) && (
+                        <button
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            handleDeleteEvent(event.id, event.name);
+                          }}
+                          className="btn btn-danger"
+                          disabled={deletingEventId === event.id}
+                          style={{
+                            padding: '12px 24px',
+                            fontSize: '15px',
+                            fontWeight: '600',
+                            borderRadius: '8px',
+                            marginLeft: '16px',
+                            flexShrink: 0,
+                            whiteSpace: 'nowrap',
+                            transition: 'all 0.2s ease'
+                          }}
+                        >
+                          {deletingEventId === event.id ? 'Deleting...' : 'Delete'}
+                        </button>
+                      )}
+                    </Link>
+                  </div>
+                );
+              }
+
+              return (
+                <Link
+                  key={event.id}
+                  to={`/events/${event.id}`}
+                  className="events-card events-card-link"
+                >
+                  <CardContent />
+                </Link>
+              );
+            })}
           </div>
 
           <div className="events-pagination">
