@@ -11,7 +11,7 @@ const UserCreateTx = () => {
   const [searchParams] = useSearchParams();
   const defaultType = searchParams.get('type') === 'transfer' ? 'transfer' : 'redemption';
   const [formData, setFormData] = useState({
-      userId: '',
+      utorid: '',
       type: defaultType,
       amount: '',
       remark: ''
@@ -29,7 +29,7 @@ const UserCreateTx = () => {
       if (formData.type === 'redemption') {
         await transactionAPI.createRedemption(amount, formData.remark || undefined)
       } else {
-        await transactionAPI.createTransfer(formData.userId, amount, formData.remark || undefined)
+        await transactionAPI.createTransfer(formData.utorid, amount, formData.remark || undefined)
       }
       
       updateLocalUser()
@@ -64,14 +64,14 @@ const UserCreateTx = () => {
           </div>
           {formData.type === 'transfer' && (
             <div className="form-group">
-              <label htmlFor="userId">Recipient Id *</label>
+              <label htmlFor="utorid">Recipient UTORid *</label>
               <input
-                type="number"
-                min="0"
-                id="userId"
-                value={formData.userId}
+                type="text"
+                id="utorid"
+                placeholder="Enter recipient UTORid"
+                value={formData.utorid}
                 onChange={(e) =>
-                  setFormData({ ...formData, userId: e.target.value })
+                  setFormData({ ...formData, utorid: e.target.value })
                 }
                 required
                 />
