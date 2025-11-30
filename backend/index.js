@@ -160,7 +160,26 @@ const schemas = {
         startTime: z.string(),
         endTime: z.string(),
         capacity: z.number().positive().nullable().optional(),
-        points: z.number().positive().int()
+        points: z.number().positive().int(),
+        organizerIds: z.preprocess(
+            (val) => {
+                if (val === undefined || val === null) return undefined;
+                if (Array.isArray(val)) {
+                    return val.map(v => {
+                        if (typeof v === 'string') {
+                            const num = Number(v);
+                            return Number.isFinite(num) && Number.isInteger(num) ? num : v;
+                        }
+                        if (typeof v === 'number') {
+                            return Number.isFinite(v) && Number.isInteger(v) ? v : v;
+                        }
+                        return v;
+                    });
+                }
+                return val;
+            },
+            z.array(z.number().int().positive()).optional()
+        )
     }),
     updateEvent: z.object({
         name: z.preprocess(
@@ -213,6 +232,25 @@ const schemas = {
         published: z.preprocess(
             (val) => val === null ? undefined : val,
             z.boolean().optional()
+        ),
+        organizerIds: z.preprocess(
+            (val) => {
+                if (val === undefined || val === null) return undefined;
+                if (Array.isArray(val)) {
+                    return val.map(v => {
+                        if (typeof v === 'string') {
+                            const num = Number(v);
+                            return Number.isFinite(num) && Number.isInteger(num) ? num : v;
+                        }
+                        if (typeof v === 'number') {
+                            return Number.isFinite(v) && Number.isInteger(v) ? v : v;
+                        }
+                        return v;
+                    });
+                }
+                return val;
+            },
+            z.array(z.number().int().positive()).optional()
         )
     }),
     createPromotion: z.object({
@@ -1870,6 +1908,22 @@ app.post('/events', validate(schemas.createEvent), async (req, res, next) => {
             return res.status(401).json({ error: 'Unauthorized' });
         }
         
+        // Handle organizerIds if provided
+        const organizerIds = req.body.organizerIds || [];
+        let organizers = [];
+        
+        if (organizerIds.length > 0) {
+            // Validate that all user IDs exist
+            const users = await prisma.user.findMany({
+                where: { id: { in: organizerIds } },
+                select: { id: true }
+            });
+            
+            if (users.length !== organizerIds.length) {
+                return res.status(400).json({ error: 'One or more organizer user IDs are invalid' });
+            }
+        }
+        
         const event = await prisma.event.create({
             data: {
                 name, description, location,
@@ -1877,15 +1931,33 @@ app.post('/events', validate(schemas.createEvent), async (req, res, next) => {
                 capacity: capacity === undefined ? null : capacity,
                 pointsAllocated: points,
                 pointsRemain: points,
-                published: false
+                published: false,
+                organizers: organizerIds.length > 0 ? {
+                    create: organizerIds.map(userId => ({ userId }))
+                } : undefined
+            },
+            include: {
+                organizers: {
+                    include: {
+                        user: {
+                            select: { id: true, utorid: true, name: true }
+                        }
+                    }
+                }
             }
         });
+        
+        organizers = event.organizers.map(o => ({
+            id: o.user.id,
+            utorid: o.user.utorid,
+            name: o.user.name
+        }));
         
         res.status(201).json({
             id: event.id, name: event.name, description: event.description,
             location: event.location, startTime: event.startTime, endTime: event.endTime,
             capacity: event.capacity, pointsRemain: event.pointsRemain,
-            pointsAwarded: 0, published: event.published, organizers: [], guests: []
+            pointsAwarded: 0, published: event.published, organizers, guests: []
         });
     } catch (error) { next(error); }
 });
@@ -2136,7 +2208,7 @@ app.patch('/events/:eventId', async (req, res, next) => {
             return res.status(403).json({ error: 'Forbidden' });
         }
         // Enforce 403 for restricted fields before structure validation
-        if (!isManagerOrAbove && ('points' in req.body || 'published' in req.body)) {
+        if (!isManagerOrAbove && ('points' in req.body || 'published' in req.body || 'organizerIds' in req.body)) {
             return res.status(403).json({ error: 'Forbidden' });
         }
 
@@ -2222,6 +2294,34 @@ app.patch('/events/:eventId', async (req, res, next) => {
             return res.status(400).json({ error: 'Cannot unpublish event' });
         }
         
+        // Handle organizerIds if provided (only for managers/superusers)
+        if (updates.organizerIds !== undefined && isManagerOrAbove) {
+            // Validate that all user IDs exist
+            const organizerIds = updates.organizerIds;
+            if (organizerIds.length > 0) {
+                const users = await prisma.user.findMany({
+                    where: { id: { in: organizerIds } },
+                    select: { id: true }
+                });
+                
+                if (users.length !== organizerIds.length) {
+                    return res.status(400).json({ error: 'One or more organizer user IDs are invalid' });
+                }
+            }
+            
+            // Remove existing organizers and add new ones
+            await prisma.eventOrganizer.deleteMany({
+                where: { eventId }
+            });
+            
+            if (organizerIds.length > 0) {
+                await prisma.eventOrganizer.createMany({
+                    data: organizerIds.map(userId => ({ eventId, userId })),
+                    skipDuplicates: true
+                });
+            }
+        }
+        
         // Build final updates object
         const finalUpdates = {};
         if (updates.name) finalUpdates.name = updates.name;
@@ -2236,7 +2336,16 @@ app.patch('/events/:eventId', async (req, res, next) => {
         
         const updated = await prisma.event.update({
             where: { id: eventId },
-            data: finalUpdates
+            data: finalUpdates,
+            include: {
+                organizers: {
+                    include: {
+                        user: {
+                            select: { id: true, utorid: true, name: true }
+                        }
+                    }
+                }
+            }
         });
         
         // Build response - always return id, name, location + fields that were in the request
@@ -2256,6 +2365,13 @@ app.patch('/events/:eventId', async (req, res, next) => {
         if ('points' in original) {
             response.pointsAllocated = updated.pointsAllocated;
             response.pointsRemain = updated.pointsRemain;
+        }
+        if ('organizerIds' in original) {
+            response.organizers = updated.organizers.map(o => ({
+                id: o.user.id,
+                utorid: o.user.utorid,
+                name: o.user.name
+            }));
         }
         
         res.json(response);

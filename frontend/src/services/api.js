@@ -113,8 +113,8 @@ export const eventAPI = {
   getEvent: (eventId) => api.get(`/events/${eventId}`),
   updateEvent: (eventId, data) => api.patch(`/events/${eventId}`, data),
   deleteEvent: (eventId) => api.delete(`/events/${eventId}`),
-  addOrganizer: (eventId, userId) =>
-    api.post(`/events/${eventId}/organizers`, { userId }),
+  addOrganizer: (eventId, utorid) =>
+    api.post(`/events/${eventId}/organizers`, { utorid }),
   removeOrganizer: (eventId, userId) =>
     api.delete(`/events/${eventId}/organizers/${userId}`),
   registerForEvent: (eventId) =>
