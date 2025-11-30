@@ -1353,6 +1353,11 @@ app.patch('/transactions/:transactionId/suspicious', requireRole('manager'), asy
         const updateData = { suspicious };
         if (suspicious && tx.processed) {
             updateData.processed = false;
+        } else if (!suspicious && tx.suspicious) {
+            if (tx.type === 'purchase' && !tx.processed) {
+                updateData.processed = true;
+                updateData.processedBy = req.user.id;
+            }
         }
         
         const updated = await prisma.transaction.update({
