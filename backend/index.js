@@ -2670,14 +2670,13 @@ app.delete('/events/:eventId/guests/:userId', async (req, res, next) => {
         const event = await prisma.event.findUnique({ where: { id: eventId } });
         if (!event) return res.status(404).json({ error: 'Event not found' });
         
-        // Authentication (401) and authorization (403)
+        // Authentication (401) and authorization (403) - only managers/superusers can remove guests
         const token = jwtUtils.extractToken(req.headers.authorization);
         if (!token) return res.status(401).json({ error: 'Unauthorized' });
         let authUser;
         try { authUser = jwtUtils.verifyToken(token); } catch (_) { return res.status(401).json({ error: 'Unauthorized' }); }
         const isManagerOrAbove = ['manager', 'superuser'].includes(authUser.role);
-        const isEventOrganizer = await isOrganizer(eventId, authUser.id);
-        if (!isManagerOrAbove && !isEventOrganizer) {
+        if (!isManagerOrAbove) {
             return res.status(403).json({ error: 'Forbidden' });
         }
         

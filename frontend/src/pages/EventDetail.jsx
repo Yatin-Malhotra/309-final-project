@@ -270,6 +270,10 @@ const EventDetail = () => {
     return (hasRole('manager') || hasRole('superuser') || isOrganizer()) && !isEventPast();
   };
 
+  const canRemoveGuests = () => {
+    return (hasRole('manager') || hasRole('superuser')) && !isEventPast();
+  };
+
   if (loading) {
     return (
       <div className="event-detail-page">
@@ -462,7 +466,7 @@ const EventDetail = () => {
                   {event.guests.map((guest) => (
                     <li key={guest.id} className="event-detail-list-item event-detail-list-item-with-action">
                       <span>{guest.name} ({guest.utorid})</span>
-                      {canManageGuests() && (
+                      {canRemoveGuests() && (
                         <button
                           onClick={() => handleRemoveGuest(guest.id)}
                           className="btn btn-danger event-detail-remove-btn"
