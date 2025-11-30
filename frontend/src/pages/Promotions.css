@@ -51,6 +51,11 @@
   transform: translateY(-2px);
 }
 
+.promotions-card-clickable {
+  cursor: pointer;
+  display: block;
+}
+
 .promotions-card-content {
   display: flex;
   justify-content: space-between;

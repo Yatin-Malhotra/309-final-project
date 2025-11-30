@@ -64,8 +64,8 @@ const Promotions = () => {
         <div className="promotions-empty-state">No promotions found</div>
       ) : (
         <div className="promotions-grid">
-          {promotions.map((promo) => (
-            <div key={promo.id} className="promotions-card">
+          {promotions.map((promo) => {
+            const CardContent = () => (
               <div className="promotions-card-content">
                 <div className="promotions-card-main">
                   <h3 className="promotions-card-title">{promo.name}</h3>
@@ -111,19 +111,28 @@ const Promotions = () => {
                     )}
                   </div>
                 </div>
-                {hasRole('manager') && (
-                  <div className="promotions-card-actions">
-                    <Link
-                      to={`/promotions/${promo.id}/edit`}
-                      className="btn btn-primary promotions-edit-btn"
-                    >
-                      Edit
-                    </Link>
-                  </div>
-                )}
               </div>
-            </div>
-          ))}
+            );
+
+            if (hasRole('manager') || hasRole('superuser')) {
+              return (
+                <Link
+                  key={promo.id}
+                  to={`/promotions/${promo.id}/edit`}
+                  className="promotions-card promotions-card-clickable"
+                  style={{ textDecoration: 'none', color: 'inherit' }}
+                >
+                  <CardContent />
+                </Link>
+              );
+            }
+
+            return (
+              <div key={promo.id} className="promotions-card">
+                <CardContent />
+              </div>
+            );
+          })}
         </div>
       )}
     </div>
