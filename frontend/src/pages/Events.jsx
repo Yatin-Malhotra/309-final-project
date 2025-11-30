@@ -14,6 +14,11 @@ const Events = () => {
   const [filters, setFilters] = useState({
     name: searchParams.get('name') || '',
     published: searchParams.get('published') || '',
+    registeredUserName: searchParams.get('registeredUserName') || '',
+    registeredUserLimitMin: searchParams.get('registeredUserLimitMin') || '',
+    registeredUserLimitMax: searchParams.get('registeredUserLimitMax') || '',
+    isFull: searchParams.get('isFull') || '',
+    registered: searchParams.get('registered') || '',
     page: parseInt(searchParams.get('page')) || 1,
     limit: parseInt(searchParams.get('limit')) || 10,
   });
@@ -96,6 +101,32 @@ const Events = () => {
               <option value="">All</option>
               <option value="true">Published</option>
               <option value="false">Unpublished</option>
+            </select>
+          </div>
+        )}
+        {!hasRole('manager') && (
+          <div className="form-group">
+            <label>Registered</label>
+            <select
+              value={filters.registered}
+              onChange={(e) => handleFilterChange('registered', e.target.value)}
+            >
+              <option value="">All Events</option>
+              <option value="true">My Registered Events</option>
+              <option value="false">Not Registered</option>
+            </select>
+          </div>
+        )}
+        {hasRole('manager') && (
+          <div className="form-group">
+            <label>Event Full Status</label>
+            <select
+              value={filters.isFull}
+              onChange={(e) => handleFilterChange('isFull', e.target.value)}
+            >
+              <option value="">All</option>
+              <option value="true">Full</option>
+              <option value="false">Not Full</option>
             </select>
           </div>
         )}

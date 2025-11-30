@@ -1898,6 +1898,11 @@ app.get('/events', optionalAuth, validateQuery(z.object({
     ended: z.string().optional(),
     showFull: z.string().optional(),
     published: z.string().optional(),
+    registeredUserName: z.string().optional(),
+    registeredUserLimitMin: z.string().optional(),
+    registeredUserLimitMax: z.string().optional(),
+    isFull: z.string().optional(),
+    registered: z.string().optional(),
     page: z.preprocess(
         (val) => (val === undefined || val === null || val === '') ? '1' : val,
         z.string().regex(/^\d+$/)
@@ -1908,7 +1913,7 @@ app.get('/events', optionalAuth, validateQuery(z.object({
     )
 })), async (req, res, next) => {
     try {
-        const { name, location, started, ended, showFull, published, page, limit } = req.validatedQuery;
+        const { name, location, started, ended, showFull, published, registeredUserName, registeredUserLimitMin, registeredUserLimitMax, isFull, registered, page, limit } = req.validatedQuery;
         
         if (started && ended) return res.status(400).json({ error: 'Cannot specify both started and ended' });
         
@@ -1940,16 +1945,68 @@ app.get('/events', optionalAuth, validateQuery(z.object({
             where.published = published === 'true';
         }
         
+        // Need to include user data for registered user name filtering or registered status filtering
+        const includeGuests = (registeredUserName || registered) ? { include: { user: { select: { id: true, name: true, utorid: true } } } } : true;
+        
         let events = await prisma.event.findMany({
             where,
             include: {
-                guests: true,
+                guests: includeGuests,
                 organizers: isManagerOrAbove ? { include: { user: true } } : false
             }
         });
         
-        // Filter out full events if needed
-        if (showFull !== 'true') {
+        // Filter by registered status (for current user) - must happen before other filters
+        // Use the same logic as isRegistered calculation
+        if (registered !== undefined && registered !== '' && req.user && req.user.id) {
+            const isRegisteredFilter = registered === 'true';
+            const userId = Number(req.user.id);
+            events = events.filter(e => {
+                // Use exact same logic as isRegistered calculation
+                const userIsRegistered = e.guests.some(g => {
+                    // Handle both direct userId and potential nested structures
+                    const guestUserId = g.userId !== undefined ? g.userId : (g.user && g.user.id);
+                    return Number(guestUserId) === userId;
+                });
+                return userIsRegistered === isRegisteredFilter;
+            });
+        }
+        
+        // Filter by registered user name if provided
+        if (registeredUserName) {
+            events = events.filter(e => {
+                return e.guests.some(g => {
+                    const userName = g.user?.name || '';
+                    return userName.toLowerCase().includes(registeredUserName.toLowerCase());
+                });
+            });
+        }
+        
+        // Filter by registered user limit (min/max)
+        if (registeredUserLimitMin) {
+            const minLimit = parseInt(registeredUserLimitMin);
+            if (!isNaN(minLimit)) {
+                events = events.filter(e => e.guests.length >= minLimit);
+            }
+        }
+        if (registeredUserLimitMax) {
+            const maxLimit = parseInt(registeredUserLimitMax);
+            if (!isNaN(maxLimit)) {
+                events = events.filter(e => e.guests.length <= maxLimit);
+            }
+        }
+        
+        // Filter by event full status
+        if (isFull !== undefined && isFull !== '') {
+            const fullStatus = isFull === 'true';
+            events = events.filter(e => {
+                const eventIsFull = e.capacity && e.guests.length >= e.capacity;
+                return eventIsFull === fullStatus;
+            });
+        }
+        
+        // Filter out full events if needed (legacy showFull parameter)
+        if (showFull !== 'true' && isFull === undefined) {
             events = events.filter(e => !e.capacity || e.guests.length < e.capacity);
         }
         
