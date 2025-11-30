@@ -468,7 +468,7 @@ const Dashboard = () => {
                 ]}
                 config={{
                   type: { accessor: (tx) => tx.type },
-                  amount: { sortFn: (a, b) => Math.abs(a.amount) - Math.abs(b.amount) },
+                  amount: { sortFn: (a, b) => a.amount - b.amount },
                   date: { accessor: (tx) => tx.createdAt ? new Date(tx.createdAt).getTime() : 0 },
                   status: { sortFn: (a, b) => (a.processed ? 1 : 0) - (b.processed ? 1 : 0) },
                 }}
@@ -486,8 +486,7 @@ const Dashboard = () => {
                       </span>
                     </td>
                     <td>
-                      {tx.type === 'redemption' ? '-' : '+'}
-                      {Math.abs(tx.amount)} points
+                      {tx.amount} points
                     </td>
                     <td>{tx.createdAt ? new Date(tx.createdAt).toLocaleDateString() : 'N/A'}</td>
                     <td>
