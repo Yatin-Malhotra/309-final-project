@@ -363,21 +363,16 @@
 
 .btn-outline-secondary {
   background-color: transparent !important;
-  color: #93B1B5 !important;
-  border: 1.5px solid #93B1B5 !important;
+  color: var(--primary) !important;
+  border: 1.5px solid var(--primary) !important;
   border-radius: 4px !important;
 }
 
 .btn-outline-secondary:hover {
-  background-color: #93B1B5 !important;
+  background-color: var(--primary) !important;
   color: white !important;
   transform: translateY(-1px);
-  box-shadow: 0 2px 4px rgba(147, 177, 181, 0.3);
-}
-
-.btn-outline-secondary:hover {
-  background-color: #93B1B5;
-  color: white;
+  box-shadow: 0 2px 4px rgba(79, 124, 130, 0.3);
 }
 
 /* Responsive adjustments */

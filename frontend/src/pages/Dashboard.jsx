@@ -849,7 +849,38 @@ const Dashboard = () => {
 
     return (
       <div className="dashboard-page">
-        <h1>Welcome, {user?.name}!</h1>
+        <div className="dashboard-header-with-badge">
+          <h1>Welcome, {user?.name}!</h1>
+          <button 
+            onClick={() => setShowQRScanner(true)} 
+            className="dashboard-header-badge"
+            style={{ 
+              background: 'var(--primary)', 
+              color: 'white', 
+              border: 'none', 
+              cursor: 'pointer',
+              padding: '6px 14px',
+              fontSize: '13px',
+              fontWeight: 600,
+              borderRadius: '6px',
+              transition: 'all 0.2s ease',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px'
+            }}
+            onMouseEnter={(e) => {
+              e.target.style.opacity = '0.9';
+              e.target.style.transform = 'translateY(-1px)';
+            }}
+            onMouseLeave={(e) => {
+              e.target.style.opacity = '1';
+              e.target.style.transform = 'translateY(0)';
+            }}
+          >
+            <span>📷</span>
+            <span>Scan QR Code</span>
+          </button>
+        </div>
         <div className="dashboard-grid">
           <Link to="/users" className="dashboard-card dashboard-quick-access-card" style={{ textDecoration: 'none', color: 'inherit' }}>
             <div className="dashboard-quick-access-value">
@@ -892,6 +923,8 @@ const Dashboard = () => {
             <div className="dashboard-quick-access-arrow">→</div>
           </Link>
         </div>
+
+        <QRScannerModal isOpen={showQRScanner} onClose={() => setShowQRScanner(false)} />
 
         {/* Financial Insights */}
         {analytics?.financial && (
