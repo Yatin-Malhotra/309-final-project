@@ -6,7 +6,7 @@ import { Link } from 'react-router-dom';
 import './Dashboard.css';
 
 const Dashboard = () => {
-  const { user, hasRole } = useAuth();
+  const { user, hasRole, currentRole } = useAuth();
   const [stats, setStats] = useState({
     totalPoints: 0,
     recentTransactions: [],
@@ -24,9 +24,10 @@ const Dashboard = () => {
   useEffect(() => {
     const loadDashboard = async () => {
       try {
-        if (user) {
-          const userRole = user.role;
-
+        console.log(user.role)
+        if (currentRole) {
+          const userRole = currentRole;
+          console.log(userRole)
           // For regular users: show points and transactions
           if (userRole === 'regular') {
             const points = user.points || 0;
@@ -99,13 +100,17 @@ const Dashboard = () => {
     };
 
     loadDashboard();
-  }, [user, hasRole]);
+  }, [user, currentRole]);
 
   if (loading) {
     return <div className="dashboard-loading">Loading dashboard...</div>;
   }
 
-  const userRole = user?.role;
+  const userRole = currentRole;
+
+  if (!currentRole) return null;
+
+  console.log(currentRole)
 
   // Regular User Dashboard: Points balance and recent transactions
   if (userRole === 'regular') {
@@ -262,7 +267,7 @@ const Dashboard = () => {
   }
 
   // Manager/Superuser Dashboard: Overview of events, promotions, and user management
-  if (hasRole('manager')) {
+  if (userRole === 'manager' || userRole === 'superuser') {
     const formatDate = (dateString) => {
       if (!dateString) return '';
       return new Date(dateString).toLocaleString();

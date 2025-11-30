@@ -15,13 +15,17 @@ export const useAuth = () => {
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const roleHierarchy = { regular: 0, cashier: 1, manager: 2, superuser: 3 };
+  const roles = ['regular', 'cashier', 'manager', 'superuser']
+  const [currentRole, setCurrentRole] = useState(null)
+  const [allowedRoles, setAllowedRoles] = useState([])
 
   // Load user from localStorage and verify token
   useEffect(() => {
     const loadUser = async () => {
       const token = localStorage.getItem('token');
       const savedUser = localStorage.getItem('user');
-      
+
       if (token && savedUser) {
         try {
           const userData = JSON.parse(savedUser);
@@ -43,6 +47,12 @@ export const AuthProvider = ({ children }) => {
     loadUser();
   }, []);
 
+  useEffect(() => {
+    if (!user) return;
+    setCurrentRole(user.role)
+    setAllowedRoles(roles.slice(0, roleHierarchy[user.role] + 1))
+  }, [user.role])
+
   const login = (token, userData) => {
     localStorage.setItem('token', token);
     localStorage.setItem('user', JSON.stringify(userData));
@@ -63,8 +73,8 @@ export const AuthProvider = ({ children }) => {
 
   const hasRole = (requiredRole) => {
     if (!user) return false;
-    const roleHierarchy = { regular: 0, cashier: 1, manager: 2, superuser: 3 };
-    const userLevel = roleHierarchy[user.role] || 0;
+
+    const userLevel = roleHierarchy[currentRole] || 0;
     const requiredLevel = roleHierarchy[requiredRole] || 0;
     return userLevel >= requiredLevel;
   };
@@ -72,10 +82,13 @@ export const AuthProvider = ({ children }) => {
   const value = {
     user,
     loading,
+    currentRole,
+    setCurrentRole,
     login,
     logout,
     updateLocalUser,
     hasRole,
+    allowedRoles,
     isAuthenticated: !!user,
   };
 
