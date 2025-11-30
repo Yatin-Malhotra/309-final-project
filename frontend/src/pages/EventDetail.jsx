@@ -34,6 +34,12 @@ const EventDetail = () => {
   const [showGuestDropdown, setShowGuestDropdown] = useState(false);
   const guestInputRef = useRef(null);
   const guestDropdownRef = useRef(null);
+  
+  // Points allocation state
+  const [allocatingPoints, setAllocatingPoints] = useState(false);
+  const [pointsAmount, setPointsAmount] = useState('');
+  const [selectedGuestForPoints, setSelectedGuestForPoints] = useState(null);
+  const [showPointsForm, setShowPointsForm] = useState(false);
 
   useEffect(() => {
     loadEvent();
@@ -311,6 +317,56 @@ const EventDetail = () => {
     return (hasRole('manager') || hasRole('superuser')) && !isEventPast();
   };
 
+  const canAllocatePoints = () => {
+    return (hasRole('manager') || hasRole('superuser') || isOrganizer()) && !isEventPast();
+  };
+
+  const handleAwardPoints = async (guest) => {
+    if (!pointsAmount || parseInt(pointsAmount) <= 0) {
+      alert('Please enter a valid points amount');
+      return;
+    }
+
+    const amount = parseInt(pointsAmount);
+    if (!confirm(`Award ${amount} points to ${guest.name} (${guest.utorid})?`)) return;
+
+    setAllocatingPoints(true);
+    try {
+      await eventAPI.awardPointsToGuest(eventId, guest.utorid, amount);
+      setPointsAmount('');
+      setSelectedGuestForPoints(null);
+      setShowPointsForm(false);
+      loadEvent(); // Reload to update points remaining
+    } catch (err) {
+      alert(err.response?.data?.error || 'Failed to award points.');
+    } finally {
+      setAllocatingPoints(false);
+    }
+  };
+
+  const handleAwardPointsToAll = async () => {
+    if (!pointsAmount || parseInt(pointsAmount) <= 0) {
+      alert('Please enter a valid points amount');
+      return;
+    }
+
+    const amount = parseInt(pointsAmount);
+    const totalPoints = amount * (event.guests?.length || 0);
+    if (!confirm(`Award ${amount} points to all ${event.guests?.length || 0} guests (${totalPoints} total points)?`)) return;
+
+    setAllocatingPoints(true);
+    try {
+      await eventAPI.awardPointsToAllGuests(eventId, amount);
+      setPointsAmount('');
+      setShowPointsForm(false);
+      loadEvent(); // Reload to update points remaining
+    } catch (err) {
+      alert(err.response?.data?.error || 'Failed to award points.');
+    } finally {
+      setAllocatingPoints(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="event-detail-page">
@@ -520,23 +576,121 @@ const EventDetail = () => {
               {event.guests && event.guests.length > 0 ? (
                 <ul className="event-detail-list">
                   {event.guests.map((guest) => (
-                    <li key={guest.id} className="event-detail-list-item event-detail-list-item-with-action">
-                      <span>{guest.name} ({guest.utorid})</span>
-                      {canRemoveGuests() && (
-                        <button
-                          onClick={() => handleRemoveGuest(guest.id)}
-                          className="btn btn-danger event-detail-remove-btn"
-                          disabled={actionLoading}
-                        >
-                          Remove
-                        </button>
-                      )}
+                    <li key={guest.id} className="event-detail-list-item">
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', gap: '12px' }}>
+                        <span>{guest.name} ({guest.utorid})</span>
+                        <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                          {canAllocatePoints() && (
+                            <>
+                              {selectedGuestForPoints?.id === guest.id && showPointsForm ? (
+                                <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                                  <input
+                                    type="number"
+                                    min="1"
+                                    placeholder="Points"
+                                    value={pointsAmount}
+                                    onChange={(e) => setPointsAmount(e.target.value)}
+                                    style={{
+                                      width: '80px',
+                                      padding: '6px 8px',
+                                      border: '1.5px solid rgba(147, 177, 181, 0.3)',
+                                      borderRadius: '6px',
+                                      fontSize: '14px'
+                                    }}
+                                    disabled={allocatingPoints}
+                                  />
+                                  <button
+                                    onClick={() => handleAwardPoints(guest)}
+                                    className="btn btn-primary"
+                                    style={{ padding: '6px 12px', fontSize: '13px' }}
+                                    disabled={allocatingPoints || !pointsAmount || parseInt(pointsAmount) <= 0}
+                                  >
+                                    {allocatingPoints ? '...' : 'Award'}
+                                  </button>
+                                  <button
+                                    onClick={() => {
+                                      setSelectedGuestForPoints(null);
+                                      setShowPointsForm(false);
+                                      setPointsAmount('');
+                                    }}
+                                    className="btn btn-secondary"
+                                    style={{ padding: '6px 12px', fontSize: '13px' }}
+                                    disabled={allocatingPoints}
+                                  >
+                                    Cancel
+                                  </button>
+                                </div>
+                              ) : (
+                                <button
+                                  onClick={() => {
+                                    setSelectedGuestForPoints(guest);
+                                    setShowPointsForm(true);
+                                    setPointsAmount('');
+                                  }}
+                                  className="btn btn-primary"
+                                  style={{ padding: '6px 12px', fontSize: '13px' }}
+                                  disabled={allocatingPoints || (showPointsForm && selectedGuestForPoints?.id !== guest.id)}
+                                >
+                                  Award Points
+                                </button>
+                              )}
+                            </>
+                          )}
+                          {canRemoveGuests() && (
+                            <button
+                              onClick={() => handleRemoveGuest(guest.id)}
+                              className="btn btn-danger event-detail-remove-btn"
+                              style={{ padding: '6px 12px', fontSize: '13px' }}
+                              disabled={actionLoading || showPointsForm}
+                            >
+                              Remove
+                            </button>
+                          )}
+                        </div>
+                      </div>
                     </li>
                   ))}
                 </ul>
               ) : (
                 <div style={{ padding: '10px', color: '#666', fontStyle: 'italic' }}>
                   No guests yet
+                </div>
+              )}
+              {canAllocatePoints() && event.guests && event.guests.length > 0 && !showPointsForm && (
+                <div className="event-detail-add-organizer-section" style={{ marginTop: '16px', paddingTop: '16px', borderTop: '1px solid rgba(147, 177, 181, 0.2)' }}>
+                  <div style={{ marginBottom: '12px', fontSize: '14px', fontWeight: '600', color: 'var(--text-primary)' }}>
+                    Award Points to All Guests
+                  </div>
+                  <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                    <input
+                      type="number"
+                      min="1"
+                      placeholder="Points per guest"
+                      value={pointsAmount}
+                      onChange={(e) => setPointsAmount(e.target.value)}
+                      style={{
+                        flex: 1,
+                        padding: '8px 12px',
+                        border: '1.5px solid rgba(147, 177, 181, 0.3)',
+                        borderRadius: '6px',
+                        fontSize: '14px'
+                      }}
+                      disabled={allocatingPoints}
+                    />
+                    <button
+                      onClick={handleAwardPointsToAll}
+                      className="btn btn-primary"
+                      style={{ padding: '8px 16px', fontSize: '14px' }}
+                      disabled={allocatingPoints || !pointsAmount || parseInt(pointsAmount) <= 0}
+                    >
+                      {allocatingPoints ? 'Awarding...' : `Award to All (${event.guests.length})`}
+                    </button>
+                  </div>
+                  {event.pointsRemain !== undefined && (
+                    <div style={{ marginTop: '8px', fontSize: '13px', color: '#666' }}>
+                      Points remaining: {event.pointsRemain}
+                    </div>
+                  )}
                 </div>
               )}
               {canManageGuests() && (

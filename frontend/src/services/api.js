@@ -125,8 +125,10 @@ export const eventAPI = {
     api.post(`/events/${eventId}/guests`, { utorid }),
   removeGuest: (eventId, userId) =>
     api.delete(`/events/${eventId}/guests/${userId}`),
-  createEventTransaction: (eventId, userId) =>
-    api.post(`/events/${eventId}/transactions`, { userId }),
+  awardPointsToGuest: (eventId, utorid, amount) =>
+    api.post(`/events/${eventId}/transactions`, { type: 'event', utorid, amount }),
+  awardPointsToAllGuests: (eventId, amount) =>
+    api.post(`/events/${eventId}/transactions`, { type: 'event', amount }),
 };
 
 // Promotion endpoints
