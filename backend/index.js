@@ -2180,6 +2180,7 @@ app.get('/events/:eventId', async (req, res, next) => {
         };
         
         if (isManagerOrAbove || isEventOrganizer) {
+            response.pointsAllocated = event.pointsAllocated;
             response.pointsRemain = event.pointsRemain;
             response.pointsAwarded = event.pointsAllocated - event.pointsRemain;
             response.published = event.published;
@@ -2329,16 +2330,47 @@ app.patch('/events/:eventId', async (req, res, next) => {
                 }
             }
             
-            // Remove existing organizers and add new ones
-            await prisma.eventOrganizer.deleteMany({
-                where: { eventId }
+            // Get current organizers
+            const currentOrganizers = await prisma.eventOrganizer.findMany({
+                where: { eventId },
+                select: { userId: true }
             });
+            const currentOrganizerIds = currentOrganizers.map(o => o.userId);
+            const newOrganizerIds = [...new Set(organizerIds)]; // Remove duplicates from input
             
-            if (organizerIds.length > 0) {
-                await prisma.eventOrganizer.createMany({
-                    data: organizerIds.map(userId => ({ eventId, userId })),
-                    skipDuplicates: true
-                });
+            // Calculate which organizers to add and remove
+            const organizersToAdd = newOrganizerIds.filter(id => !currentOrganizerIds.includes(id));
+            const organizersToRemove = currentOrganizerIds.filter(id => !newOrganizerIds.includes(id));
+            
+            // Only update if organizers have actually changed
+            if (organizersToAdd.length > 0 || organizersToRemove.length > 0) {
+                // Remove organizers that are no longer in the list
+                if (organizersToRemove.length > 0) {
+                    await prisma.eventOrganizer.deleteMany({
+                        where: {
+                            eventId,
+                            userId: { in: organizersToRemove }
+                        }
+                    });
+                }
+                
+                // Add new organizers (we've already filtered out existing ones)
+                if (organizersToAdd.length > 0) {
+                    // Use individual creates with error handling to gracefully skip duplicates
+                    for (const userId of organizersToAdd) {
+                        try {
+                            await prisma.eventOrganizer.create({
+                                data: { eventId, userId }
+                            });
+                        } catch (error) {
+                            // If organizer already exists (unique constraint violation), skip it
+                            // This is defensive programming in case of race conditions
+                            if (error.code !== 'P2002') {
+                                throw error; // Re-throw if it's not a unique constraint error
+                            }
+                        }
+                    }
+                }
             }
         }
         

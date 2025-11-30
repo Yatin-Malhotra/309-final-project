@@ -26,6 +26,7 @@ const CreateEvent = () => {
   const [loadingEvent, setLoadingEvent] = useState(isEditMode);
   const [isOrganizer, setIsOrganizer] = useState(false);
   const [organizerIds, setOrganizerIds] = useState([]);
+  const [originalOrganizerIds, setOriginalOrganizerIds] = useState([]);
   const [users, setUsers] = useState([]);
   const [userSearch, setUserSearch] = useState('');
   const [loadingUsers, setLoadingUsers] = useState(false);
@@ -66,13 +67,15 @@ const CreateEvent = () => {
         startTime: formatDateTimeLocal(event.startTime),
         endTime: formatDateTimeLocal(event.endTime),
         capacity: event.capacity ? String(event.capacity) : '',
-        points: event.points ? String(event.points) : '',
+        points: event.pointsAllocated ? String(event.pointsAllocated) : '',
         published: event.published || false,
       });
       
       // Load existing organizers
       if (event.organizers) {
-        setOrganizerIds(event.organizers.map(o => o.id));
+        const orgIds = event.organizers.map(o => o.id);
+        setOrganizerIds(orgIds);
+        setOriginalOrganizerIds(orgIds);
       }
     } catch (err) {
       setError(err.response?.data?.error || 'Failed to load event.');
@@ -135,7 +138,11 @@ const CreateEvent = () => {
       if (hasRole('manager') || hasRole('superuser')) {
         data.points = parseInt(formData.points);
         data.published = formData.published;
-        data.organizerIds = organizerIds;
+        // Only send organizerIds if they've changed (to avoid unnecessary delete/recreate)
+        const organizerIdsChanged = JSON.stringify([...organizerIds].sort()) !== JSON.stringify([...originalOrganizerIds].sort());
+        if (organizerIdsChanged) {
+          data.organizerIds = organizerIds;
+        }
       }
 
       if (isEditMode) {
