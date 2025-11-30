@@ -299,40 +299,39 @@ const Events = () => {
 
               if (hasRole('manager') || hasRole('superuser')) {
                 return (
-                  <div key={event.id} className="events-card">
-                    <Link
-                      to={`/events/${event.id}`}
-                      className="events-card-link"
-                      style={{ textDecoration: 'none', color: 'inherit', display: 'flex', alignItems: 'center' }}
-                    >
-                      <div style={{ flex: 1 }}>
-                        <CardContent />
-                      </div>
-                      {canDeleteEvent(event) && (
-                        <button
-                          onClick={(e) => {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            handleDeleteEvent(event.id, event.name);
-                          }}
-                          className="btn btn-danger"
-                          disabled={deletingEventId === event.id}
-                          style={{
-                            padding: '12px 24px',
-                            fontSize: '15px',
-                            fontWeight: '600',
-                            borderRadius: '8px',
-                            marginLeft: '16px',
-                            flexShrink: 0,
-                            whiteSpace: 'nowrap',
-                            transition: 'all 0.2s ease'
-                          }}
-                        >
-                          {deletingEventId === event.id ? 'Deleting...' : 'Delete'}
-                        </button>
-                      )}
-                    </Link>
-                  </div>
+                  <Link
+                    key={event.id}
+                    to={`/events/${event.id}`}
+                    className="events-card events-card-link"
+                    style={{ textDecoration: 'none', color: 'inherit', display: 'flex', alignItems: 'center' }}
+                  >
+                    <div style={{ flex: 1 }}>
+                      <CardContent />
+                    </div>
+                    {canDeleteEvent(event) && (
+                      <button
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          handleDeleteEvent(event.id, event.name);
+                        }}
+                        className="btn btn-danger"
+                        disabled={deletingEventId === event.id}
+                        style={{
+                          padding: '12px 24px',
+                          fontSize: '15px',
+                          fontWeight: '600',
+                          borderRadius: '8px',
+                          marginLeft: '16px',
+                          flexShrink: 0,
+                          whiteSpace: 'nowrap',
+                          transition: 'all 0.2s ease'
+                        }}
+                      >
+                        {deletingEventId === event.id ? 'Deleting...' : 'Delete'}
+                      </button>
+                    )}
+                  </Link>
                 );
               }
 
