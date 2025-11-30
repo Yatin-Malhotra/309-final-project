@@ -16,20 +16,24 @@ const EventDetail = () => {
   const [users, setUsers] = useState([]);
   const [userSearch, setUserSearch] = useState('');
   const [loadingUsers, setLoadingUsers] = useState(false);
-  const [selectedUserId, setSelectedUserId] = useState('');
+  const [selectedUserId, setSelectedUserId] = useState(null);
   const [addingOrganizer, setAddingOrganizer] = useState(false);
   const [showAddOrganizerForm, setShowAddOrganizerForm] = useState(false);
-  const selectRef = useRef(null);
+  const [showOrganizerDropdown, setShowOrganizerDropdown] = useState(false);
+  const organizerInputRef = useRef(null);
+  const organizerDropdownRef = useRef(null);
   
   // Guest management state
   const [guestUsers, setGuestUsers] = useState([]);
   const [guestUserSearch, setGuestUserSearch] = useState('');
   const [loadingGuestUsers, setLoadingGuestUsers] = useState(false);
-  const [selectedGuestUserId, setSelectedGuestUserId] = useState('');
+  const [selectedGuestUserId, setSelectedGuestUserId] = useState(null);
   const [addingGuest, setAddingGuest] = useState(false);
   const [showAddGuestForm, setShowAddGuestForm] = useState(false);
   const [guestUtorid, setGuestUtorid] = useState('');
-  const guestSelectRef = useRef(null);
+  const [showGuestDropdown, setShowGuestDropdown] = useState(false);
+  const guestInputRef = useRef(null);
+  const guestDropdownRef = useRef(null);
 
   useEffect(() => {
     loadEvent();
@@ -40,10 +44,8 @@ const EventDetail = () => {
     
     setLoadingUsers(true);
     try {
-      const params = { limit: 50 };
-      if (userSearch) {
-        params.name = userSearch;
-      }
+      // Load more users for client-side filtering
+      const params = { limit: 100 };
       const response = await userAPI.getUsers(params);
       // Filter out users who are already organizers or guests
       const existingOrganizerIds = event?.organizers?.map(o => o.id) || [];
@@ -57,17 +59,15 @@ const EventDetail = () => {
     } finally {
       setLoadingUsers(false);
     }
-  }, [userSearch, hasRole, event]);
+  }, [hasRole, event]);
 
   const loadGuestUsers = useCallback(async () => {
     if (!hasRole('manager') && !hasRole('superuser')) return;
     
     setLoadingGuestUsers(true);
     try {
-      const params = { limit: 50 };
-      if (guestUserSearch) {
-        params.name = guestUserSearch;
-      }
+      // Load more users for client-side filtering
+      const params = { limit: 100 };
       const response = await userAPI.getUsers(params);
       // Filter out users who are already organizers or guests
       const existingOrganizerIds = event?.organizers?.map(o => o.id) || [];
@@ -81,48 +81,76 @@ const EventDetail = () => {
     } finally {
       setLoadingGuestUsers(false);
     }
-  }, [guestUserSearch, hasRole, event]);
+  }, [hasRole, event]);
 
   // Load users for organizer selection (only for managers/superusers)
   useEffect(() => {
-    if ((hasRole('manager') || hasRole('superuser')) && event) {
+    if ((hasRole('manager') || hasRole('superuser')) && event && showAddOrganizerForm) {
       loadUsers();
     }
-  }, [userSearch, hasRole, event, loadUsers]);
+  }, [hasRole, event, showAddOrganizerForm, loadUsers]);
 
   // Load users for guest selection (only for managers/superusers)
   useEffect(() => {
     if ((hasRole('manager') || hasRole('superuser')) && event && showAddGuestForm) {
       loadGuestUsers();
     }
-  }, [guestUserSearch, hasRole, event, showAddGuestForm, loadGuestUsers]);
+  }, [hasRole, event, showAddGuestForm, loadGuestUsers]);
 
-  // Auto-focus dropdown when user starts typing to enable keyboard navigation
-  useEffect(() => {
-    if (showAddOrganizerForm && userSearch && userSearch.length > 0 && selectRef.current) {
-      // Small delay to ensure the users list has been updated
-      const timer = setTimeout(() => {
-        if (selectRef.current && users.length > 0) {
-          selectRef.current.focus();
-        }
-      }, 150);
-      
-      return () => clearTimeout(timer);
-    }
-  }, [userSearch, users, showAddOrganizerForm]);
+  // Filter users based on search input (client-side filtering)
+  const filteredOrganizerUsers = userSearch.trim()
+    ? users.filter(u => 
+        u.name.toLowerCase().includes(userSearch.toLowerCase()) ||
+        u.utorid.toLowerCase().includes(userSearch.toLowerCase())
+      )
+    : users;
 
-  // Auto-focus dropdown for guest selection when user starts typing
+  const filteredGuestUsers = guestUserSearch.trim()
+    ? guestUsers.filter(u => 
+        u.name.toLowerCase().includes(guestUserSearch.toLowerCase()) ||
+        u.utorid.toLowerCase().includes(guestUserSearch.toLowerCase())
+      )
+    : guestUsers;
+
+  // Close dropdown when clicking outside
   useEffect(() => {
-    if (showAddGuestForm && guestUserSearch && guestUserSearch.length > 0 && guestSelectRef.current) {
-      const timer = setTimeout(() => {
-        if (guestSelectRef.current && guestUsers.length > 0) {
-          guestSelectRef.current.focus();
-        }
-      }, 150);
-      
-      return () => clearTimeout(timer);
+    const handleClickOutside = (event) => {
+      if (showOrganizerDropdown && 
+          organizerInputRef.current && 
+          organizerDropdownRef.current &&
+          !organizerInputRef.current.contains(event.target) &&
+          !organizerDropdownRef.current.contains(event.target)) {
+        setShowOrganizerDropdown(false);
+      }
+      if (showGuestDropdown && 
+          guestInputRef.current && 
+          guestDropdownRef.current &&
+          !guestInputRef.current.contains(event.target) &&
+          !guestDropdownRef.current.contains(event.target)) {
+        setShowGuestDropdown(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [showOrganizerDropdown, showGuestDropdown]);
+
+  // Autofocus input when form opens
+  useEffect(() => {
+    if (showAddOrganizerForm && organizerInputRef.current) {
+      setTimeout(() => {
+        organizerInputRef.current?.focus();
+      }, 100);
     }
-  }, [guestUserSearch, guestUsers, showAddGuestForm]);
+  }, [showAddOrganizerForm]);
+
+  useEffect(() => {
+    if (showAddGuestForm && guestInputRef.current) {
+      setTimeout(() => {
+        guestInputRef.current?.focus();
+      }, 100);
+    }
+  }, [showAddGuestForm]);
 
   const loadEvent = async () => {
     setLoading(true);
@@ -187,17 +215,15 @@ const EventDetail = () => {
 
   const handleAddOrganizer = async () => {
     if (!selectedUserId) return;
-    
-    const user = users.find(u => u.id === parseInt(selectedUserId));
-    if (!user) return;
 
-    if (!confirm(`Add ${user.name} (${user.utorid}) as an organizer?`)) return;
+    if (!confirm(`Add ${selectedUserId.name} (${selectedUserId.utorid}) as an organizer?`)) return;
 
     setAddingOrganizer(true);
     try {
-      await eventAPI.addOrganizer(eventId, user.utorid);
-      setSelectedUserId('');
+      await eventAPI.addOrganizer(eventId, selectedUserId.utorid);
+      setSelectedUserId(null);
       setUserSearch('');
+      setShowOrganizerDropdown(false);
       setShowAddOrganizerForm(false); // Hide the form after successful addition
       loadEvent();
       // Reload users to update the list
@@ -211,17 +237,21 @@ const EventDetail = () => {
     }
   };
 
+  const handleOrganizerSelect = (user) => {
+    setSelectedUserId(user);
+    setUserSearch(`${user.name} (${user.utorid})`);
+    setShowOrganizerDropdown(false);
+  };
+
   const handleAddGuest = async () => {
     let utoridToAdd = '';
     
     // If manager/superuser, get from selected user
     if (hasRole('manager') || hasRole('superuser')) {
       if (!selectedGuestUserId) return;
-      const user = guestUsers.find(u => u.id === parseInt(selectedGuestUserId));
-      if (!user) return;
-      utoridToAdd = user.utorid;
+      utoridToAdd = selectedGuestUserId.utorid;
       
-      if (!confirm(`Add ${user.name} (${user.utorid}) as a guest?`)) return;
+      if (!confirm(`Add ${selectedGuestUserId.name} (${selectedGuestUserId.utorid}) as a guest?`)) return;
     } else {
       // Event organizer - use utorid directly
       if (!guestUtorid || !guestUtorid.trim()) {
@@ -236,9 +266,10 @@ const EventDetail = () => {
     setAddingGuest(true);
     try {
       await eventAPI.addGuest(eventId, utoridToAdd);
-      setSelectedGuestUserId('');
+      setSelectedGuestUserId(null);
       setGuestUserSearch('');
       setGuestUtorid('');
+      setShowGuestDropdown(false);
       setShowAddGuestForm(false);
       loadEvent();
       // Reload guest users to update the list
@@ -250,6 +281,12 @@ const EventDetail = () => {
     } finally {
       setAddingGuest(false);
     }
+  };
+
+  const handleGuestSelect = (user) => {
+    setSelectedGuestUserId(user);
+    setGuestUserSearch(`${user.name} (${user.utorid})`);
+    setShowGuestDropdown(false);
   };
 
   const handleRemoveGuest = async (userId) => {
@@ -398,36 +435,54 @@ const EventDetail = () => {
                   </button>
                 ) : (
                   <div className="event-detail-add-organizer-form">
-                    <div className="form-group">
+                    <div className="form-group" style={{ position: 'relative' }}>
                       <input
+                        ref={organizerInputRef}
                         type="text"
                         placeholder="Search users by name or UTORid..."
                         value={userSearch}
-                        onChange={(e) => setUserSearch(e.target.value)}
+                        onChange={(e) => {
+                          setUserSearch(e.target.value);
+                          setShowOrganizerDropdown(true);
+                          setSelectedUserId(null);
+                        }}
                         onFocus={() => {
-                          // Focus the dropdown when search input is focused
-                          if (selectRef.current && users.length > 0) {
-                            setTimeout(() => {
-                              selectRef.current?.focus();
-                            }, 50);
+                          if (filteredOrganizerUsers.length > 0) {
+                            setShowOrganizerDropdown(true);
                           }
                         }}
-                      />
-                    </div>
-                    <div className="form-group">
-                      <select
-                        ref={selectRef}
-                        value={selectedUserId}
-                        onChange={(e) => setSelectedUserId(e.target.value)}
                         disabled={loadingUsers || addingOrganizer}
-                      >
-                        <option value="">Select a user to add as organizer...</option>
-                        {users.map((u) => (
-                          <option key={u.id} value={u.id}>
-                            {u.name} ({u.utorid})
-                          </option>
-                        ))}
-                      </select>
+                        className="event-detail-searchable-input"
+                      />
+                      {showOrganizerDropdown && filteredOrganizerUsers.length > 0 && (
+                        <div 
+                          ref={organizerDropdownRef}
+                          className="event-detail-searchable-dropdown"
+                        >
+                          {filteredOrganizerUsers.map((u) => (
+                            <div
+                              key={u.id}
+                              className="event-detail-dropdown-item"
+                              onClick={() => handleOrganizerSelect(u)}
+                            >
+                              {u.name} ({u.utorid})
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                      {showOrganizerDropdown && filteredOrganizerUsers.length === 0 && userSearch.trim() && (
+                        <div 
+                          ref={organizerDropdownRef}
+                          className="event-detail-searchable-dropdown"
+                        >
+                          <div className="event-detail-dropdown-item event-detail-dropdown-empty">
+                            No users found
+                          </div>
+                        </div>
+                      )}
+                      {loadingUsers && (
+                        <div className="event-detail-dropdown-loading">Loading users...</div>
+                      )}
                     </div>
                     <div className="event-detail-add-organizer-actions">
                       <button
@@ -440,8 +495,9 @@ const EventDetail = () => {
                       <button
                         onClick={() => {
                           setShowAddOrganizerForm(false);
-                          setSelectedUserId('');
+                          setSelectedUserId(null);
                           setUserSearch('');
+                          setShowOrganizerDropdown(false);
                         }}
                         className="btn btn-secondary"
                         disabled={addingOrganizer}
@@ -496,38 +552,55 @@ const EventDetail = () => {
                   ) : (
                     <div className="event-detail-add-organizer-form">
                       {(hasRole('manager') || hasRole('superuser')) ? (
-                        <>
-                          <div className="form-group">
-                            <input
-                              type="text"
-                              placeholder="Search users by name or UTORid..."
-                              value={guestUserSearch}
-                              onChange={(e) => setGuestUserSearch(e.target.value)}
-                              onFocus={() => {
-                                if (guestSelectRef.current && guestUsers.length > 0) {
-                                  setTimeout(() => {
-                                    guestSelectRef.current?.focus();
-                                  }, 50);
-                                }
-                              }}
-                            />
-                          </div>
-                          <div className="form-group">
-                            <select
-                              ref={guestSelectRef}
-                              value={selectedGuestUserId}
-                              onChange={(e) => setSelectedGuestUserId(e.target.value)}
-                              disabled={loadingGuestUsers || addingGuest}
+                        <div className="form-group" style={{ position: 'relative' }}>
+                          <input
+                            ref={guestInputRef}
+                            type="text"
+                            placeholder="Search users by name or UTORid..."
+                            value={guestUserSearch}
+                            onChange={(e) => {
+                              setGuestUserSearch(e.target.value);
+                              setShowGuestDropdown(true);
+                              setSelectedGuestUserId(null);
+                            }}
+                            onFocus={() => {
+                              if (filteredGuestUsers.length > 0) {
+                                setShowGuestDropdown(true);
+                              }
+                            }}
+                            disabled={loadingGuestUsers || addingGuest}
+                            className="event-detail-searchable-input"
+                          />
+                          {showGuestDropdown && filteredGuestUsers.length > 0 && (
+                            <div 
+                              ref={guestDropdownRef}
+                              className="event-detail-searchable-dropdown"
                             >
-                              <option value="">Select a user to add as guest...</option>
-                              {guestUsers.map((u) => (
-                                <option key={u.id} value={u.id}>
+                              {filteredGuestUsers.map((u) => (
+                                <div
+                                  key={u.id}
+                                  className="event-detail-dropdown-item"
+                                  onClick={() => handleGuestSelect(u)}
+                                >
                                   {u.name} ({u.utorid})
-                                </option>
+                                </div>
                               ))}
-                            </select>
-                          </div>
-                        </>
+                            </div>
+                          )}
+                          {showGuestDropdown && filteredGuestUsers.length === 0 && guestUserSearch.trim() && (
+                            <div 
+                              ref={guestDropdownRef}
+                              className="event-detail-searchable-dropdown"
+                            >
+                              <div className="event-detail-dropdown-item event-detail-dropdown-empty">
+                                No users found
+                              </div>
+                            </div>
+                          )}
+                          {loadingGuestUsers && (
+                            <div className="event-detail-dropdown-loading">Loading users...</div>
+                          )}
+                        </div>
                       ) : (
                         <div className="form-group">
                           <input
@@ -555,9 +628,10 @@ const EventDetail = () => {
                         <button
                           onClick={() => {
                             setShowAddGuestForm(false);
-                            setSelectedGuestUserId('');
+                            setSelectedGuestUserId(null);
                             setGuestUserSearch('');
                             setGuestUtorid('');
+                            setShowGuestDropdown(false);
                           }}
                           className="btn btn-secondary"
                           disabled={addingGuest}
