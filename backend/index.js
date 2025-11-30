@@ -2935,7 +2935,8 @@ app.post('/events/:eventId/transactions', async (req, res, next) => {
                         amount: amount,
                         relatedId: eventId,
                         remark: event.name,
-                        createdBy: authUser.id
+                        createdBy: authUser.id,
+                        processed: true
                     }
                 });
                 
@@ -2986,7 +2987,8 @@ app.post('/events/:eventId/transactions', async (req, res, next) => {
                 amount: amount,
                 relatedId: eventId,
                 remark: event.name,
-                createdBy: authUser.id
+                createdBy: authUser.id,
+                processed: true
             }
         });
         
