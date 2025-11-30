@@ -1001,6 +1001,8 @@ app.post('/transactions', requireRole('cashier'), validate(schemas.createTransac
             
             // Transaction is suspicious if creator is a cashier AND marked as suspicious
             const suspicious = creator.role === 'cashier' && Boolean(creator.suspicious);
+            // If cashier is suspicious, transaction should be pending (not processed)
+            const processed = !suspicious;
             
             transaction = await prisma.transaction.create({
                 data: {
@@ -1009,6 +1011,7 @@ app.post('/transactions', requireRole('cashier'), validate(schemas.createTransac
                     amount: earnedPoints, // Store the calculated points even if suspicious
                     spent,
                     suspicious,
+                    processed,
                     remark: remark || '',
                     createdBy: req.user.id
                 }
@@ -1346,9 +1349,15 @@ app.patch('/transactions/:transactionId/suspicious', requireRole('manager'), asy
             });
         }
         
+        // If marking as suspicious and transaction was processed, set processed to false
+        const updateData = { suspicious };
+        if (suspicious && tx.processed) {
+            updateData.processed = false;
+        }
+        
         const updated = await prisma.transaction.update({
             where: { id: tx.id },
-            data: { suspicious }
+            data: updateData
         });
         
         res.json({
@@ -1359,6 +1368,7 @@ app.patch('/transactions/:transactionId/suspicious', requireRole('manager'), asy
             amount: updated.amount,
             promotionIds: tx.transactionPromotions.map(tp => tp.promotionId),
             suspicious: updated.suspicious,
+            processed: updated.processed,
             remark: updated.remark,
             createdBy: tx.creator.utorid,
             createdAt: tx.createdAt
@@ -1736,7 +1746,7 @@ app.get('/users/:userId/transactions', requireRole('manager'), validateQuery(z.o
 });
 
 
-// PATCH /transactions/:transactionId/processed - Process redemption
+// PATCH /transactions/:transactionId/processed - Process redemption or purchase
 app.patch('/transactions/:transactionId/processed', requireRole('cashier'), async (req, res, next) => {
     try {
         const processed = coerceBoolean(req.body.processed);
@@ -1746,18 +1756,40 @@ app.patch('/transactions/:transactionId/processed', requireRole('cashier'), asyn
         if (isNaN(transactionId)) return res.status(400).json({ error: 'Invalid transaction ID' });
         const tx = await prisma.transaction.findUnique({
             where: { id: transactionId },
-            include: { user: true }
+            include: { user: true, creator: { select: { utorid: true } }, transactionPromotions: { select: { promotionId: true } } }
         });
         if (!tx) return res.status(404).json({ error: 'Transaction not found' });
-        if (tx.type !== 'redemption') return res.status(400).json({ error: 'Not a redemption' });
         if (tx.processed) return res.status(400).json({ error: 'Already processed' });
-        if (tx.user.points < Math.abs(tx.amount)) return res.status(400).json({ error: 'Insufficient points' });
         
-        // Deduct points (amount is negative, so increment by negative = subtract)
-        await prisma.user.update({
-            where: { id: tx.userId },
-            data: { points: { increment: tx.amount } }
-        });
+        // Cashiers can only process redemptions
+        if (req.user.role === 'cashier' && tx.type !== 'redemption') {
+            return res.status(403).json({ error: 'Cashiers can only process redemptions' });
+        }
+        
+        // Managers can process purchase transactions (pending and not suspicious)
+        if (tx.type === 'purchase') {
+            if (req.user.role !== 'manager' && req.user.role !== 'superuser') {
+                return res.status(403).json({ error: 'Only managers can process purchase transactions' });
+            }
+            if (tx.suspicious) {
+                return res.status(400).json({ error: 'Cannot process suspicious transactions' });
+            }
+            // Add points to user
+            await prisma.user.update({
+                where: { id: tx.userId },
+                data: { points: { increment: tx.amount } }
+            });
+        } else if (tx.type === 'redemption') {
+            // For redemptions, check if user has enough points
+            if (tx.user.points < Math.abs(tx.amount)) return res.status(400).json({ error: 'Insufficient points' });
+            // Deduct points (amount is negative, so increment by negative = subtract)
+            await prisma.user.update({
+                where: { id: tx.userId },
+                data: { points: { increment: tx.amount } }
+            });
+        } else {
+            return res.status(400).json({ error: 'Cannot process this transaction type' });
+        }
         
         const updated = await prisma.transaction.update({
             where: { id: tx.id },
@@ -1766,16 +1798,27 @@ app.patch('/transactions/:transactionId/processed', requireRole('cashier'), asyn
         
         const processor = await prisma.user.findUnique({ where: { id: req.user.id } });
         
-        res.json({
+        const result = {
             id: updated.id,
             utorid: tx.user.utorid,
-            type: 'redemption',
+            type: updated.type,
             processed: updated.processed,
             processedBy: processor.utorid,
-            redeemed: Math.abs(updated.amount),  // Return absolute value
             remark: updated.remark,
-            createdBy: tx.user.utorid
-        });
+            createdAt: updated.createdAt
+        };
+        
+        if (tx.type === 'redemption') {
+            result.redeemed = Math.abs(updated.amount);
+            result.createdBy = tx.user.utorid;
+        } else if (tx.type === 'purchase') {
+            result.spent = updated.spent;
+            result.amount = updated.amount;
+            result.promotionIds = tx.transactionPromotions.map(tp => tp.promotionId);
+            result.createdBy = tx.creator.utorid;
+        }
+        
+        res.json(result);
     } catch (error) { next(error); }
 });
 
