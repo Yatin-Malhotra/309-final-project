@@ -3,6 +3,9 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { transactionAPI } from '../services/api';
 import { Link, useSearchParams } from 'react-router-dom';
+import useTableSort from '../hooks/useTableSort';
+import SortableTableHeader from '../components/SortableTableHeader';
+import TransactionDetailPanel from '../components/TransactionDetailPanel';
 import './Transactions.css';
 
 const Transactions = () => {
@@ -29,6 +32,8 @@ const Transactions = () => {
     status: '',
   });
   const [error, setError] = useState('');
+  const [selectedTransaction, setSelectedTransaction] = useState(null);
+  const [isPanelOpen, setIsPanelOpen] = useState(false);
 
   // Check if client-side filtering is active
   const hasClientSideFilters = () => {
@@ -202,6 +207,35 @@ const Transactions = () => {
     return colors[type] || 'transactions-badge-secondary';
   };
 
+  // Table sorting configuration
+  const sortConfig = {
+    id: { sortFn: (a, b) => a.id - b.id },
+    user: { 
+      accessor: (tx) => (tx.userName || tx.utorid || tx.user?.utorid || '').toLowerCase() 
+    },
+    type: { 
+      accessor: (tx) => tx.type 
+    },
+    amount: { 
+      sortFn: (a, b) => {
+        const aVal = isCashierOnly ? (a.redeemed || Math.abs(a.amount)) : a.amount;
+        const bVal = isCashierOnly ? (b.redeemed || Math.abs(b.amount)) : b.amount;
+        return aVal - bVal;
+      }
+    },
+    date: { 
+      accessor: (tx) => tx.createdAt ? new Date(tx.createdAt).getTime() : 0 
+    },
+    status: { 
+      sortFn: (a, b) => {
+        // Processed = 1, Pending = 0
+        return (a.processed ? 1 : 0) - (b.processed ? 1 : 0);
+      }
+    },
+  };
+
+  const { sortedData, sortConfig: currentSort, handleSort } = useTableSort(transactions, sortConfig);
+
   return (
     <div className="transactions-page">
       <div className="transactions-page-header">
@@ -339,18 +373,73 @@ const Transactions = () => {
             <table className="transactions-table">
               <thead>
                 <tr>
-                  <th>ID</th>
-                  {(hasRole('manager') || isCashierOnly) && <th>User</th>}
-                  {!isCashierOnly && <th>Type</th>}
-                  <th>Amount</th>
-                  <th>Date</th>
-                  <th>Status</th>
+                  <SortableTableHeader 
+                    sortKey="id" 
+                    currentSortKey={currentSort.key} 
+                    sortDirection={currentSort.direction}
+                    onSort={handleSort}
+                  >
+                    ID
+                  </SortableTableHeader>
+                  {(hasRole('manager') || isCashierOnly) && (
+                    <SortableTableHeader 
+                      sortKey="user" 
+                      currentSortKey={currentSort.key} 
+                      sortDirection={currentSort.direction}
+                      onSort={handleSort}
+                    >
+                      User
+                    </SortableTableHeader>
+                  )}
+                  {!isCashierOnly && (
+                    <SortableTableHeader 
+                      sortKey="type" 
+                      currentSortKey={currentSort.key} 
+                      sortDirection={currentSort.direction}
+                      onSort={handleSort}
+                    >
+                      Type
+                    </SortableTableHeader>
+                  )}
+                  <SortableTableHeader 
+                    sortKey="amount" 
+                    currentSortKey={currentSort.key} 
+                    sortDirection={currentSort.direction}
+                    onSort={handleSort}
+                  >
+                    Amount
+                  </SortableTableHeader>
+                  <SortableTableHeader 
+                    sortKey="date" 
+                    currentSortKey={currentSort.key} 
+                    sortDirection={currentSort.direction}
+                    onSort={handleSort}
+                  >
+                    Date
+                  </SortableTableHeader>
+                  <SortableTableHeader 
+                    sortKey="status" 
+                    currentSortKey={currentSort.key} 
+                    sortDirection={currentSort.direction}
+                    onSort={handleSort}
+                  >
+                    Status
+                  </SortableTableHeader>
                   {(hasRole('manager') || hasRole('cashier')) && <th>Actions</th>}
                 </tr>
               </thead>
               <tbody>
-                {transactions.map((tx) => (
-                  <tr key={tx.id}>
+                {sortedData.map((tx) => (
+                  <tr 
+                    key={tx.id}
+                    onClick={() => {
+                      if (hasRole('cashier') || hasRole('manager') || hasRole('superuser')) {
+                        setSelectedTransaction(tx);
+                        setIsPanelOpen(true);
+                      }
+                    }}
+                    className={(hasRole('cashier') || hasRole('manager') || hasRole('superuser')) ? 'transactions-row-clickable' : ''}
+                  >
                     <td>{tx.id}</td>
                     {(hasRole('manager') || isCashierOnly) && (
                       <td>{tx.userName || tx.utorid || tx.user?.utorid}</td>
@@ -375,10 +464,13 @@ const Transactions = () => {
                     </td>
                     {(hasRole('manager') || hasRole('cashier')) && (
                       <td>
-                        <div className="transactions-actions-container">
+                        <div className="transactions-actions-container" onClick={(e) => e.stopPropagation()}>
                           {hasRole('cashier') && !tx.processed && (isCashierOnly || tx.type === 'redemption') && (
                             <button
-                              onClick={() => handleProcessRedemption(tx.id)}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleProcessRedemption(tx.id);
+                              }}
                               className="btn btn-success transactions-action-btn"
                             >
                               Process
@@ -390,7 +482,10 @@ const Transactions = () => {
                                 <>
                                   <span className="transactions-badge transactions-badge-danger">Suspicious</span>
                                   <button
-                                    onClick={() => handleToggleSuspicious(tx.id, true)}
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handleToggleSuspicious(tx.id, true);
+                                    }}
                                     className="btn btn-outline-secondary transactions-suspicious-btn"
                                     title="Unmark as suspicious"
                                   >
@@ -399,7 +494,10 @@ const Transactions = () => {
                                 </>
                               ) : (
                                 <button
-                                  onClick={() => handleToggleSuspicious(tx.id, false)}
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleToggleSuspicious(tx.id, false);
+                                  }}
                                   className="btn btn-outline-danger transactions-suspicious-btn"
                                   title="Mark as suspicious"
                                 >
@@ -450,6 +548,19 @@ const Transactions = () => {
           </div>
         </>
       )}
+
+      <TransactionDetailPanel
+        transaction={selectedTransaction}
+        isOpen={isPanelOpen}
+        onClose={() => {
+          setIsPanelOpen(false);
+          setSelectedTransaction(null);
+        }}
+        onUpdate={() => {
+          loadTransactions();
+        }}
+        hasRole={hasRole}
+      />
     </div>
   );
 };

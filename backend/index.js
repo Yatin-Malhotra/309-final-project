@@ -1284,7 +1284,7 @@ app.get('/transactions/redemptions', requireRole('cashier'), validateQuery(z.obj
 });
 
 // GET /transactions/:transactionId - Get single transaction
-app.get('/transactions/:transactionId', requireRole('manager'), async (req, res, next) => {
+app.get('/transactions/:transactionId', requireRole('cashier'), async (req, res, next) => {
     try {
         const transactionId = parseInt(req.params.transactionId);
         if (isNaN(transactionId)) return res.status(400).json({ error: 'Invalid transaction ID' });
@@ -1305,7 +1305,8 @@ app.get('/transactions/:transactionId', requireRole('manager'), async (req, res,
             amount: tx.amount,
             promotionIds: tx.transactionPromotions.map(tp => tp.promotionId),
             remark: tx.remark,
-            createdBy: tx.creator.utorid
+            createdBy: tx.creator.utorid,
+            createdAt: tx.createdAt
         };
         if (tx.spent) result.spent = tx.spent;
         if (tx.relatedId) result.relatedId = tx.relatedId;
@@ -1358,7 +1359,127 @@ app.patch('/transactions/:transactionId/suspicious', requireRole('manager'), asy
             promotionIds: tx.transactionPromotions.map(tp => tp.promotionId),
             suspicious: updated.suspicious,
             remark: updated.remark,
-            createdBy: tx.creator.utorid
+            createdBy: tx.creator.utorid,
+            createdAt: tx.createdAt
+        });
+    } catch (error) { next(error); }
+});
+
+// PATCH /transactions/:transactionId/amount - Update transaction amount
+app.patch('/transactions/:transactionId/amount', requireRole('manager'), async (req, res, next) => {
+    try {
+        const amount = parseFloat(req.body.amount);
+        if (isNaN(amount)) return res.status(400).json({ error: 'Invalid amount' });
+        
+        const transactionId = parseInt(req.params.transactionId);
+        if (isNaN(transactionId)) return res.status(400).json({ error: 'Invalid transaction ID' });
+        
+        const tx = await prisma.transaction.findUnique({
+            where: { id: transactionId },
+            include: { 
+                user: true, 
+                creator: { select: { utorid: true } }, 
+                transactionPromotions: { select: { promotionId: true } } 
+            }
+        });
+        if (!tx) return res.status(404).json({ error: 'Transaction not found' });
+        
+        // Only allow updating amount for purchase and adjustment transactions
+        if (tx.type !== 'purchase' && tx.type !== 'adjustment') {
+            return res.status(400).json({ error: 'Cannot update amount for this transaction type' });
+        }
+        
+        // Calculate the difference
+        const oldAmount = tx.amount;
+        const difference = amount - oldAmount;
+        
+        // Update user points if transaction is not suspicious
+        if (!tx.suspicious) {
+            await prisma.user.update({
+                where: { id: tx.userId },
+                data: { points: { increment: difference } }
+            });
+        }
+        
+        // Update transaction amount
+        const updated = await prisma.transaction.update({
+            where: { id: tx.id },
+            data: { amount }
+        });
+        
+        res.json({
+            id: updated.id,
+            utorid: tx.user.utorid,
+            type: updated.type,
+            spent: updated.spent,
+            amount: updated.amount,
+            promotionIds: tx.transactionPromotions.map(tp => tp.promotionId),
+            suspicious: updated.suspicious,
+            remark: updated.remark,
+            createdBy: tx.creator.utorid,
+            createdAt: updated.createdAt
+        });
+    } catch (error) { next(error); }
+});
+
+// PATCH /transactions/:transactionId/spent - Update transaction spent amount
+app.patch('/transactions/:transactionId/spent', requireRole('manager'), async (req, res, next) => {
+    try {
+        const spent = parseFloat(req.body.spent);
+        if (isNaN(spent) || spent <= 0) return res.status(400).json({ error: 'Invalid spent amount' });
+        
+        const transactionId = parseInt(req.params.transactionId);
+        if (isNaN(transactionId)) return res.status(400).json({ error: 'Invalid transaction ID' });
+        
+        const tx = await prisma.transaction.findUnique({
+            where: { id: transactionId },
+            include: { 
+                user: true, 
+                creator: { select: { utorid: true } }, 
+                transactionPromotions: { select: { promotionId: true } } 
+            }
+        });
+        if (!tx) return res.status(404).json({ error: 'Transaction not found' });
+        
+        // Only allow updating spent for purchase transactions
+        if (tx.type !== 'purchase') {
+            return res.status(400).json({ error: 'Cannot update spent for this transaction type' });
+        }
+        
+        // Recalculate points based on new spent amount and promotions
+        const promotionIds = tx.transactionPromotions.map(tp => tp.promotionId);
+        const newAmount = await calculatePurchasePoints(spent, promotionIds, tx.userId);
+        const oldAmount = tx.amount;
+        const amountDifference = newAmount - oldAmount;
+        
+        // Update user points if transaction is not suspicious
+        if (!tx.suspicious && amountDifference !== 0) {
+            await prisma.user.update({
+                where: { id: tx.userId },
+                data: { points: { increment: amountDifference } }
+            });
+        }
+        
+        // Update transaction spent and amount
+        const updated = await prisma.transaction.update({
+            where: { id: tx.id },
+            data: { 
+                spent,
+                amount: newAmount
+            }
+        });
+        
+        res.json({
+            id: updated.id,
+            utorid: tx.user.utorid,
+            type: updated.type,
+            spent: updated.spent,
+            amount: updated.amount,
+            promotionIds: tx.transactionPromotions.map(tp => tp.promotionId),
+            suspicious: updated.suspicious,
+            remark: updated.remark,
+            createdBy: tx.creator.utorid,
+            createdAt: updated.createdAt
         });
     } catch (error) { next(error); }
 });

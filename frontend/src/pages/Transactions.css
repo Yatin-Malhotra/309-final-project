@@ -182,6 +182,14 @@
   transform: scale(1.01);
 }
 
+.transactions-row-clickable {
+  cursor: pointer;
+}
+
+.transactions-row-clickable:hover {
+  background-color: rgba(79, 124, 130, 0.1) !important;
+}
+
 .transactions-table tbody tr:last-child td {
   border-bottom: none;
 }

@@ -98,6 +98,10 @@ export const transactionAPI = {
   getRedemptionTransactions: (params) => api.get('/transactions/redemptions', { params }),
   processRedemption: (transactionId) =>
     api.patch(`/transactions/${transactionId}/processed`, { processed: true }),
+  updateTransactionAmount: (transactionId, amount) =>
+    api.patch(`/transactions/${transactionId}/amount`, { amount }),
+  updateTransactionSpent: (transactionId, spent) =>
+    api.patch(`/transactions/${transactionId}/spent`, { spent }),
 };
 
 // Event endpoints
