@@ -271,7 +271,7 @@ const Events = () => {
                             </span>
                           )}
                           {isEventPast(event) && (
-                            <span className="events-badge events-badge-secondary">
+                            <span className="events-badge events-badge-danger">
                               Past
                             </span>
                           )}

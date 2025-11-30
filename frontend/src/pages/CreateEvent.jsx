@@ -125,16 +125,16 @@ const CreateEvent = () => {
         location: formData.location,
         startTime: new Date(formData.startTime).toISOString(),
         endTime: new Date(formData.endTime).toISOString(),
-        points: parseInt(formData.points),
-        published: formData.published,
       };
 
       if (formData.capacity) {
         data.capacity = parseInt(formData.capacity);
       }
 
-      // Add organizerIds if user is manager/superuser
+      // Only include points and published for managers/superusers
       if (hasRole('manager') || hasRole('superuser')) {
+        data.points = parseInt(formData.points);
+        data.published = formData.published;
         data.organizerIds = organizerIds;
       }
 
@@ -248,19 +248,21 @@ const CreateEvent = () => {
                 }
               />
             </div>
-            <div className="form-group">
-              <label htmlFor="points">Points to Allocate *</label>
-              <input
-                type="number"
-                id="points"
-                min="1"
-                value={formData.points}
-                onChange={(e) =>
-                  setFormData({ ...formData, points: e.target.value })
-                }
-                required
-              />
-            </div>
+            {(hasRole('manager') || hasRole('superuser')) && (
+              <div className="form-group">
+                <label htmlFor="points">Points to Allocate *</label>
+                <input
+                  type="number"
+                  id="points"
+                  min="1"
+                  value={formData.points}
+                  onChange={(e) =>
+                    setFormData({ ...formData, points: e.target.value })
+                  }
+                  required={!isEditMode}
+                />
+              </div>
+            )}
           </div>
           
           {(hasRole('manager') || hasRole('superuser')) && (
@@ -333,7 +335,7 @@ const CreateEvent = () => {
             </div>
           )}
 
-          {(hasRole('manager') || isOrganizer) && (
+          {(hasRole('manager') || hasRole('superuser')) && (
             <div className="form-group">
               <label>Published Status</label>
               <div className="switch-container">

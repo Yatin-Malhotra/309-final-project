@@ -357,7 +357,7 @@ const EventDetail = () => {
             </>
           )}
 
-          {hasRole('manager') && (
+          {(hasRole('manager') || isOrganizer()) && !isEventPast() && (
             <Link to={`/events/${eventId}/edit`} className="btn btn-primary">
               Edit Event
             </Link>
