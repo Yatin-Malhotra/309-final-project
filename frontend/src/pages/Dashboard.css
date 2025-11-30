@@ -73,6 +73,11 @@
   margin-bottom: 40px;
 }
 
+.dashboard-grid-vertical {
+  grid-template-columns: 1fr;
+  margin-bottom: 0;
+}
+
 .dashboard-grid-single {
   grid-template-columns: auto;
   justify-content: start;
@@ -163,6 +168,92 @@
   width: 100%;
 }
 
+/* Quick Access Cards */
+.dashboard-quick-access-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 200px;
+  position: relative;
+  padding: 28px;
+  text-decoration: none;
+  color: inherit;
+}
+
+.dashboard-quick-access-card .dashboard-card-title {
+  display: none;
+}
+
+.dashboard-quick-access-icon {
+  font-size: 56px;
+  margin-bottom: auto;
+  margin-top: 16px;
+  transition: transform 0.3s ease;
+  line-height: 1;
+}
+
+.dashboard-quick-access-card:hover .dashboard-quick-access-icon {
+  transform: scale(1.15) translateY(-4px);
+}
+
+.dashboard-quick-access-card .dashboard-quick-access-value {
+  margin-bottom: auto;
+  margin-top: 16px;
+  transition: transform 0.3s ease;
+}
+
+.dashboard-quick-access-card:hover .dashboard-quick-access-value {
+  transform: scale(1.1) translateY(-4px);
+}
+
+.dashboard-quick-access-content {
+  margin-top: auto;
+  text-align: center;
+  width: 100%;
+  padding-bottom: 8px;
+}
+
+.dashboard-quick-access-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 6px;
+}
+
+.dashboard-quick-access-description {
+  font-size: 13px;
+  color: var(--text-primary);
+  opacity: 0.7;
+  font-weight: 500;
+  line-height: 1.4;
+}
+
+.dashboard-quick-access-value {
+  font-size: 48px;
+  font-weight: 700;
+  color: var(--text-primary);
+  line-height: 1;
+  text-shadow: 0 1px 2px rgba(11, 46, 51, 0.1);
+}
+
+.dashboard-quick-access-arrow {
+  position: absolute;
+  right: 24px;
+  top: 50%;
+  font-size: 20px;
+  color: var(--text-primary);
+  opacity: 0;
+  transform: translate(-8px, -50%);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  font-weight: 600;
+}
+
+.dashboard-quick-access-card:hover .dashboard-quick-access-arrow {
+  opacity: 0.8;
+  transform: translate(4px, -50%);
+}
+
 .dashboard-quick-actions {
   gap: 12px;
 }
@@ -204,6 +295,17 @@
   border-radius: 12px 12px 0 0;
   letter-spacing: -0.3px;
   box-shadow: 0 2px 4px rgba(11, 46, 51, 0.1);
+}
+
+.dashboard-section-header-collapsible {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: background-color 0.2s ease;
+}
+
+.dashboard-section-header-collapsible:hover {
+  background: linear-gradient(135deg, rgba(79, 124, 130, 0.9) 0%, rgba(11, 46, 51, 0.9) 100%);
 }
 
 .dashboard-table {
@@ -287,6 +389,12 @@
   font-weight: 700;
 }
 
+.dashboard-badge-blue {
+  background-color: var(--badge-blue-bg);
+  color: var(--badge-blue-color);
+  font-weight: 700;
+}
+
 .dashboard-list-item {
   padding: 20px 0;
   border-bottom: 1px solid var(--border-light);
@@ -321,7 +429,7 @@
 }
 
 .dashboard-list-item-title a:hover {
-  color: #4F7C82;
+  color: var(--primary);
   text-decoration: underline;
 }
 
@@ -359,7 +467,7 @@
 .dashboard-empty-state {
   text-align: center;
   padding: 48px 20px;
-  color: #93B1B5;
+  color: var(--text-muted);
   font-size: 15px;
 }
 
@@ -373,7 +481,7 @@
 .dashboard-loading {
   text-align: center;
   padding: 60px 20px;
-  color: #4F7C82;
+  color: var(--text-secondary);
   font-size: 16px;
 }
 
@@ -383,15 +491,16 @@
   padding: 16px;
   background: var(--bg-tertiary);
   border-radius: 8px;
+  border: 1px solid var(--border-light);
+  transition: background-color 0.3s ease, border-color 0.3s ease;
 }
 
 .analytics-chart-caption {
   margin-top: 16px;
   text-align: center;
-  font-size: 13px;
+  font-size: 18px;
   color: var(--text-primary);
   opacity: 0.7;
-  font-style: italic;
 }
 
 .analytics-card-wide {
@@ -419,6 +528,8 @@
   background: var(--bg-tertiary);
   border-radius: 8px;
   padding: 16px;
+  border: 1px solid var(--border-light);
+  transition: background-color 0.3s ease, border-color 0.3s ease;
 }
 
 @media (max-width: 968px) {
@@ -448,6 +559,8 @@
   background: var(--bg-tertiary);
   border-radius: 8px;
   padding: 16px;
+  border: 1px solid var(--border-light);
+  transition: background-color 0.3s ease, border-color 0.3s ease;
 }
 
 @media (max-width: 968px) {

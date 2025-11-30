@@ -1,4 +1,5 @@
 // Simple chart component using recharts
+import { useState } from 'react';
 import {
   LineChart,
   Line,
@@ -23,6 +24,7 @@ const SimpleChart = ({ type, data, dataKey, xKey = 'date', height = 300, classNa
   const { isDark } = useTheme();
   const textColor = isDark ? '#B8E3E9' : '#0B2E33';
   const gridColor = isDark ? 'rgba(184, 227, 233, 0.1)' : 'rgba(11, 46, 51, 0.1)';
+  const [activeIndex, setActiveIndex] = useState(null);
 
   if (!data || data.length === 0) {
     return (
@@ -51,9 +53,13 @@ const SimpleChart = ({ type, data, dataKey, xKey = 'date', height = 300, classNa
             <YAxis stroke={textColor} style={{ fontSize: '12px' }} />
             <Tooltip
               contentStyle={{
-                backgroundColor: isDark ? '#0B2E33' : '#B8E3E9',
+                backgroundColor: isDark ? '#1a2d31' : '#ffffff',
                 border: `1px solid ${isDark ? '#4F7C82' : '#93B1B5'}`,
                 borderRadius: '8px',
+                color: textColor,
+                boxShadow: isDark ? '0 4px 12px rgba(0, 0, 0, 0.5)' : '0 2px 8px rgba(11, 46, 51, 0.15)'
+              }}
+              itemStyle={{
                 color: textColor
               }}
             />
@@ -88,7 +94,7 @@ const SimpleChart = ({ type, data, dataKey, xKey = 'date', height = 300, classNa
     return (
       <div className={`simple-chart ${className}`} style={{ height }}>
         <ResponsiveContainer width="100%" height="100%">
-          <BarChart {...commonProps}>
+          <BarChart {...commonProps} barCategoryGap="20%">
             <CartesianGrid strokeDasharray="3 3" stroke={gridColor} />
             <XAxis
               dataKey={xKey}
@@ -103,6 +109,7 @@ const SimpleChart = ({ type, data, dataKey, xKey = 'date', height = 300, classNa
                 borderRadius: '8px',
                 color: textColor
               }}
+              cursor={{ fill: 'transparent' }}
             />
             <Legend wrapperStyle={{ color: textColor }} />
             {Array.isArray(dataKey) ? (
@@ -111,10 +118,15 @@ const SimpleChart = ({ type, data, dataKey, xKey = 'date', height = 300, classNa
                   key={key}
                   dataKey={key}
                   fill={COLORS[index % COLORS.length]}
+                  activeBar={{ fill: COLORS[index % COLORS.length], opacity: 0.8 }}
                 />
               ))
             ) : (
-              <Bar dataKey={dataKey} fill={COLORS[0]} />
+              <Bar 
+                dataKey={dataKey} 
+                fill={COLORS[0]}
+                activeBar={{ fill: COLORS[0], opacity: 0.8 }}
+              />
             )}
           </BarChart>
         </ResponsiveContainer>
@@ -168,10 +180,14 @@ const SimpleChart = ({ type, data, dataKey, xKey = 'date', height = 300, classNa
               cx="50%"
               cy="50%"
               labelLine={false}
-              label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+              label={false}
               outerRadius={80}
               fill="#8884d8"
               dataKey="value"
+              activeIndex={activeIndex}
+              activeShape={{ outerRadius: 90 }}
+              onMouseEnter={(_, index) => setActiveIndex(index)}
+              onMouseLeave={() => setActiveIndex(null)}
             >
               {pieData.map((entry, index) => (
                 <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
@@ -179,13 +195,20 @@ const SimpleChart = ({ type, data, dataKey, xKey = 'date', height = 300, classNa
             </Pie>
             <Tooltip
               contentStyle={{
-                backgroundColor: isDark ? '#0B2E33' : '#B8E3E9',
+                backgroundColor: isDark ? '#1a2d31' : '#ffffff',
                 border: `1px solid ${isDark ? '#4F7C82' : '#93B1B5'}`,
                 borderRadius: '8px',
+                color: textColor,
+                boxShadow: isDark ? '0 4px 12px rgba(0, 0, 0, 0.5)' : '0 2px 8px rgba(11, 46, 51, 0.15)'
+              }}
+              itemStyle={{
                 color: textColor
               }}
             />
-            <Legend wrapperStyle={{ color: textColor }} />
+            <Legend 
+              wrapperStyle={{ color: textColor }} 
+              iconType="circle"
+            />
           </PieChart>
         </ResponsiveContainer>
       </div>

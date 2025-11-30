@@ -4,6 +4,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { transactionAPI, eventAPI, promotionAPI, userAPI, analyticsAPI } from '../services/api';
 import { Link } from 'react-router-dom';
 import AnalyticsCard from '../components/AnalyticsCard';
+import AnimatedNumber from '../components/AnimatedNumber';
 import SimpleChart from '../components/SimpleChart';
 import './Dashboard.css';
 
@@ -23,6 +24,12 @@ const Dashboard = () => {
   });
   const [analytics, setAnalytics] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [collapsedSections, setCollapsedSections] = useState({
+    userAnalytics: false,
+    transactionAnalytics: false,
+    eventAnalytics: false,
+    promotionAnalytics: false,
+  });
 
   useEffect(() => {
     const loadDashboard = async () => {
@@ -64,9 +71,14 @@ const Dashboard = () => {
               .filter(tx => tx.type === 'redemption' && new Date(tx.createdAt) >= monthAgo)
               .reduce((sum, tx) => sum + Math.abs(tx.amount), 0);
 
-            // Points trend (last 30 days)
+            // Points trend (last 2 weeks)
+            const formatDate = (date) => {
+              const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+              return `${months[date.getMonth()]} ${date.getDate()}`;
+            };
+            
             const pointsTrend = [];
-            for (let i = 29; i >= 0; i--) {
+            for (let i = 13; i >= 0; i--) {
               const date = new Date(now);
               date.setDate(date.getDate() - i);
               const nextDate = new Date(date);
@@ -86,7 +98,7 @@ const Dashboard = () => {
                 .reduce((sum, tx) => sum + Math.abs(tx.amount), 0);
               
               pointsTrend.push({
-                date: date.toISOString().split('T')[0],
+                date: formatDate(date),
                 earned,
                 spent
               });
@@ -174,13 +186,27 @@ const Dashboard = () => {
             // Load cashier analytics
             const cashierAnalytics = await analyticsAPI.getCashierStats();
 
+            // Format dates in dailyVolume to match user dashboard format
+            const formatDate = (date) => {
+              const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+              return `${months[date.getMonth()]} ${date.getDate()}`;
+            };
+
+            const formattedAnalytics = {
+              ...cashierAnalytics.data,
+              dailyVolume: cashierAnalytics.data.dailyVolume?.map(item => ({
+                ...item,
+                date: formatDate(new Date(item.date))
+              })) || []
+            };
+
             setStats({
               totalPoints: points,
               recentTransactions: txResponse.data.results || [],
               pendingRedemptions: pendingCount,
             });
 
-            setAnalytics(cashierAnalytics.data);
+            setAnalytics(formattedAnalytics);
           }
           // For managers and superusers: show overview of events, promotions, and users
           else if (hasRole('manager')) {
@@ -207,6 +233,34 @@ const Dashboard = () => {
               analyticsAPI.getFinancialAnalytics()
             ]);
 
+            // Format dates for charts (same format as user dashboard)
+            const formatDate = (date) => {
+              const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+              return `${months[date.getMonth()]} ${date.getDate()}`;
+            };
+
+            // Format overview dates
+            const formattedOverview = {
+              ...overview.data,
+              userGrowthTrend: overview.data.userGrowthTrend?.map(item => ({
+                ...item,
+                date: formatDate(new Date(item.date))
+              })) || []
+            };
+
+            // Format transaction dates
+            const formattedTransactions = {
+              ...transactionAnalytics.data,
+              volumeTrend: transactionAnalytics.data.volumeTrend?.map(item => ({
+                ...item,
+                date: formatDate(new Date(item.date))
+              })) || [],
+              pointsFlow: transactionAnalytics.data.pointsFlow?.map(item => ({
+                ...item,
+                date: formatDate(new Date(item.date))
+              })) || []
+            };
+
             setStats({
               totalPoints: user.points || 0,
               recentTransactions: [],
@@ -220,9 +274,9 @@ const Dashboard = () => {
             });
 
             setAnalytics({
-              overview: overview.data,
+              overview: formattedOverview,
               users: userAnalytics.data,
-              transactions: transactionAnalytics.data,
+              transactions: formattedTransactions,
               events: eventAnalytics.data,
               promotions: promotionAnalytics.data,
               financial: financialAnalytics.data
@@ -238,6 +292,13 @@ const Dashboard = () => {
 
     loadDashboard();
   }, [user, hasRole]);
+
+  const toggleSection = (section) => {
+    setCollapsedSections(prev => ({
+      ...prev,
+      [section]: !prev[section]
+    }));
+  };
 
   if (loading) {
     return <div className="dashboard-loading">Loading dashboard...</div>;
@@ -257,11 +318,40 @@ const Dashboard = () => {
             <span className="dashboard-badge dashboard-badge-warning dashboard-header-badge">Unverified</span>
           )}
         </div>
-        <div className="dashboard-grid dashboard-grid-single">
-          <div className="dashboard-card dashboard-card-narrow">
-            <div className="dashboard-card-title">Your Points Balance</div>
-            <div className="dashboard-card-value">{stats.totalPoints}</div>
+        <div className="dashboard-grid">
+          <div className="dashboard-card dashboard-quick-access-card">
+            <div className="dashboard-quick-access-value">
+              <AnimatedNumber value={stats.totalPoints} />
+            </div>
+            <div className="dashboard-quick-access-content">
+              <div className="dashboard-quick-access-title">Your Points Balance</div>
+              <div className="dashboard-quick-access-description">Available points</div>
+            </div>
           </div>
+          <Link to="/transactions/create?type=transfer" className="dashboard-card dashboard-quick-access-card" style={{ textDecoration: 'none', color: 'inherit' }}>
+            <div className="dashboard-quick-access-icon">↗</div>
+            <div className="dashboard-quick-access-content">
+              <div className="dashboard-quick-access-title">Transfer Points</div>
+              <div className="dashboard-quick-access-description">Send points to other users</div>
+            </div>
+            <div className="dashboard-quick-access-arrow">→</div>
+          </Link>
+          <Link to="/transactions/create?type=redemption" className="dashboard-card dashboard-quick-access-card" style={{ textDecoration: 'none', color: 'inherit' }}>
+            <div className="dashboard-quick-access-icon">🎁</div>
+            <div className="dashboard-quick-access-content">
+              <div className="dashboard-quick-access-title">Redeem Points</div>
+              <div className="dashboard-quick-access-description">Redeem your points for rewards</div>
+            </div>
+            <div className="dashboard-quick-access-arrow">→</div>
+          </Link>
+          <Link to="/events" className="dashboard-card dashboard-quick-access-card" style={{ textDecoration: 'none', color: 'inherit' }}>
+            <div className="dashboard-quick-access-icon">📅</div>
+            <div className="dashboard-quick-access-content">
+              <div className="dashboard-quick-access-title">Browse Events</div>
+              <div className="dashboard-quick-access-description">Discover and register for events</div>
+            </div>
+            <div className="dashboard-quick-access-arrow">→</div>
+          </Link>
         </div>
 
         {/* Points Activity Analytics */}
@@ -294,50 +384,11 @@ const Dashboard = () => {
                   xKey="date"
                   height={300}
                 />
+                <p className="analytics-chart-caption">
+                  Daily Earnings vs Spendings
+                </p>
               </div>
             )}
-          </div>
-        )}
-
-        {/* Transaction Insights */}
-        {analytics?.transactionInsights && (
-          <div className="dashboard-section">
-            <div className="dashboard-section-header">Transaction Insights</div>
-            <div className="dashboard-grid">
-              <AnalyticsCard
-                title="Total Transactions This Month"
-                value={analytics.transactionInsights.totalMonth}
-              />
-              <AnalyticsCard
-                title="Average Transaction Value"
-                value={`${analytics.transactionInsights.averageValue} pts`}
-              />
-              <AnalyticsCard
-                title="Most Common Type"
-                value={analytics.transactionInsights.mostCommonType}
-              />
-            </div>
-          </div>
-        )}
-
-        {/* Engagement Metrics */}
-        {analytics?.engagement && (
-          <div className="dashboard-section">
-            <div className="dashboard-section-header">Engagement</div>
-            <div className="dashboard-grid">
-              <AnalyticsCard
-                title="Upcoming Events Registered"
-                value={analytics.engagement.upcomingEvents}
-              />
-              <AnalyticsCard
-                title="Active Promotions Available"
-                value={analytics.engagement.activePromotions}
-              />
-              <AnalyticsCard
-                title="Events Attended This Month"
-                value={analytics.engagement.eventsAttendedMonth}
-              />
-            </div>
           </div>
         )}
 
@@ -361,7 +412,7 @@ const Dashboard = () => {
                     <tr key={tx.id}>
                       <td>
                         <span className={`dashboard-badge ${
-                          tx.type === 'purchase' ? 'dashboard-badge-primary' :
+                          tx.type === 'purchase' ? 'dashboard-badge-blue' :
                           tx.type === 'redemption' ? 'dashboard-badge-danger' :
                           tx.type === 'event' ? 'dashboard-badge-success' :
                           'dashboard-badge-secondary'
@@ -393,6 +444,54 @@ const Dashboard = () => {
             </>
           )}
         </div>
+
+        {/* Transaction Insights and Engagement */}
+        {(analytics?.transactionInsights || analytics?.engagement) && (
+          <div className="dashboard-two-column">
+            {analytics?.transactionInsights && (
+              <div className="dashboard-section">
+                <div className="dashboard-section-header">Transaction Insights</div>
+                <div className="dashboard-grid dashboard-grid-vertical">
+                  <AnalyticsCard
+                    title="Total Transactions This Month"
+                    value={analytics.transactionInsights.totalMonth}
+                  />
+                  <AnalyticsCard
+                    title="Average Transaction Value"
+                    value={`${analytics.transactionInsights.averageValue} pts`}
+                  />
+                  <AnalyticsCard
+                    title="Most Common Type"
+                    value={analytics.transactionInsights.mostCommonType ? 
+                      analytics.transactionInsights.mostCommonType.charAt(0).toUpperCase() + 
+                      analytics.transactionInsights.mostCommonType.slice(1).toLowerCase() : 
+                      ''}
+                  />
+                </div>
+              </div>
+            )}
+
+            {analytics?.engagement && (
+              <div className="dashboard-section">
+                <div className="dashboard-section-header">Engagement</div>
+                <div className="dashboard-grid dashboard-grid-vertical">
+                  <AnalyticsCard
+                    title="Upcoming Events Registered"
+                    value={analytics.engagement.upcomingEvents}
+                  />
+                  <AnalyticsCard
+                    title="Active Promotions Available"
+                    value={analytics.engagement.activePromotions}
+                  />
+                  <AnalyticsCard
+                    title="Events Attended This Month"
+                    value={analytics.engagement.eventsAttendedMonth}
+                  />
+                </div>
+              </div>
+            )}
+          </div>
+        )}
       </div>
     );
   }
@@ -401,24 +500,34 @@ const Dashboard = () => {
   if (userRole === 'cashier') {
     return (
       <div className="dashboard-page">
-        <div className="dashboard-header-with-action">
-          <h1>Welcome, {user?.name}!</h1>
-          <Link to="/transactions/create" className="btn btn-primary dashboard-create-btn">
-            Create Transaction
+        <h1>Welcome, {user?.name}!</h1>
+        <div className="dashboard-grid">
+          <Link to="/transactions/create" className="dashboard-card dashboard-quick-access-card" style={{ textDecoration: 'none', color: 'inherit' }}>
+            <div className="dashboard-quick-access-icon">➕</div>
+            <div className="dashboard-quick-access-content">
+              <div className="dashboard-quick-access-title">Create Transaction</div>
+              <div className="dashboard-quick-access-description">Create a new transaction</div>
+            </div>
+            <div className="dashboard-quick-access-arrow">→</div>
           </Link>
-        </div>
-        <div className="dashboard-grid dashboard-grid-single">
-          <div className="dashboard-card dashboard-card-narrow">
-            <div className="dashboard-card-title">Pending Redemptions</div>
-            <div className="dashboard-card-value">
-              {stats.pendingRedemptions}
+          <Link to="/transactions" className="dashboard-card dashboard-quick-access-card" style={{ textDecoration: 'none', color: 'inherit' }}>
+            <div className="dashboard-quick-access-value">
+              <AnimatedNumber value={stats.pendingRedemptions} />
             </div>
-            <div className="dashboard-card-actions">
-              <Link to="/transactions" className="btn btn-primary">
-                View Redemptions
-              </Link>
+            <div className="dashboard-quick-access-content">
+              <div className="dashboard-quick-access-title">Pending Redemptions</div>
+              <div className="dashboard-quick-access-description">Awaiting processing</div>
             </div>
-          </div>
+            <div className="dashboard-quick-access-arrow">→</div>
+          </Link>
+          <Link to="/events" className="dashboard-card dashboard-quick-access-card" style={{ textDecoration: 'none', color: 'inherit' }}>
+            <div className="dashboard-quick-access-icon">📅</div>
+            <div className="dashboard-quick-access-content">
+              <div className="dashboard-quick-access-title">Browse Events</div>
+              <div className="dashboard-quick-access-description">Discover and register for events</div>
+            </div>
+            <div className="dashboard-quick-access-arrow">→</div>
+          </Link>
         </div>
 
         {/* Transaction Processing Metrics */}
@@ -440,11 +549,6 @@ const Dashboard = () => {
                 title="Average Transaction Value"
                 value={`${analytics.averageTransactionValue || 0} pts`}
               />
-              <AnalyticsCard
-                title="Points Issued Today"
-                value={analytics.pointsIssued?.today || 0}
-                subtitle={`${analytics.pointsIssued?.week || 0} this week`}
-              />
             </div>
           </div>
         )}
@@ -453,13 +557,38 @@ const Dashboard = () => {
         {analytics && (
           <div className="dashboard-section">
             <div className="dashboard-section-header">Performance Metrics</div>
-            <div className="dashboard-grid">
-              <AnalyticsCard
-                title="Processing Rate"
-                value={`${analytics.processingRate || 0}%`}
-                description={`${analytics.pendingRedemptions || 0} pending redemptions`}
-              />
-              {analytics.topUsers && analytics.topUsers.length > 0 && (
+            <div className="transaction-analytics-layout">
+              <div className="transaction-analytics-cards">
+                <AnalyticsCard
+                  title="Processing Rate"
+                  value={`${analytics.processingRate || 0}%`}
+                  description={`${analytics.pendingRedemptions || 0} pending redemptions`}
+                />
+                <AnalyticsCard
+                  title="Total Redemptions Processed"
+                  value={analytics.redemptions?.month || 0}
+                  subtitle={`${analytics.redemptions?.week || 0} this week, ${analytics.redemptions?.today || 0} today`}
+                />
+              </div>
+              {analytics.typeBreakdown && (
+                <div className="transaction-analytics-chart">
+                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%' }}>
+                    <p className="analytics-chart-caption" style={{ marginTop: 0, marginBottom: '16px' }}>
+                      Transaction Types Distribution
+                    </p>
+                    <SimpleChart
+                      type="pie"
+                      data={Object.entries(analytics.typeBreakdown).map(([name, value]) => ({ name, value }))}
+                      dataKey="value"
+                      xKey="name"
+                      height={300}
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
+            {analytics.topUsers && analytics.topUsers.length > 0 && (
+              <div className="dashboard-grid" style={{ marginTop: '24px' }}>
                 <AnalyticsCard
                   title="Most Active Users"
                   className="analytics-card-wide"
@@ -483,8 +612,8 @@ const Dashboard = () => {
                     </tbody>
                   </table>
                 </AnalyticsCard>
-              )}
-            </div>
+              </div>
+            )}
           </div>
         )}
 
@@ -492,13 +621,18 @@ const Dashboard = () => {
         {analytics?.dailyVolume && analytics.dailyVolume.length > 0 && (
           <div className="dashboard-section">
             <div className="dashboard-section-header">Daily Transaction Volume (Last 7 Days)</div>
-            <SimpleChart
-              type="bar"
-              data={analytics.dailyVolume}
-              dataKey="count"
-              xKey="date"
-              height={300}
-            />
+            <div className="analytics-chart-container">
+              <SimpleChart
+                type="bar"
+                data={analytics.dailyVolume}
+                dataKey="count"
+                xKey="date"
+                height={300}
+              />
+              <p className="analytics-chart-caption">
+                Daily transaction count over the last 7 days
+              </p>
+            </div>
           </div>
         )}
 
@@ -507,7 +641,6 @@ const Dashboard = () => {
           <div className="dashboard-section">
             <div className="dashboard-section-header">Transaction Types Breakdown</div>
             <div style={{ marginTop: '24px' }}>
-              <h3 style={{ marginBottom: '16px', fontSize: '18px', fontWeight: 600 }}>Transaction Types</h3>
               <table className="dashboard-table">
                 <thead>
                   <tr>
@@ -520,7 +653,8 @@ const Dashboard = () => {
                     <tr key={type}>
                       <td>
                         <span className={`dashboard-badge ${
-                          type === 'purchase' ? 'dashboard-badge-primary' :
+                          type === 'purchase' ? 'dashboard-badge-blue' :
+                          type === 'adjustment' ? 'dashboard-badge-warning' :
                           type === 'redemption' ? 'dashboard-badge-danger' :
                           type === 'event' ? 'dashboard-badge-success' :
                           'dashboard-badge-secondary'
@@ -533,15 +667,6 @@ const Dashboard = () => {
                   ))}
                 </tbody>
               </table>
-            </div>
-            <div className="analytics-chart-container" style={{ marginTop: '24px' }}>
-              <SimpleChart
-                type="pie"
-                data={Object.entries(analytics.typeBreakdown).map(([name, value]) => ({ name, value }))}
-                dataKey="value"
-                xKey="name"
-                height={300}
-              />
             </div>
           </div>
         )}
@@ -566,7 +691,7 @@ const Dashboard = () => {
                     <tr key={tx.id}>
                       <td>
                         <span className={`dashboard-badge ${
-                          tx.type === 'purchase' ? 'dashboard-badge-primary' :
+                          tx.type === 'purchase' ? 'dashboard-badge-blue' :
                           tx.type === 'redemption' ? 'dashboard-badge-danger' :
                           'dashboard-badge-secondary'
                         }`}>
@@ -612,43 +737,69 @@ const Dashboard = () => {
       <div className="dashboard-page">
         <h1>Welcome, {user?.name}!</h1>
         <div className="dashboard-grid">
-          <div className="dashboard-card">
-            <div className="dashboard-card-title">Total Users</div>
-            <div className="dashboard-card-value">{stats.totalUsers}</div>
-            <div className="dashboard-card-actions">
-              <Link to="/users" className="btn btn-primary">
-                Manage Users
-              </Link>
+          <Link to="/users" className="dashboard-card dashboard-quick-access-card" style={{ textDecoration: 'none', color: 'inherit' }}>
+            <div className="dashboard-quick-access-value">
+              <AnimatedNumber value={stats.totalUsers} />
             </div>
-          </div>
-          <div className="dashboard-card">
-            <div className="dashboard-card-title">Total Transactions</div>
-            <div className="dashboard-card-value">{stats.totalTransactions}</div>
-            <div className="dashboard-card-actions">
-              <Link to="/transactions" className="btn btn-primary">
-                View Transactions
-              </Link>
+            <div className="dashboard-quick-access-content">
+              <div className="dashboard-quick-access-title">Total Users</div>
+              <div className="dashboard-quick-access-description">Manage user accounts</div>
             </div>
-          </div>
-          <div className="dashboard-card">
-            <div className="dashboard-card-title">Total Events</div>
-            <div className="dashboard-card-value">{stats.totalEvents}</div>
-            <div className="dashboard-card-actions">
-              <Link to="/events" className="btn btn-primary">
-                Manage Events
-              </Link>
+            <div className="dashboard-quick-access-arrow">→</div>
+          </Link>
+          <Link to="/transactions" className="dashboard-card dashboard-quick-access-card" style={{ textDecoration: 'none', color: 'inherit' }}>
+            <div className="dashboard-quick-access-value">
+              <AnimatedNumber value={stats.totalTransactions} />
             </div>
-          </div>
-          <div className="dashboard-card">
-            <div className="dashboard-card-title">Total Promotions</div>
-            <div className="dashboard-card-value">{stats.totalPromotions}</div>
-            <div className="dashboard-card-actions">
-              <Link to="/promotions" className="btn btn-primary">
-                Manage Promotions
-              </Link>
+            <div className="dashboard-quick-access-content">
+              <div className="dashboard-quick-access-title">Total Transactions</div>
+              <div className="dashboard-quick-access-description">View all transactions</div>
             </div>
-          </div>
+            <div className="dashboard-quick-access-arrow">→</div>
+          </Link>
+          <Link to="/events" className="dashboard-card dashboard-quick-access-card" style={{ textDecoration: 'none', color: 'inherit' }}>
+            <div className="dashboard-quick-access-value">
+              <AnimatedNumber value={stats.totalEvents} />
+            </div>
+            <div className="dashboard-quick-access-content">
+              <div className="dashboard-quick-access-title">Total Events</div>
+              <div className="dashboard-quick-access-description">Manage events</div>
+            </div>
+            <div className="dashboard-quick-access-arrow">→</div>
+          </Link>
+          <Link to="/promotions" className="dashboard-card dashboard-quick-access-card" style={{ textDecoration: 'none', color: 'inherit' }}>
+            <div className="dashboard-quick-access-value">
+              <AnimatedNumber value={stats.totalPromotions} />
+            </div>
+            <div className="dashboard-quick-access-content">
+              <div className="dashboard-quick-access-title">Total Promotions</div>
+              <div className="dashboard-quick-access-description">Manage promotions</div>
+            </div>
+            <div className="dashboard-quick-access-arrow">→</div>
+          </Link>
         </div>
+
+        {/* Financial Insights */}
+        {analytics?.financial && (
+          <div className="dashboard-section">
+            <div className="dashboard-section-header">Financial Insights</div>
+            <div className="dashboard-grid">
+              <AnalyticsCard
+                title="Total Earnings This Week"
+                value={`$${(analytics.financial.totalSpent?.week || 0).toFixed(2)}`}
+                subtitle={`Month: $${(analytics.financial.totalSpent?.month || 0).toFixed(2)}`}
+              />
+              <AnalyticsCard
+                title="Average Earning per Transaction"
+                value={`$${(analytics.financial.averageSpendingPerTransaction || 0).toFixed(2)}`}
+              />
+              <AnalyticsCard
+                title="Points per Dollar Ratio"
+                value={analytics.financial.pointsPerDollarRatio || 0}
+              />
+            </div>
+          </div>
+        )}
 
         {/* System Overview Analytics */}
         {analytics?.overview && (
@@ -656,10 +807,6 @@ const Dashboard = () => {
             <div className="dashboard-section-header">System Overview</div>
             <div className="system-overview-layout">
               <div className="system-overview-cards">
-                <AnalyticsCard
-                  title="Total Points in Circulation"
-                  value={analytics.overview.totalPointsInCirculation || 0}
-                />
                 <AnalyticsCard
                   title="Points Earned This Week"
                   value={analytics.overview.pointsFlow?.week?.earned || 0}
@@ -670,14 +817,12 @@ const Dashboard = () => {
                   value={analytics.overview.pointsFlow?.week?.net || 0}
                   subtitle={`Month: ${analytics.overview.pointsFlow?.month?.net || 0}`}
                 />
-                <AnalyticsCard
-                  title="New Users This Week"
-                  value={analytics.overview.userGrowth?.week || 0}
-                  subtitle={`${analytics.overview.userGrowth?.month || 0} this month`}
-                />
               </div>
               {analytics.overview.pointsDistribution && (
-                <div className="system-overview-chart">
+                <div className="system-overview-chart" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%' }}>
+                  <p className="analytics-chart-caption" style={{ marginTop: 0, marginBottom: '16px', textAlign: 'center', width: '100%' }}>
+                    Points Distribution by User Balance Range
+                  </p>
                   <SimpleChart
                     type="pie"
                     data={[
@@ -703,272 +848,10 @@ const Dashboard = () => {
                   height={300}
                 />
                 <p className="analytics-chart-caption">
-                  Daily new user registrations over the last 14 days
+                  Daily New User Registrations
                 </p>
               </div>
             )}
-          </div>
-        )}
-
-        {/* User Analytics */}
-        {analytics?.users && (
-          <div className="dashboard-section">
-            <div className="dashboard-section-header">User Analytics</div>
-            <div className="dashboard-grid">
-              <AnalyticsCard
-                title="Verified Users"
-                value={analytics.users.verified?.verified || 0}
-                subtitle={`Unverified: ${analytics.users.verified?.unverified || 0}`}
-              />
-              <AnalyticsCard
-                title="Suspicious Users"
-                value={analytics.users.suspicious || 0}
-              />
-              <AnalyticsCard
-                title="New Users This Month"
-                value={analytics.users.newUsers?.month || 0}
-                subtitle={`Week: ${analytics.users.newUsers?.week || 0}`}
-              />
-            </div>
-            {analytics.users.topUsersByPoints && analytics.users.topUsersByPoints.length > 0 && (
-              <div style={{ marginTop: '24px' }}>
-                <h3 style={{ marginBottom: '16px', fontSize: '18px', fontWeight: 600 }}>Top 10 Users by Points</h3>
-                <table className="dashboard-table">
-                  <thead>
-                    <tr>
-                      <th>Name</th>
-                      <th>UTORid</th>
-                      <th>Points</th>
-                      <th>Status</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {analytics.users.topUsersByPoints.map((u) => (
-                      <tr key={u.id}>
-                        <td>{u.name}</td>
-                        <td>{u.utorid}</td>
-                        <td>{u.points}</td>
-                        <td>
-                          {u.verified ? (
-                            <span className="dashboard-badge dashboard-badge-success">Verified</span>
-                          ) : (
-                            <span className="dashboard-badge dashboard-badge-warning">Unverified</span>
-                          )}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
-            {analytics.users.topUsersByTransactionCount && analytics.users.topUsersByTransactionCount.length > 0 && (
-              <div style={{ marginTop: '24px' }}>
-                <h3 style={{ marginBottom: '16px', fontSize: '18px', fontWeight: 600 }}>Top 10 Users by Transaction Count</h3>
-                <table className="dashboard-table">
-                  <thead>
-                    <tr>
-                      <th>Name</th>
-                      <th>UTORid</th>
-                      <th>Transactions</th>
-                      <th>Points</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {analytics.users.topUsersByTransactionCount.map((u) => (
-                      <tr key={u.userId}>
-                        <td>{u.name}</td>
-                        <td>{u.utorid}</td>
-                        <td>{u.transactionCount}</td>
-                        <td>{u.points}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* Transaction Analytics */}
-        {analytics?.transactions && (
-          <div className="dashboard-section">
-            <div className="dashboard-section-header">Transaction Analytics</div>
-            <div className="transaction-analytics-layout">
-              <div className="transaction-analytics-cards">
-                <AnalyticsCard
-                  title="Transactions Today"
-                  value={analytics.transactions.volume?.today || 0}
-                  subtitle={`${analytics.transactions.volume?.week || 0} this week, ${analytics.transactions.volume?.month || 0} this month`}
-                />
-                <AnalyticsCard
-                  title="Suspicious Transactions"
-                  value={analytics.transactions.suspicious || 0}
-                />
-                <AnalyticsCard
-                  title="Average Transaction Value"
-                  value={`${analytics.transactions.averageTransactionValue || 0} pts`}
-                />
-              </div>
-              {analytics.transactions.typeBreakdown && (
-                <div className="transaction-analytics-chart">
-                  <SimpleChart
-                    type="pie"
-                    data={Object.entries(analytics.transactions.typeBreakdown).map(([name, value]) => ({ name, value }))}
-                    dataKey="value"
-                    xKey="name"
-                    height={300}
-                  />
-                </div>
-              )}
-            </div>
-            {analytics.transactions.volumeTrend && analytics.transactions.volumeTrend.length > 0 && (
-              <div className="analytics-chart-container">
-                <SimpleChart
-                  type="line"
-                  data={analytics.transactions.volumeTrend}
-                  dataKey="count"
-                  xKey="date"
-                  height={300}
-                />
-                <p className="analytics-chart-caption">
-                  Daily transaction volume over the last 14 days
-                </p>
-              </div>
-            )}
-            {analytics.transactions.pointsFlow && analytics.transactions.pointsFlow.length > 0 && (
-              <div className="analytics-chart-container" style={{ marginTop: '24px' }}>
-                <SimpleChart
-                  type="line"
-                  data={analytics.transactions.pointsFlow}
-                  dataKey={['earned', 'spent']}
-                  xKey="date"
-                  height={300}
-                />
-                <p className="analytics-chart-caption">
-                  Daily points earned vs spent over the last 14 days
-                </p>
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* Event Analytics */}
-        {analytics?.events && (
-          <div className="dashboard-section">
-            <div className="dashboard-section-header">Event Analytics</div>
-            <div className="dashboard-grid">
-              <AnalyticsCard
-                title="Published Events"
-                value={analytics.events.published || 0}
-                subtitle={`Unpublished: ${analytics.events.unpublished || 0}`}
-              />
-              <AnalyticsCard
-                title="Upcoming Events"
-                value={analytics.events.upcoming || 0}
-              />
-              <AnalyticsCard
-                title="Total Points Allocated"
-                value={analytics.events.totalPointsAllocated || 0}
-                subtitle={`Remaining: ${analytics.events.totalPointsRemaining || 0}`}
-              />
-            </div>
-            {analytics.events.popularEvents && analytics.events.popularEvents.length > 0 && (
-              <div style={{ marginTop: '24px' }}>
-                <h3 style={{ marginBottom: '16px', fontSize: '18px', fontWeight: 600 }}>Most Popular Events</h3>
-                <table className="dashboard-table">
-                  <thead>
-                    <tr>
-                      <th>Event Name</th>
-                      <th>Guests</th>
-                      <th>Capacity</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {analytics.events.popularEvents.map((event) => (
-                      <tr key={event.eventId}>
-                        <td>{event.name}</td>
-                        <td>{event.guestCount}</td>
-                        <td>{event.capacity || 'Unlimited'}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* Promotion Analytics */}
-        {analytics?.promotions && (
-          <div className="dashboard-section">
-            <div className="dashboard-section-header">Promotion Analytics</div>
-            <div className="dashboard-grid">
-              <AnalyticsCard
-                title="Active Promotions"
-                value={analytics.promotions.active || 0}
-                subtitle={`Total: ${analytics.promotions.total || 0}`}
-              />
-              <AnalyticsCard
-                title="Automatic Promotions"
-                value={analytics.promotions.typeBreakdown?.automatic || 0}
-                subtitle={`One-time: ${analytics.promotions.typeBreakdown?.onetime || 0}`}
-              />
-              <AnalyticsCard
-                title="Total Points Awarded"
-                value={analytics.promotions.totalPointsAwarded || 0}
-              />
-            </div>
-            {analytics.promotions.effectivePromotions && analytics.promotions.effectivePromotions.length > 0 && (
-              <div style={{ marginTop: '24px' }}>
-                <h3 style={{ marginBottom: '16px', fontSize: '18px', fontWeight: 600 }}>Most Effective Promotions</h3>
-                <table className="dashboard-table">
-                  <thead>
-                    <tr>
-                      <th>Promotion Name</th>
-                      <th>Type</th>
-                      <th>Usage Count</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {analytics.promotions.effectivePromotions.map((promo) => (
-                      <tr key={promo.promotionId}>
-                        <td>{promo.name}</td>
-                        <td>
-                          <span className={`dashboard-badge ${
-                            promo.type === 'automatic' ? 'dashboard-badge-primary' : 'dashboard-badge-secondary'
-                          }`}>
-                            {promo.type}
-                          </span>
-                        </td>
-                        <td>{promo.usageCount}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* Financial Insights */}
-        {analytics?.financial && (
-          <div className="dashboard-section">
-            <div className="dashboard-section-header">Financial Insights</div>
-            <div className="dashboard-grid">
-              <AnalyticsCard
-                title="Total Spent This Week"
-                value={`$${(analytics.financial.totalSpent?.week || 0).toFixed(2)}`}
-                subtitle={`Month: $${(analytics.financial.totalSpent?.month || 0).toFixed(2)}`}
-              />
-              <AnalyticsCard
-                title="Average Spending per Transaction"
-                value={`$${(analytics.financial.averageSpendingPerTransaction || 0).toFixed(2)}`}
-              />
-              <AnalyticsCard
-                title="Points per Dollar Ratio"
-                value={analytics.financial.pointsPerDollarRatio || 0}
-              />
-            </div>
           </div>
         )}
 
@@ -1052,6 +935,301 @@ const Dashboard = () => {
             )}
           </div>
         </div>
+
+        {/* User Analytics */}
+        {analytics?.users && (
+          <div className="dashboard-section">
+            <div 
+              className="dashboard-section-header dashboard-section-header-collapsible" 
+              onClick={() => toggleSection('userAnalytics')}
+              style={{ cursor: 'pointer', userSelect: 'none' }}
+            >
+              <span>User Analytics</span>
+              <span style={{ float: 'right', transition: 'transform 0.3s ease', transform: collapsedSections.userAnalytics ? 'rotate(-90deg)' : 'rotate(0deg)' }}>
+                ▼
+              </span>
+            </div>
+            {!collapsedSections.userAnalytics && (
+              <>
+                <div className="dashboard-grid">
+              <AnalyticsCard
+                title="Verified Users"
+                value={analytics.users.verified?.verified || 0}
+                subtitle={`Unverified: ${analytics.users.verified?.unverified || 0}`}
+              />
+              <AnalyticsCard
+                title="Suspicious Users"
+                value={analytics.users.suspicious || 0}
+              />
+              <AnalyticsCard
+                title="New Users This Month"
+                value={analytics.users.newUsers?.month || 0}
+                subtitle={`Week: ${analytics.users.newUsers?.week || 0}`}
+              />
+            </div>
+            {analytics.users.topUsersByPoints && analytics.users.topUsersByPoints.length > 0 && (
+              <div style={{ marginTop: '24px' }}>
+                <h3 style={{ marginBottom: '16px', fontSize: '18px', fontWeight: 600 }}>Top 5 Users by Points</h3>
+                <table className="dashboard-table">
+                  <thead>
+                    <tr>
+                      <th>Name</th>
+                      <th>UTORid</th>
+                      <th>Points</th>
+                      <th>Status</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {analytics.users.topUsersByPoints.slice(0, 5).map((u) => (
+                      <tr key={u.id}>
+                        <td>{u.name}</td>
+                        <td>{u.utorid}</td>
+                        <td>{u.points}</td>
+                        <td>
+                          {u.verified ? (
+                            <span className="dashboard-badge dashboard-badge-success">Verified</span>
+                          ) : (
+                            <span className="dashboard-badge dashboard-badge-warning">Unverified</span>
+                          )}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+            {analytics.users.topUsersByTransactionCount && analytics.users.topUsersByTransactionCount.length > 0 && (
+              <div style={{ marginTop: '24px' }}>
+                <h3 style={{ marginBottom: '16px', fontSize: '18px', fontWeight: 600 }}>Top 5 Users by Transaction Count</h3>
+                <table className="dashboard-table">
+                  <thead>
+                    <tr>
+                      <th>Name</th>
+                      <th>UTORid</th>
+                      <th>Transactions</th>
+                      <th>Points</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {analytics.users.topUsersByTransactionCount.slice(0, 5).map((u) => (
+                      <tr key={u.userId}>
+                        <td>{u.name}</td>
+                        <td>{u.utorid}</td>
+                        <td>{u.transactionCount}</td>
+                        <td>{u.points}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+              </>
+            )}
+          </div>
+        )}
+
+        {/* Transaction Analytics */}
+        {analytics?.transactions && (
+          <div className="dashboard-section">
+            <div 
+              className="dashboard-section-header dashboard-section-header-collapsible" 
+              onClick={() => toggleSection('transactionAnalytics')}
+              style={{ cursor: 'pointer', userSelect: 'none' }}
+            >
+              <span>Transaction Analytics</span>
+              <span style={{ float: 'right', transition: 'transform 0.3s ease', transform: collapsedSections.transactionAnalytics ? 'rotate(-90deg)' : 'rotate(0deg)' }}>
+                ▼
+              </span>
+            </div>
+            {!collapsedSections.transactionAnalytics && (
+              <>
+                <div className="transaction-analytics-layout">
+                  <div className="transaction-analytics-cards">
+                    <AnalyticsCard
+                      title="Transactions Today"
+                      value={analytics.transactions.volume?.today || 0}
+                      subtitle={`${analytics.transactions.volume?.week || 0} this week, ${analytics.transactions.volume?.month || 0} this month`}
+                    />
+                    <AnalyticsCard
+                      title="Suspicious Transactions"
+                      value={analytics.transactions.suspicious || 0}
+                    />
+                    <AnalyticsCard
+                      title="Average Transaction Value"
+                      value={`${analytics.transactions.averageTransactionValue || 0} pts`}
+                    />
+                  </div>
+                  {analytics.transactions.typeBreakdown && (
+                    <div className="transaction-analytics-chart" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%' }}>
+                      <p className="analytics-chart-caption" style={{ marginTop: 0, marginBottom: '16px', textAlign: 'center', width: '100%' }}>
+                        Transaction Types Distribution
+                      </p>
+                      <SimpleChart
+                        type="pie"
+                        data={Object.entries(analytics.transactions.typeBreakdown).map(([name, value]) => ({ name, value }))}
+                        dataKey="value"
+                        xKey="name"
+                        height={300}
+                      />
+                    </div>
+                  )}
+                </div>
+                {analytics.transactions.volumeTrend && analytics.transactions.volumeTrend.length > 0 && (
+                  <div className="analytics-chart-container">
+                    <SimpleChart
+                      type="line"
+                      data={analytics.transactions.volumeTrend}
+                      dataKey="count"
+                      xKey="date"
+                      height={300}
+                    />
+                    <p className="analytics-chart-caption">
+                      Daily Transaction Volume
+                    </p>
+                  </div>
+                )}
+                {analytics.transactions.pointsFlow && analytics.transactions.pointsFlow.length > 0 && (
+                  <div className="analytics-chart-container" style={{ marginTop: '24px' }}>
+                    <SimpleChart
+                      type="line"
+                      data={analytics.transactions.pointsFlow}
+                      dataKey={['earned', 'spent']}
+                      xKey="date"
+                      height={300}
+                    />
+                    <p className="analytics-chart-caption">
+                      Daily Earnings vs Spendings
+                    </p>
+                  </div>
+                )}
+              </>
+            )}
+          </div>
+        )}
+
+        {/* Event Analytics */}
+        {analytics?.events && (
+          <div className="dashboard-section">
+            <div 
+              className="dashboard-section-header dashboard-section-header-collapsible" 
+              onClick={() => toggleSection('eventAnalytics')}
+              style={{ cursor: 'pointer', userSelect: 'none' }}
+            >
+              <span>Event Analytics</span>
+              <span style={{ float: 'right', transition: 'transform 0.3s ease', transform: collapsedSections.eventAnalytics ? 'rotate(-90deg)' : 'rotate(0deg)' }}>
+                ▼
+              </span>
+            </div>
+            {!collapsedSections.eventAnalytics && (
+              <>
+                <div className="dashboard-grid">
+              <AnalyticsCard
+                title="Published Events"
+                value={analytics.events.published || 0}
+                subtitle={`Unpublished: ${analytics.events.unpublished || 0}`}
+              />
+              <AnalyticsCard
+                title="Upcoming Events"
+                value={analytics.events.upcoming || 0}
+              />
+              <AnalyticsCard
+                title="Total Points Allocated"
+                value={analytics.events.totalPointsAllocated || 0}
+                subtitle={`Remaining: ${analytics.events.totalPointsRemaining || 0}`}
+              />
+            </div>
+            {analytics.events.popularEvents && analytics.events.popularEvents.length > 0 && (
+              <div style={{ marginTop: '24px' }}>
+                <h3 style={{ marginBottom: '16px', fontSize: '18px', fontWeight: 600 }}>Most Popular Events</h3>
+                <table className="dashboard-table">
+                  <thead>
+                    <tr>
+                      <th>Event Name</th>
+                      <th>Guests</th>
+                      <th>Capacity</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {analytics.events.popularEvents.map((event) => (
+                      <tr key={event.eventId}>
+                        <td>{event.name}</td>
+                        <td>{event.guestCount}</td>
+                        <td>{event.capacity || 'Unlimited'}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+              </>
+            )}
+          </div>
+        )}
+
+        {/* Promotion Analytics */}
+        {analytics?.promotions && (
+          <div className="dashboard-section">
+            <div 
+              className="dashboard-section-header dashboard-section-header-collapsible" 
+              onClick={() => toggleSection('promotionAnalytics')}
+              style={{ cursor: 'pointer', userSelect: 'none' }}
+            >
+              <span>Promotion Analytics</span>
+              <span style={{ float: 'right', transition: 'transform 0.3s ease', transform: collapsedSections.promotionAnalytics ? 'rotate(-90deg)' : 'rotate(0deg)' }}>
+                ▼
+              </span>
+            </div>
+            {!collapsedSections.promotionAnalytics && (
+              <>
+                <div className="dashboard-grid">
+              <AnalyticsCard
+                title="Active Promotions"
+                value={analytics.promotions.active || 0}
+                subtitle={`Total: ${analytics.promotions.total || 0}`}
+              />
+              <AnalyticsCard
+                title="Automatic Promotions"
+                value={analytics.promotions.typeBreakdown?.automatic || 0}
+                subtitle={`One-time: ${analytics.promotions.typeBreakdown?.onetime || 0}`}
+              />
+              <AnalyticsCard
+                title="Total Points Awarded"
+                value={analytics.promotions.totalPointsAwarded || 0}
+              />
+            </div>
+            {analytics.promotions.effectivePromotions && analytics.promotions.effectivePromotions.length > 0 && (
+              <div style={{ marginTop: '24px' }}>
+                <h3 style={{ marginBottom: '16px', fontSize: '18px', fontWeight: 600 }}>Most Effective Promotions</h3>
+                <table className="dashboard-table">
+                  <thead>
+                    <tr>
+                      <th>Promotion Name</th>
+                      <th>Type</th>
+                      <th>Usage Count</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {analytics.promotions.effectivePromotions.map((promo) => (
+                      <tr key={promo.promotionId}>
+                        <td>{promo.name}</td>
+                        <td>
+                          <span className={`dashboard-badge ${
+                            promo.type === 'automatic' ? 'dashboard-badge-primary' : 'dashboard-badge-secondary'
+                          }`}>
+                            {promo.type}
+                          </span>
+                        </td>
+                        <td>{promo.usageCount}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+              </>
+            )}
+          </div>
+        )}
       </div>
     );
   }
@@ -1066,4 +1244,6 @@ const Dashboard = () => {
 };
 
 export default Dashboard;
+
+
 

@@ -1,6 +1,6 @@
 // Create transaction form (for users)
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { transactionAPI } from "../services/api";
 import { useAuth } from "../contexts/AuthContext";
 import '../pages/CreateTransaction.css';
@@ -8,9 +8,11 @@ import '../pages/CreateTransaction.css';
 const UserCreateTx = () => {
   const { user, updateLocalUser } = useAuth()
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const defaultType = searchParams.get('type') === 'transfer' ? 'transfer' : 'redemption';
   const [formData, setFormData] = useState({
       userId: '',
-      type: 'redemption',
+      type: defaultType,
       amount: '',
       remark: ''
   })
