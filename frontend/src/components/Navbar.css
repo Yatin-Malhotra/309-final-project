@@ -53,7 +53,8 @@
   border-radius: 8px;
   box-shadow: 0 4px 12px var(--shadow-hover), 0 2px 4px var(--shadow);
   min-width: 200px;
-  overflow: hidden;
+  overflow-x: visible;
+  overflow-y: auto;
   z-index: 1000;
   border: 1px solid var(--border-light);
   transition: background-color 0.3s ease;
@@ -189,5 +190,122 @@
 
 .theme-switch input:checked + .theme-slider:before {
   transform: translateX(20px);
+}
+
+/* Role dropdown wrapper */
+.navbar-dropdown-role-wrapper {
+  position: relative;
+}
+
+.navbar-dropdown-role {
+  position: relative;
+}
+
+.navbar-dropdown-role.active {
+  background-color: var(--bg-hover) !important;
+}
+
+.navbar-dropdown-role .chevron {
+  margin-left: auto;
+  transition: transform 0.2s ease;
+  color: var(--text-secondary);
+}
+
+.navbar-dropdown-role .chevron.rotated {
+  transform: rotate(-90deg);
+}
+
+/* Role menu popout */
+.navbar-role-menu {
+  position: fixed;
+  background: var(--bg-secondary);
+  border-radius: 8px;
+  box-shadow: 0 4px 12px var(--shadow-hover), 0 2px 4px var(--shadow);
+  min-width: 160px;
+  overflow: hidden;
+  z-index: 1002;
+  border: 1px solid var(--border-light);
+  animation: slideInRight 0.2s ease-out;
+  padding: 4px;
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.navbar-role-menu-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 10px 14px;
+  color: var(--text-primary);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: all 0.15s ease;
+  position: relative;
+}
+
+.navbar-role-menu-item:hover {
+  background-color: var(--bg-hover);
+  color: var(--text-primary);
+}
+
+.navbar-role-menu-item.active {
+  background-color: var(--primary);
+  color: white;
+  font-weight: 600;
+}
+
+.navbar-role-menu-item.active:hover {
+  background-color: var(--primary);
+  opacity: 0.9;
+}
+
+.navbar-role-menu-item .role-name {
+  flex: 1;
+  white-space: nowrap;
+}
+
+.navbar-role-menu-item.active svg {
+  color: white;
+  flex-shrink: 0;
+  width: 14px;
+  height: 14px;
+  stroke-width: 3;
+}
+
+/* Arrow connector between dropdown and role menu */
+.navbar-role-menu::before {
+  content: '';
+  position: absolute;
+  left: -6px;
+  top: 20px;
+  width: 0;
+  height: 0;
+  border-top: 6px solid transparent;
+  border-bottom: 6px solid transparent;
+  border-right: 6px solid var(--border-light);
+}
+
+.navbar-role-menu::after {
+  content: '';
+  position: absolute;
+  left: -5px;
+  top: 20px;
+  width: 0;
+  height: 0;
+  border-top: 6px solid transparent;
+  border-bottom: 6px solid transparent;
+  border-right: 6px solid var(--bg-secondary);
 }
 

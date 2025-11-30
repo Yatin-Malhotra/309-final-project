@@ -6,7 +6,7 @@ import { Link } from 'react-router-dom';
 import './Dashboard.css';
 
 const Dashboard = () => {
-  const { user, hasRole } = useAuth();
+  const { user, hasRole, currentRole } = useAuth();
   const [stats, setStats] = useState({
     totalPoints: 0,
     recentTransactions: [],
@@ -23,10 +23,15 @@ const Dashboard = () => {
 
   useEffect(() => {
     const loadDashboard = async () => {
+      if (!user || !currentRole) {
+        setLoading(false);
+        return;
+      }
+      
+      setLoading(true);
       try {
-        if (user) {
-          const userRole = user.role;
-
+        const userRole = currentRole;
+        console.log('Loading dashboard for role:', userRole)
           // For regular users: show points and transactions
           if (userRole === 'regular') {
             const points = user.points || 0;
@@ -39,6 +44,13 @@ const Dashboard = () => {
               totalPoints: points,
               recentTransactions: txResponse.data.results || [],
               pendingRedemptions: 0,
+              // Ensure manager stats are initialized
+              totalEvents: 0,
+              totalPromotions: 0,
+              totalUsers: 0,
+              totalTransactions: 0,
+              recentEvents: [],
+              recentPromotions: [],
             });
           }
           // For cashiers: show transaction creation and redemption processing
@@ -61,10 +73,17 @@ const Dashboard = () => {
               totalPoints: points,
               recentTransactions: txResponse.data.results || [],
               pendingRedemptions: pendingCount,
+              // Ensure manager stats are initialized
+              totalEvents: 0,
+              totalPromotions: 0,
+              totalUsers: 0,
+              totalTransactions: 0,
+              recentEvents: [],
+              recentPromotions: [],
             });
           }
           // For managers and superusers: show overview of events, promotions, and users
-          else if (hasRole('manager')) {
+          else if (userRole === 'manager' || userRole === 'superuser') {
             // Get events overview
             const eventsResponse = await eventAPI.getEvents({ limit: 5, page: 1 });
             const allEventsResponse = await eventAPI.getEvents({ limit: 1 });
@@ -90,7 +109,6 @@ const Dashboard = () => {
               recentPromotions: promotionsResponse.data.results?.slice(0, 5) || [],
             });
           }
-        }
       } catch (error) {
         console.error('Failed to load dashboard:', error);
       } finally {
@@ -99,13 +117,17 @@ const Dashboard = () => {
     };
 
     loadDashboard();
-  }, [user, hasRole]);
+  }, [user?.id, currentRole]); // Only depend on user.id and currentRole to avoid unnecessary reloads
 
   if (loading) {
     return <div className="dashboard-loading">Loading dashboard...</div>;
   }
 
-  const userRole = user?.role;
+  const userRole = currentRole;
+
+  if (!user || !currentRole) {
+    return <div className="dashboard-page"><h1>Loading dashboard...</h1></div>;
+  }
 
   // Regular User Dashboard: Points balance and recent transactions
   if (userRole === 'regular') {
@@ -262,7 +284,7 @@ const Dashboard = () => {
   }
 
   // Manager/Superuser Dashboard: Overview of events, promotions, and user management
-  if (hasRole('manager')) {
+  if (userRole === 'manager' || userRole === 'superuser') {
     const formatDate = (dateString) => {
       if (!dateString) return '';
       return new Date(dateString).toLocaleString();
@@ -313,7 +335,7 @@ const Dashboard = () => {
         <div className="dashboard-two-column">
           <div className="dashboard-section">
             <div className="dashboard-section-header">Recent Events</div>
-            {stats.recentEvents.length === 0 ? (
+            {!stats.recentEvents || stats.recentEvents.length === 0 ? (
               <div className="dashboard-empty-state">No events found</div>
             ) : (
               <>
@@ -348,7 +370,7 @@ const Dashboard = () => {
 
           <div className="dashboard-section">
             <div className="dashboard-section-header">Recent Promotions</div>
-            {stats.recentPromotions.length === 0 ? (
+            {!stats.recentPromotions || stats.recentPromotions.length === 0 ? (
               <div className="dashboard-empty-state">No promotions found</div>
             ) : (
               <>

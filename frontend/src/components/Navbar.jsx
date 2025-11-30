@@ -6,27 +6,53 @@ import { useTheme } from '../contexts/ThemeContext';
 import './Navbar.css';
 
 const Navbar = () => {
-  const { user, logout, hasRole } = useAuth();
+  const { user, logout, hasRole, allowedRoles, currentRole, setCurrentRole } = useAuth();
   const { theme, toggleTheme } = useTheme();
   const navigate = useNavigate();
   const [dropdownOpen, setDropdownOpen] = useState(false);
+
+  const [roleMenuOpen, setRoleMenuOpen] = useState(false);
+
   const dropdownRef = useRef(null);
+  const roleMenuRef = useRef(null);
+
+  const switchRole = (newRole) => {
+    setCurrentRole(newRole)
+    navigate('/dashboard')
+  };
 
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+      const clickedInsideDropdown = dropdownRef.current?.contains(event.target);
+      const clickedInsideRoleMenu = roleMenuRef.current?.querySelector('.navbar-role-menu')?.contains(event.target);
+      
+      if (!clickedInsideDropdown && !clickedInsideRoleMenu) {
         setDropdownOpen(false);
+        setRoleMenuOpen(false);
       }
     };
 
-    if (dropdownOpen) {
+    if (dropdownOpen || roleMenuOpen) {
       document.addEventListener('mousedown', handleClickOutside);
     }
 
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
-  }, [dropdownOpen]);
+  }, [dropdownOpen, roleMenuOpen]);
+
+  // Position the role menu dynamically
+  useEffect(() => {
+    if (roleMenuOpen && roleMenuRef.current) {
+      const roleItem = roleMenuRef.current.querySelector('.navbar-dropdown-role');
+      const roleMenu = roleMenuRef.current.querySelector('.navbar-role-menu');
+      if (roleItem && roleMenu) {
+        const rect = roleItem.getBoundingClientRect();
+        roleMenu.style.left = `${rect.right + 8}px`;
+        roleMenu.style.top = `${rect.top}px`;
+      }
+    }
+  }, [roleMenuOpen]);
 
   const handleLogout = () => {
     logout();
@@ -54,15 +80,17 @@ const Navbar = () => {
         <Link to="/" className="navbar-brand">
           CSSU Rewards
         </Link>
+
         {user ? (
           <div className="navbar-links">
             <Link to="/dashboard">Dashboard</Link>
-            {<Link to="/transactions">Transactions</Link>}
+            <Link to="/transactions">Transactions</Link>
             {hasRole('manager') && <Link to="/users">Users</Link>}
-            {<Link to="/events">Events</Link>}
-            {<Link to="/promotions">Promotions</Link>}
+            <Link to="/events">Events</Link>
+            <Link to="/promotions">Promotions</Link>
+
             <div className="navbar-user" ref={dropdownRef}>
-              <div 
+              <div
                 className="user-info-clickable"
                 onClick={() => setDropdownOpen(!dropdownOpen)}
               >
@@ -75,12 +103,16 @@ const Navbar = () => {
                 </div>
                 <span>{user.name}</span>
               </div>
+
               {dropdownOpen && (
                 <div className="navbar-dropdown">
-                  <Link 
-                    to="/profile" 
+                  <Link
+                    to="/profile"
                     className="navbar-dropdown-item"
-                    onClick={() => setDropdownOpen(false)}
+                    onClick={() => {
+                      setDropdownOpen(false);
+                      setRoleMenuOpen(false);
+                    }}
                   >
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                       <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
@@ -88,16 +120,60 @@ const Navbar = () => {
                     </svg>
                     <span>My Profile</span>
                   </Link>
-                  <div className="navbar-dropdown-item navbar-dropdown-item-disabled">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                      <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
-                      <circle cx="9" cy="7" r="4"></circle>
-                      <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
-                      <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
-                    </svg>
-                    <span>Role: {capitalizeRole(user.role)}</span>
+                  <div className="navbar-dropdown-role-wrapper" ref={roleMenuRef}>
+                    <div
+                      className={`navbar-dropdown-item navbar-dropdown-role ${roleMenuOpen ? 'active' : ''}`}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setRoleMenuOpen(!roleMenuOpen);
+                      }}
+                    >
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="9" cy="7" r="4"></circle>
+                        <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                        <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                      </svg>
+
+                      <span>Role: {capitalizeRole(currentRole)}</span>
+
+                      <svg 
+                        width="12" 
+                        height="12" 
+                        viewBox="0 0 24 24" 
+                        className={`chevron ${roleMenuOpen ? 'rotated' : ''}`}
+                      >
+                        <polyline points="9 18 15 12 9 6" />
+                      </svg>
+                    </div>
+                    {roleMenuOpen && (
+                      <div 
+                        className="navbar-role-menu"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        {allowedRoles.map((r) => (
+                          <div
+                            key={r}
+                            className={`navbar-role-menu-item ${currentRole === r ? 'active' : ''}`}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              switchRole(r);
+                              setRoleMenuOpen(false);
+                              setDropdownOpen(false);
+                            }}
+                          >
+                            <span className="role-name">{capitalizeRole(r)}</span>
+                            {currentRole === r && (
+                              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
+                                <polyline points="20 6 9 17 4 12"></polyline>
+                              </svg>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </div>
-                  <div 
+                  <div
                     className="navbar-dropdown-item navbar-dropdown-item-theme"
                     onClick={(e) => e.stopPropagation()}
                   >
@@ -128,7 +204,7 @@ const Navbar = () => {
                       <span className="theme-slider"></span>
                     </label>
                   </div>
-                  <div 
+                  <div
                     className="navbar-dropdown-item navbar-dropdown-item-logout"
                     onClick={handleLogout}
                   >
@@ -154,4 +230,3 @@ const Navbar = () => {
 };
 
 export default Navbar;
-
