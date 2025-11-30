@@ -2037,6 +2037,16 @@ app.get('/events/:eventId', async (req, res, next) => {
             response.guests = event.guests.map(g => ({ id: g.user.id, utorid: g.user.utorid, name: g.user.name }));
         } else {
             response.numGuests = event.guests.length;
+            // Add isRegistered for regular users
+            if (authUser && authUser.id) {
+                const userId = Number(authUser.id);
+                response.isRegistered = event.guests.some(g => {
+                    const guestUserId = g.userId !== undefined ? g.userId : (g.user && g.user.id);
+                    return Number(guestUserId) === userId;
+                });
+            } else {
+                response.isRegistered = false;
+            }
         }
         
         res.json(response);

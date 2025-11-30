@@ -123,6 +123,17 @@
   transform: none;
 }
 
+.event-detail-already-registered {
+  padding: 12px 24px;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-primary);
+  background-color: rgba(79, 124, 130, 0.1);
+  border: 1px solid rgba(79, 124, 130, 0.3);
+  border-radius: 8px;
+  display: inline-block;
+}
+
 .event-detail-list {
   list-style: none;
   padding: 0;

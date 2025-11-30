@@ -59,6 +59,10 @@ const EventDetail = () => {
 
   const isRegistered = () => {
     if (!event || !user) return false;
+    // Use isRegistered property from backend if available, otherwise check guests array
+    if (event.isRegistered !== undefined) {
+      return event.isRegistered;
+    }
     return event.guests?.some((g) => g.id === user.id);
   };
 
@@ -143,13 +147,18 @@ const EventDetail = () => {
           {user && !isOrganizer() && !isEventPast() && (
             <>
               {isRegistered() ? (
-                <button
-                  onClick={handleUnregister}
-                  className="btn btn-danger"
-                  disabled={actionLoading}
-                >
-                  {actionLoading ? 'Unregistering...' : 'Unregister'}
-                </button>
+                // For regular users, show "Already Registered" text instead of Unregister button
+                !hasRole('cashier') ? (
+                  <span className="event-detail-already-registered">Already Registered</span>
+                ) : (
+                  <button
+                    onClick={handleUnregister}
+                    className="btn btn-danger"
+                    disabled={actionLoading}
+                  >
+                    {actionLoading ? 'Unregistering...' : 'Unregister'}
+                  </button>
+                )
               ) : (
                 <button
                   onClick={handleRegister}
