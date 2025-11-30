@@ -1,8 +1,8 @@
 // Create/Edit event page (for managers)
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate, useParams, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { eventAPI } from '../services/api';
+import { eventAPI, userAPI } from '../services/api';
 import './CreateEvent.css';
 
 const CreateEvent = () => {
@@ -25,6 +25,15 @@ const CreateEvent = () => {
   const [loading, setLoading] = useState(false);
   const [loadingEvent, setLoadingEvent] = useState(isEditMode);
   const [isOrganizer, setIsOrganizer] = useState(false);
+  const [organizerIds, setOrganizerIds] = useState([]);
+  const [originalOrganizerIds, setOriginalOrganizerIds] = useState([]);
+  const [organizerUsers, setOrganizerUsers] = useState([]); // Store organizer user objects for display
+  const [users, setUsers] = useState([]);
+  const [userSearch, setUserSearch] = useState('');
+  const [loadingUsers, setLoadingUsers] = useState(false);
+  const [showOrganizerDropdown, setShowOrganizerDropdown] = useState(false);
+  const organizerInputRef = useRef(null);
+  const organizerDropdownRef = useRef(null);
 
   const loadEvent = useCallback(async () => {
     if (!eventId || !user) return;
@@ -62,9 +71,23 @@ const CreateEvent = () => {
         startTime: formatDateTimeLocal(event.startTime),
         endTime: formatDateTimeLocal(event.endTime),
         capacity: event.capacity ? String(event.capacity) : '',
-        points: event.points ? String(event.points) : '',
+        points: event.pointsAllocated ? String(event.pointsAllocated) : '',
         published: event.published || false,
       });
+      
+      // Load existing organizers
+      if (event.organizers) {
+        const orgIds = event.organizers.map(o => o.id);
+        // Store organizer user objects for display (convert from {id, utorid, name} to user format)
+        const orgUsers = event.organizers.map(o => ({
+          id: o.id,
+          utorid: o.utorid,
+          name: o.name
+        }));
+        setOrganizerIds(orgIds);
+        setOriginalOrganizerIds(orgIds);
+        setOrganizerUsers(orgUsers);
+      }
     } catch (err) {
       setError(err.response?.data?.error || 'Failed to load event.');
     } finally {
@@ -78,6 +101,68 @@ const CreateEvent = () => {
     }
   }, [isEditMode, loadEvent]);
 
+  const loadUsers = useCallback(async () => {
+    if (!hasRole('manager') && !hasRole('superuser')) return;
+    
+    setLoadingUsers(true);
+    try {
+      // Load more users for client-side filtering (like EventDetail)
+      const params = { limit: 100 };
+      const response = await userAPI.getUsers(params);
+      // Filter out users who are already selected as organizers
+      const filteredUsers = (response.data.results || []).filter(
+        u => !organizerIds.includes(u.id)
+      );
+      setUsers(filteredUsers);
+    } catch (err) {
+      // Silently fail - users list is optional
+      console.error('Failed to load users:', err);
+    } finally {
+      setLoadingUsers(false);
+    }
+  }, [hasRole, organizerIds]);
+
+  // Load users for organizer selection (only for managers/superusers)
+  useEffect(() => {
+    if (hasRole('manager') || hasRole('superuser')) {
+      loadUsers();
+    }
+  }, [hasRole, loadUsers]);
+
+  // Filter users based on search input (client-side filtering)
+  const filteredOrganizerUsers = userSearch.trim()
+    ? users.filter(u => 
+        u.name.toLowerCase().includes(userSearch.toLowerCase()) ||
+        u.utorid.toLowerCase().includes(userSearch.toLowerCase())
+      )
+    : users;
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (showOrganizerDropdown && 
+          organizerInputRef.current && 
+          organizerDropdownRef.current &&
+          !organizerInputRef.current.contains(event.target) &&
+          !organizerDropdownRef.current.contains(event.target)) {
+        setShowOrganizerDropdown(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [showOrganizerDropdown]);
+
+  const handleOrganizerSelect = (user) => {
+    if (!organizerIds.includes(user.id)) {
+      setOrganizerIds([...organizerIds, user.id]);
+      // Add to organizerUsers for display
+      setOrganizerUsers([...organizerUsers, user]);
+    }
+    setUserSearch('');
+    setShowOrganizerDropdown(false);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
@@ -90,12 +175,21 @@ const CreateEvent = () => {
         location: formData.location,
         startTime: new Date(formData.startTime).toISOString(),
         endTime: new Date(formData.endTime).toISOString(),
-        points: parseInt(formData.points),
-        published: formData.published,
       };
 
       if (formData.capacity) {
         data.capacity = parseInt(formData.capacity);
+      }
+
+      // Only include points and published for managers/superusers
+      if (hasRole('manager') || hasRole('superuser')) {
+        data.points = parseInt(formData.points);
+        data.published = formData.published;
+        // Only send organizerIds if they've changed (to avoid unnecessary delete/recreate)
+        const organizerIdsChanged = JSON.stringify([...organizerIds].sort()) !== JSON.stringify([...originalOrganizerIds].sort());
+        if (organizerIdsChanged) {
+          data.organizerIds = organizerIds;
+        }
       }
 
       if (isEditMode) {
@@ -208,22 +302,120 @@ const CreateEvent = () => {
                 }
               />
             </div>
-            <div className="form-group">
-              <label htmlFor="points">Points to Allocate *</label>
-              <input
-                type="number"
-                id="points"
-                min="1"
-                value={formData.points}
-                onChange={(e) =>
-                  setFormData({ ...formData, points: e.target.value })
-                }
-                required
-              />
-            </div>
+            {(hasRole('manager') || hasRole('superuser')) && (
+              <div className="form-group">
+                <label htmlFor="points">Points to Allocate *</label>
+                <input
+                  type="number"
+                  id="points"
+                  min="1"
+                  value={formData.points}
+                  onChange={(e) =>
+                    setFormData({ ...formData, points: e.target.value })
+                  }
+                  required={!isEditMode}
+                />
+              </div>
+            )}
           </div>
           
-          {(hasRole('manager') || isOrganizer) && (
+          {(hasRole('manager') || hasRole('superuser')) && (
+            <div className="form-group">
+              <label htmlFor="organizers">Organizers (optional)</label>
+              <div className="form-group" style={{ position: 'relative', marginBottom: '8px' }}>
+                <input
+                  ref={organizerInputRef}
+                  type="text"
+                  placeholder="Search users by name or UTORid..."
+                  value={userSearch}
+                  onChange={(e) => {
+                    setUserSearch(e.target.value);
+                    setShowOrganizerDropdown(true);
+                  }}
+                  onFocus={() => {
+                    if (filteredOrganizerUsers.length > 0) {
+                      setShowOrganizerDropdown(true);
+                    }
+                  }}
+                  disabled={loadingUsers}
+                  className="event-detail-searchable-input"
+                  style={{ width: '100%', padding: '8px' }}
+                />
+                {showOrganizerDropdown && filteredOrganizerUsers.length > 0 && (
+                  <div 
+                    ref={organizerDropdownRef}
+                    className="event-detail-searchable-dropdown"
+                  >
+                    {filteredOrganizerUsers.map((u) => (
+                      <div
+                        key={u.id}
+                        className="event-detail-dropdown-item"
+                        onClick={() => handleOrganizerSelect(u)}
+                      >
+                        {u.name} ({u.utorid})
+                      </div>
+                    ))}
+                  </div>
+                )}
+                {showOrganizerDropdown && filteredOrganizerUsers.length === 0 && userSearch.trim() && (
+                  <div 
+                    ref={organizerDropdownRef}
+                    className="event-detail-searchable-dropdown"
+                  >
+                    <div className="event-detail-dropdown-item event-detail-dropdown-empty">
+                      No users found
+                    </div>
+                  </div>
+                )}
+                {loadingUsers && (
+                  <div className="event-detail-dropdown-loading">Loading users...</div>
+                )}
+              </div>
+              {organizerIds.length > 0 && (
+                <div style={{ marginTop: '12px' }}>
+                  {organizerIds.map((userId) => {
+                    const user = organizerUsers.find(u => u.id === userId);
+                    return (
+                      <div
+                        key={userId}
+                        style={{
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          alignItems: 'center',
+                          padding: '8px',
+                          marginBottom: '4px',
+                          backgroundColor: '#f5f5f5',
+                          borderRadius: '4px',
+                        }}
+                      >
+                        <span>
+                          {user ? `${user.name} (${user.utorid})` : `User #${userId}`}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setOrganizerIds(organizerIds.filter(id => id !== userId));
+                            setOrganizerUsers(organizerUsers.filter(u => u.id !== userId));
+                            // Reload users to include the removed user in the list
+                            if (hasRole('manager') || hasRole('superuser')) {
+                              loadUsers();
+                            }
+                          }}
+                          className="btn btn-secondary"
+                          style={{ padding: '4px 8px', fontSize: '12px' }}
+                        >
+                          Remove
+                        </button>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+              <small>Select users who will organize this event.</small>
+            </div>
+          )}
+
+          {(hasRole('manager') || hasRole('superuser')) && (
             <div className="form-group">
               <label>Published Status</label>
               <div className="switch-container">

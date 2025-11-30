@@ -113,20 +113,22 @@ export const eventAPI = {
   getEvent: (eventId) => api.get(`/events/${eventId}`),
   updateEvent: (eventId, data) => api.patch(`/events/${eventId}`, data),
   deleteEvent: (eventId) => api.delete(`/events/${eventId}`),
-  addOrganizer: (eventId, userId) =>
-    api.post(`/events/${eventId}/organizers`, { userId }),
+  addOrganizer: (eventId, utorid) =>
+    api.post(`/events/${eventId}/organizers`, { utorid }),
   removeOrganizer: (eventId, userId) =>
     api.delete(`/events/${eventId}/organizers/${userId}`),
   registerForEvent: (eventId) =>
     api.post(`/events/${eventId}/guests/me`),
   unregisterFromEvent: (eventId) =>
     api.delete(`/events/${eventId}/guests/me`),
-  addGuest: (eventId, userId) =>
-    api.post(`/events/${eventId}/guests`, { userId }),
+  addGuest: (eventId, utorid) =>
+    api.post(`/events/${eventId}/guests`, { utorid }),
   removeGuest: (eventId, userId) =>
     api.delete(`/events/${eventId}/guests/${userId}`),
-  createEventTransaction: (eventId, userId) =>
-    api.post(`/events/${eventId}/transactions`, { userId }),
+  awardPointsToGuest: (eventId, utorid, amount) =>
+    api.post(`/events/${eventId}/transactions`, { type: 'event', utorid, amount }),
+  awardPointsToAllGuests: (eventId, amount) =>
+    api.post(`/events/${eventId}/transactions`, { type: 'event', amount }),
 };
 
 // Promotion endpoints

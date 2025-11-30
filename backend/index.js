@@ -160,7 +160,26 @@ const schemas = {
         startTime: z.string(),
         endTime: z.string(),
         capacity: z.number().positive().nullable().optional(),
-        points: z.number().positive().int()
+        points: z.number().positive().int(),
+        organizerIds: z.preprocess(
+            (val) => {
+                if (val === undefined || val === null) return undefined;
+                if (Array.isArray(val)) {
+                    return val.map(v => {
+                        if (typeof v === 'string') {
+                            const num = Number(v);
+                            return Number.isFinite(num) && Number.isInteger(num) ? num : v;
+                        }
+                        if (typeof v === 'number') {
+                            return Number.isFinite(v) && Number.isInteger(v) ? v : v;
+                        }
+                        return v;
+                    });
+                }
+                return val;
+            },
+            z.array(z.number().int().positive()).optional()
+        )
     }),
     updateEvent: z.object({
         name: z.preprocess(
@@ -213,6 +232,25 @@ const schemas = {
         published: z.preprocess(
             (val) => val === null ? undefined : val,
             z.boolean().optional()
+        ),
+        organizerIds: z.preprocess(
+            (val) => {
+                if (val === undefined || val === null) return undefined;
+                if (Array.isArray(val)) {
+                    return val.map(v => {
+                        if (typeof v === 'string') {
+                            const num = Number(v);
+                            return Number.isFinite(num) && Number.isInteger(num) ? num : v;
+                        }
+                        if (typeof v === 'number') {
+                            return Number.isFinite(v) && Number.isInteger(v) ? v : v;
+                        }
+                        return v;
+                    });
+                }
+                return val;
+            },
+            z.array(z.number().int().positive()).optional()
         )
     }),
     createPromotion: z.object({
@@ -1870,6 +1908,22 @@ app.post('/events', validate(schemas.createEvent), async (req, res, next) => {
             return res.status(401).json({ error: 'Unauthorized' });
         }
         
+        // Handle organizerIds if provided
+        const organizerIds = req.body.organizerIds || [];
+        let organizers = [];
+        
+        if (organizerIds.length > 0) {
+            // Validate that all user IDs exist
+            const users = await prisma.user.findMany({
+                where: { id: { in: organizerIds } },
+                select: { id: true }
+            });
+            
+            if (users.length !== organizerIds.length) {
+                return res.status(400).json({ error: 'One or more organizer user IDs are invalid' });
+            }
+        }
+        
         const event = await prisma.event.create({
             data: {
                 name, description, location,
@@ -1877,15 +1931,33 @@ app.post('/events', validate(schemas.createEvent), async (req, res, next) => {
                 capacity: capacity === undefined ? null : capacity,
                 pointsAllocated: points,
                 pointsRemain: points,
-                published: false
+                published: false,
+                organizers: organizerIds.length > 0 ? {
+                    create: organizerIds.map(userId => ({ userId }))
+                } : undefined
+            },
+            include: {
+                organizers: {
+                    include: {
+                        user: {
+                            select: { id: true, utorid: true, name: true }
+                        }
+                    }
+                }
             }
         });
+        
+        organizers = event.organizers.map(o => ({
+            id: o.user.id,
+            utorid: o.user.utorid,
+            name: o.user.name
+        }));
         
         res.status(201).json({
             id: event.id, name: event.name, description: event.description,
             location: event.location, startTime: event.startTime, endTime: event.endTime,
             capacity: event.capacity, pointsRemain: event.pointsRemain,
-            pointsAwarded: 0, published: event.published, organizers: [], guests: []
+            pointsAwarded: 0, published: event.published, organizers, guests: []
         });
     } catch (error) { next(error); }
 });
@@ -1898,6 +1970,11 @@ app.get('/events', optionalAuth, validateQuery(z.object({
     ended: z.string().optional(),
     showFull: z.string().optional(),
     published: z.string().optional(),
+    registeredUserName: z.string().optional(),
+    registeredUserLimitMin: z.string().optional(),
+    registeredUserLimitMax: z.string().optional(),
+    isFull: z.string().optional(),
+    registered: z.string().optional(),
     page: z.preprocess(
         (val) => (val === undefined || val === null || val === '') ? '1' : val,
         z.string().regex(/^\d+$/)
@@ -1908,7 +1985,7 @@ app.get('/events', optionalAuth, validateQuery(z.object({
     )
 })), async (req, res, next) => {
     try {
-        const { name, location, started, ended, showFull, published, page, limit } = req.validatedQuery;
+        const { name, location, started, ended, showFull, published, registeredUserName, registeredUserLimitMin, registeredUserLimitMax, isFull, registered, page, limit } = req.validatedQuery;
         
         if (started && ended) return res.status(400).json({ error: 'Cannot specify both started and ended' });
         
@@ -1940,16 +2017,72 @@ app.get('/events', optionalAuth, validateQuery(z.object({
             where.published = published === 'true';
         }
         
+        // Need to include user data for registered user name filtering or registered status filtering
+        const includeGuests = (registeredUserName || registered) ? { include: { user: { select: { id: true, name: true, utorid: true } } } } : true;
+        
+        // Always include organizer userId to check if current user is organizer
+        // But only include full user details for managers
         let events = await prisma.event.findMany({
             where,
             include: {
-                guests: true,
-                organizers: isManagerOrAbove ? { include: { user: true } } : false
+                guests: includeGuests,
+                organizers: isManagerOrAbove 
+                    ? { include: { user: true } } 
+                    : true  // Include basic organizer info (with userId) for all users
             }
         });
         
-        // Filter out full events if needed
-        if (showFull !== 'true') {
+        // Filter by registered status (for current user) - must happen before other filters
+        // Use the same logic as isRegistered calculation
+        if (registered !== undefined && registered !== '' && req.user && req.user.id) {
+            const isRegisteredFilter = registered === 'true';
+            const userId = Number(req.user.id);
+            events = events.filter(e => {
+                // Use exact same logic as isRegistered calculation
+                const userIsRegistered = e.guests.some(g => {
+                    // Handle both direct userId and potential nested structures
+                    const guestUserId = g.userId !== undefined ? g.userId : (g.user && g.user.id);
+                    return Number(guestUserId) === userId;
+                });
+                return userIsRegistered === isRegisteredFilter;
+            });
+        }
+        
+        // Filter by registered user name if provided
+        if (registeredUserName) {
+            events = events.filter(e => {
+                return e.guests.some(g => {
+                    const userName = g.user?.name || '';
+                    return userName.toLowerCase().includes(registeredUserName.toLowerCase());
+                });
+            });
+        }
+        
+        // Filter by registered user limit (min/max)
+        if (registeredUserLimitMin) {
+            const minLimit = parseInt(registeredUserLimitMin);
+            if (!isNaN(minLimit)) {
+                events = events.filter(e => e.guests.length >= minLimit);
+            }
+        }
+        if (registeredUserLimitMax) {
+            const maxLimit = parseInt(registeredUserLimitMax);
+            if (!isNaN(maxLimit)) {
+                events = events.filter(e => e.guests.length <= maxLimit);
+            }
+        }
+        
+        // Filter by event full status
+        if (isFull !== undefined && isFull !== '') {
+            const fullStatus = isFull === 'true';
+            events = events.filter(e => {
+                const eventIsFull = e.capacity && e.guests.length >= e.capacity;
+                return eventIsFull === fullStatus;
+            });
+        }
+        
+        // Filter out full events if needed (legacy showFull parameter)
+        if (showFull !== 'true' && isFull === undefined) {
             events = events.filter(e => !e.capacity || e.guests.length < e.capacity);
         }
         
@@ -1966,6 +2099,40 @@ app.get('/events', optionalAuth, validateQuery(z.object({
                 result.pointsRemain = e.pointsRemain;
                 result.pointsAwarded = e.pointsAllocated - e.pointsRemain;
                 result.published = e.published;
+            }
+            // Check if current user is registered for this event
+            // Always include isRegistered field (false if not logged in or not registered)
+            if (req.user && req.user.id) {
+                // When using include: { guests: true }, we get EventGuest objects with userId field
+                // Ensure we compare as numbers since both are integers
+                const userId = Number(req.user.id);
+                // Debug: Check guest structure (remove after testing)
+                if (e.guests.length > 0 && !e.guests[0].hasOwnProperty('userId')) {
+                    console.log('Warning: Guest object structure:', Object.keys(e.guests[0]));
+                }
+                result.isRegistered = e.guests.some(g => {
+                    // Handle both direct userId and potential nested structures
+                    const guestUserId = g.userId !== undefined ? g.userId : (g.user && g.user.id);
+                    return Number(guestUserId) === userId;
+                });
+            } else {
+                result.isRegistered = false;
+            }
+            // Check if current user is an organizer for this event
+            // Always include isOrganizer field (false if not logged in or not organizer)
+            if (req.user && req.user.id) {
+                const userId = Number(req.user.id);
+                if (e.organizers && e.organizers.length > 0) {
+                    result.isOrganizer = e.organizers.some(o => {
+                        // Handle both cases: with full user object (o.user.id) or just userId field
+                        const organizerUserId = (o.user && o.user.id) ? o.user.id : o.userId;
+                        return organizerUserId !== undefined && Number(organizerUserId) === userId;
+                    });
+                } else {
+                    result.isOrganizer = false;
+                }
+            } else {
+                result.isOrganizer = false;
             }
             return result;
         });
@@ -2013,12 +2180,23 @@ app.get('/events/:eventId', async (req, res, next) => {
         };
         
         if (isManagerOrAbove || isEventOrganizer) {
+            response.pointsAllocated = event.pointsAllocated;
             response.pointsRemain = event.pointsRemain;
             response.pointsAwarded = event.pointsAllocated - event.pointsRemain;
             response.published = event.published;
             response.guests = event.guests.map(g => ({ id: g.user.id, utorid: g.user.utorid, name: g.user.name }));
         } else {
             response.numGuests = event.guests.length;
+            // Add isRegistered for regular users
+            if (authUser && authUser.id) {
+                const userId = Number(authUser.id);
+                response.isRegistered = event.guests.some(g => {
+                    const guestUserId = g.userId !== undefined ? g.userId : (g.user && g.user.id);
+                    return Number(guestUserId) === userId;
+                });
+            } else {
+                response.isRegistered = false;
+            }
         }
         
         res.json(response);
@@ -2051,7 +2229,7 @@ app.patch('/events/:eventId', async (req, res, next) => {
             return res.status(403).json({ error: 'Forbidden' });
         }
         // Enforce 403 for restricted fields before structure validation
-        if (!isManagerOrAbove && ('points' in req.body || 'published' in req.body)) {
+        if (!isManagerOrAbove && ('points' in req.body || 'published' in req.body || 'organizerIds' in req.body)) {
             return res.status(403).json({ error: 'Forbidden' });
         }
 
@@ -2137,6 +2315,65 @@ app.patch('/events/:eventId', async (req, res, next) => {
             return res.status(400).json({ error: 'Cannot unpublish event' });
         }
         
+        // Handle organizerIds if provided (only for managers/superusers)
+        if (updates.organizerIds !== undefined && isManagerOrAbove) {
+            // Validate that all user IDs exist
+            const organizerIds = updates.organizerIds;
+            if (organizerIds.length > 0) {
+                const users = await prisma.user.findMany({
+                    where: { id: { in: organizerIds } },
+                    select: { id: true }
+                });
+                
+                if (users.length !== organizerIds.length) {
+                    return res.status(400).json({ error: 'One or more organizer user IDs are invalid' });
+                }
+            }
+            
+            // Get current organizers
+            const currentOrganizers = await prisma.eventOrganizer.findMany({
+                where: { eventId },
+                select: { userId: true }
+            });
+            const currentOrganizerIds = currentOrganizers.map(o => o.userId);
+            const newOrganizerIds = [...new Set(organizerIds)]; // Remove duplicates from input
+            
+            // Calculate which organizers to add and remove
+            const organizersToAdd = newOrganizerIds.filter(id => !currentOrganizerIds.includes(id));
+            const organizersToRemove = currentOrganizerIds.filter(id => !newOrganizerIds.includes(id));
+            
+            // Only update if organizers have actually changed
+            if (organizersToAdd.length > 0 || organizersToRemove.length > 0) {
+                // Remove organizers that are no longer in the list
+                if (organizersToRemove.length > 0) {
+                    await prisma.eventOrganizer.deleteMany({
+                        where: {
+                            eventId,
+                            userId: { in: organizersToRemove }
+                        }
+                    });
+                }
+                
+                // Add new organizers (we've already filtered out existing ones)
+                if (organizersToAdd.length > 0) {
+                    // Use individual creates with error handling to gracefully skip duplicates
+                    for (const userId of organizersToAdd) {
+                        try {
+                            await prisma.eventOrganizer.create({
+                                data: { eventId, userId }
+                            });
+                        } catch (error) {
+                            // If organizer already exists (unique constraint violation), skip it
+                            // This is defensive programming in case of race conditions
+                            if (error.code !== 'P2002') {
+                                throw error; // Re-throw if it's not a unique constraint error
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        
         // Build final updates object
         const finalUpdates = {};
         if (updates.name) finalUpdates.name = updates.name;
@@ -2151,7 +2388,16 @@ app.patch('/events/:eventId', async (req, res, next) => {
         
         const updated = await prisma.event.update({
             where: { id: eventId },
-            data: finalUpdates
+            data: finalUpdates,
+            include: {
+                organizers: {
+                    include: {
+                        user: {
+                            select: { id: true, utorid: true, name: true }
+                        }
+                    }
+                }
+            }
         });
         
         // Build response - always return id, name, location + fields that were in the request
@@ -2171,6 +2417,13 @@ app.patch('/events/:eventId', async (req, res, next) => {
         if ('points' in original) {
             response.pointsAllocated = updated.pointsAllocated;
             response.pointsRemain = updated.pointsRemain;
+        }
+        if ('organizerIds' in original) {
+            response.organizers = updated.organizers.map(o => ({
+                id: o.user.id,
+                utorid: o.user.utorid,
+                name: o.user.name
+            }));
         }
         
         res.json(response);
@@ -2358,14 +2611,27 @@ app.post('/events/:eventId/guests', async (req, res, next) => {
             return res.status(403).json({ error: 'Forbidden' });
         }
 
-        // Validate request body (400)
-        const { utorid } = req.body || {};
-        if (!utorid) {
-            return res.status(400).json({ error: 'utorid is required' });
+        // Validate request body (400) - accept either userId or utorid
+        const { utorid, userId } = req.body || {};
+        if (!utorid && !userId) {
+            return res.status(400).json({ error: 'utorid or userId is required' });
+        }
+        if (utorid && userId) {
+            return res.status(400).json({ error: 'Provide either utorid or userId, not both' });
         }
 
         // Load user (404)
-        const user = await prisma.user.findUnique({ where: { utorid } });
+        const whereClause = utorid 
+            ? { utorid } 
+            : /^\d+$/.test(String(userId))
+                ? { id: parseInt(userId, 10) }
+                : null;
+        
+        if (!whereClause) {
+            return res.status(400).json({ error: 'Invalid userId format' });
+        }
+        
+        const user = await prisma.user.findUnique({ where: whereClause });
         if (!user) return res.status(404).json({ error: 'User not found' });
         
         // 400 checks
@@ -2425,12 +2691,26 @@ app.delete('/events/:eventId/guests/me', async (req, res, next) => {
 });
 
 // DELETE /events/:eventId/guests/:userId - Remove guest
-app.delete('/events/:eventId/guests/:userId', requireRole('manager'), async (req, res, next) => {
+app.delete('/events/:eventId/guests/:userId', async (req, res, next) => {
     try {
         const eventId = parseInt(req.params.eventId);
         const userId = parseInt(req.params.userId);
         if (isNaN(eventId)) return res.status(400).json({ error: 'Invalid event ID' });
         if (isNaN(userId)) return res.status(400).json({ error: 'Invalid user ID' });
+        
+        // Load event (404 first)
+        const event = await prisma.event.findUnique({ where: { id: eventId } });
+        if (!event) return res.status(404).json({ error: 'Event not found' });
+        
+        // Authentication (401) and authorization (403) - only managers/superusers can remove guests
+        const token = jwtUtils.extractToken(req.headers.authorization);
+        if (!token) return res.status(401).json({ error: 'Unauthorized' });
+        let authUser;
+        try { authUser = jwtUtils.verifyToken(token); } catch (_) { return res.status(401).json({ error: 'Unauthorized' }); }
+        const isManagerOrAbove = ['manager', 'superuser'].includes(authUser.role);
+        if (!isManagerOrAbove) {
+            return res.status(403).json({ error: 'Forbidden' });
+        }
         
         const guest = await prisma.eventGuest.findUnique({
             where: { eventId_userId: { eventId, userId } }
