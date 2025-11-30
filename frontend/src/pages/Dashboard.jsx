@@ -682,7 +682,9 @@ const Dashboard = () => {
                     </p>
                     <SimpleChart
                       type="pie"
-                      data={Object.entries(analytics.typeBreakdown).map(([name, value]) => ({ name, value }))}
+                      data={Object.entries(analytics.typeBreakdown)
+                        .filter(([name]) => name === 'purchase' || name === 'redemption')
+                        .map(([name, value]) => ({ name, value }))}
                       dataKey="value"
                       xKey="name"
                       height={300}
@@ -749,7 +751,9 @@ const Dashboard = () => {
             <div className="dashboard-section-header">Transaction Types Breakdown</div>
             <div style={{ marginTop: '24px' }}>
               <SortableTable
-                data={Object.entries(analytics.typeBreakdown).map(([type, count]) => ({ type, count }))}
+                data={Object.entries(analytics.typeBreakdown)
+                  .filter(([type]) => type === 'purchase' || type === 'redemption')
+                  .map(([type, count]) => ({ type, count }))}
                 columns={[
                   { key: 'type', label: 'Transaction Type' },
                   { key: 'count', label: 'Count' },
@@ -764,9 +768,7 @@ const Dashboard = () => {
                     <td>
                       <span className={`dashboard-badge ${
                         type === 'purchase' ? 'dashboard-badge-blue' :
-                        type === 'adjustment' ? 'dashboard-badge-warning' :
                         type === 'redemption' ? 'dashboard-badge-danger' :
-                        type === 'event' ? 'dashboard-badge-success' :
                         'dashboard-badge-secondary'
                       }`}>
                         {type.charAt(0).toUpperCase() + type.slice(1)}

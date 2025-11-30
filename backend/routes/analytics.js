@@ -107,13 +107,10 @@ const getCashierStats = async (req, res, next) => {
             ? ((totalRedemptions - pendingRedemptions) / totalRedemptions * 100).toFixed(1)
             : 0;
 
-        // Transaction types breakdown
+        // Transaction types breakdown (only purchase and redemption for cashier)
         const typeBreakdown = {
             purchase: allTransactions.filter(tx => tx.type === 'purchase').length,
-            redemption: allTransactions.filter(tx => tx.type === 'redemption').length,
-            adjustment: allTransactions.filter(tx => tx.type === 'adjustment').length,
-            event: allTransactions.filter(tx => tx.type === 'event').length,
-            transfer: allTransactions.filter(tx => tx.type === 'transfer').length
+            redemption: allTransactions.filter(tx => tx.type === 'redemption').length
         };
 
         // Daily transaction volume (last 7 days)
