@@ -338,18 +338,13 @@ const EventDetail = () => {
           {user && !isOrganizer() && !isEventPast() && (
             <>
               {isRegistered() ? (
-                // For regular users, show "Already Registered" text instead of Unregister button
-                !hasRole('cashier') ? (
-                  <span className="event-detail-already-registered">Already Registered</span>
-                ) : (
-                  <button
-                    onClick={handleUnregister}
-                    className="btn btn-danger"
-                    disabled={actionLoading}
-                  >
-                    {actionLoading ? 'Unregistering...' : 'Unregister'}
-                  </button>
-                )
+                <button
+                  onClick={handleUnregister}
+                  className="btn btn-danger"
+                  disabled={actionLoading}
+                >
+                  {actionLoading ? 'Unregistering...' : 'Unregister'}
+                </button>
               ) : (
                 <button
                   onClick={handleRegister}
