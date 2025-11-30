@@ -153,7 +153,11 @@ const Events = () => {
         <>
           <div className="events-grid">
             {events.map((event) => (
-              <div key={event.id} className="events-card">
+              <Link
+                key={event.id}
+                to={`/events/${event.id}`}
+                className="events-card events-card-link"
+              >
                 <div className="events-card-content">
                   <div className="events-card-main">
                     <h3 className="events-card-title">{event.name}</h3>
@@ -206,16 +210,8 @@ const Events = () => {
                       )}
                     </div>
                   </div>
-                  <div className="events-card-actions">
-                    <Link
-                      to={`/events/${event.id}`}
-                      className="btn btn-primary events-view-btn"
-                    >
-                      View Details
-                    </Link>
-                  </div>
                 </div>
-              </div>
+              </Link>
             ))}
           </div>
 
