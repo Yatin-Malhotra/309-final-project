@@ -3,6 +3,8 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { userAPI } from '../services/api';
 import { Link, useSearchParams, useNavigate } from 'react-router-dom';
+import useTableSort from '../hooks/useTableSort';
+import SortableTableHeader from '../components/SortableTableHeader';
 import './Users.css';
 
 const Users = () => {
@@ -63,6 +65,19 @@ const Users = () => {
     };
     return colors[role] || 'users-badge-secondary';
   };
+
+  // Table sorting configuration
+  const sortConfig = {
+    id: { sortFn: (a, b) => a.id - b.id },
+    utorid: { accessor: (user) => (user.utorid || '').toLowerCase() },
+    name: { accessor: (user) => (user.name || '').toLowerCase() },
+    email: { accessor: (user) => (user.email || '').toLowerCase() },
+    role: { accessor: (user) => user.role },
+    points: { sortFn: (a, b) => (a.points || 0) - (b.points || 0) },
+    verified: { sortFn: (a, b) => (a.verified ? 1 : 0) - (b.verified ? 1 : 0) },
+  };
+
+  const { sortedData, sortConfig: currentSort, handleSort } = useTableSort(users, sortConfig);
 
   return (
     <div className="users-page">
@@ -134,17 +149,66 @@ const Users = () => {
             <table className="users-table">
               <thead>
                 <tr>
-                  <th>ID</th>
-                  <th>UTORid</th>
-                  <th>Name</th>
-                  <th>Email</th>
-                  <th>Role</th>
-                  <th>Points</th>
-                  <th>Verified</th>
+                  <SortableTableHeader 
+                    sortKey="id" 
+                    currentSortKey={currentSort.key} 
+                    sortDirection={currentSort.direction}
+                    onSort={handleSort}
+                  >
+                    ID
+                  </SortableTableHeader>
+                  <SortableTableHeader 
+                    sortKey="utorid" 
+                    currentSortKey={currentSort.key} 
+                    sortDirection={currentSort.direction}
+                    onSort={handleSort}
+                  >
+                    UTORid
+                  </SortableTableHeader>
+                  <SortableTableHeader 
+                    sortKey="name" 
+                    currentSortKey={currentSort.key} 
+                    sortDirection={currentSort.direction}
+                    onSort={handleSort}
+                  >
+                    Name
+                  </SortableTableHeader>
+                  <SortableTableHeader 
+                    sortKey="email" 
+                    currentSortKey={currentSort.key} 
+                    sortDirection={currentSort.direction}
+                    onSort={handleSort}
+                  >
+                    Email
+                  </SortableTableHeader>
+                  <SortableTableHeader 
+                    sortKey="role" 
+                    currentSortKey={currentSort.key} 
+                    sortDirection={currentSort.direction}
+                    onSort={handleSort}
+                  >
+                    Role
+                  </SortableTableHeader>
+                  <SortableTableHeader 
+                    sortKey="points" 
+                    currentSortKey={currentSort.key} 
+                    sortDirection={currentSort.direction}
+                    onSort={handleSort}
+                  >
+                    Points
+                  </SortableTableHeader>
+                  <SortableTableHeader 
+                    sortKey="verified" 
+                    currentSortKey={currentSort.key} 
+                    sortDirection={currentSort.direction}
+                    onSort={handleSort}
+                  >
+                    Verified
+                  </SortableTableHeader>
                 </tr>
               </thead>
               <tbody>
-                {users.map((user) => (
+                {sortedData.map((user) => (
                   <tr 
                     key={user.id}
                     onClick={() => navigate(`/users/${user.id}`)}

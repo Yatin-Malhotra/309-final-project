@@ -6,6 +6,9 @@ import { Link } from 'react-router-dom';
 import AnalyticsCard from '../components/AnalyticsCard';
 import AnimatedNumber from '../components/AnimatedNumber';
 import SimpleChart from '../components/SimpleChart';
+import QRCodeModal from '../components/QRCodeModal';
+import QRScannerModal from '../components/QRScannerModal';
+import SortableTable from '../components/SortableTable';
 import './Dashboard.css';
 
 const Dashboard = () => {
@@ -24,6 +27,8 @@ const Dashboard = () => {
   });
   const [analytics, setAnalytics] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [showQRCode, setShowQRCode] = useState(false);
+  const [showQRScanner, setShowQRScanner] = useState(false);
   const [collapsedSections, setCollapsedSections] = useState({
     userAnalytics: false,
     transactionAnalytics: false,
@@ -334,11 +339,42 @@ const Dashboard = () => {
       <div className="dashboard-page">
         <div className="dashboard-header-with-badge">
           <h1>Welcome, {user?.name}!</h1>
-          {user?.verified ? (
-            <span className="dashboard-badge dashboard-badge-success dashboard-header-badge">Verified</span>
-          ) : (
-            <span className="dashboard-badge dashboard-badge-warning dashboard-header-badge">Unverified</span>
-          )}
+          <div style={{ display: 'flex', gap: '12px', alignItems: 'center', flexWrap: 'wrap' }}>
+            {user?.verified ? (
+              <span className="dashboard-badge dashboard-badge-success dashboard-header-badge">Verified</span>
+            ) : (
+              <span className="dashboard-badge dashboard-badge-warning dashboard-header-badge">Unverified</span>
+            )}
+            <button 
+              onClick={() => setShowQRCode(true)} 
+              className="dashboard-header-badge"
+              style={{ 
+                background: 'var(--primary)', 
+                color: 'white', 
+                border: 'none', 
+                cursor: 'pointer',
+                padding: '6px 14px',
+                fontSize: '13px',
+                fontWeight: 600,
+                borderRadius: '6px',
+                transition: 'all 0.2s ease',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px'
+              }}
+              onMouseEnter={(e) => {
+                e.target.style.opacity = '0.9';
+                e.target.style.transform = 'translateY(-1px)';
+              }}
+              onMouseLeave={(e) => {
+                e.target.style.opacity = '1';
+                e.target.style.transform = 'translateY(0)';
+              }}
+            >
+              <span>📱</span>
+              <span>Scan QR Code</span>
+            </button>
+          </div>
         </div>
         <div className="dashboard-grid">
           <div className="dashboard-card dashboard-quick-access-card">
@@ -375,6 +411,8 @@ const Dashboard = () => {
             <div className="dashboard-quick-access-arrow">→</div>
           </Link>
         </div>
+
+        <QRCodeModal isOpen={showQRCode} onClose={() => setShowQRCode(false)} />
 
         {/* Points Activity Analytics */}
         {analytics?.pointsActivity && (
@@ -420,44 +458,47 @@ const Dashboard = () => {
             <div className="dashboard-empty-state">No recent transactions</div>
           ) : (
             <>
-              <table className="dashboard-table">
-                <thead>
-                  <tr>
-                    <th>Type</th>
-                    <th>Amount</th>
-                    <th>Date</th>
-                    <th>Status</th>
+              <SortableTable
+                data={stats.recentTransactions}
+                columns={[
+                  { key: 'type', label: 'Type' },
+                  { key: 'amount', label: 'Amount' },
+                  { key: 'date', label: 'Date' },
+                  { key: 'status', label: 'Status' },
+                ]}
+                config={{
+                  type: { accessor: (tx) => tx.type },
+                  amount: { sortFn: (a, b) => a.amount - b.amount },
+                  date: { accessor: (tx) => tx.createdAt ? new Date(tx.createdAt).getTime() : 0 },
+                  status: { sortFn: (a, b) => (a.processed ? 1 : 0) - (b.processed ? 1 : 0) },
+                }}
+                className="dashboard-table"
+                renderRow={(tx) => (
+                  <tr key={tx.id}>
+                    <td>
+                      <span className={`dashboard-badge ${
+                        tx.type === 'purchase' ? 'dashboard-badge-blue' :
+                        tx.type === 'redemption' ? 'dashboard-badge-danger' :
+                        tx.type === 'event' ? 'dashboard-badge-success' :
+                        'dashboard-badge-secondary'
+                      }`}>
+                        {tx.type}
+                      </span>
+                    </td>
+                    <td>
+                      {tx.amount} points
+                    </td>
+                    <td>{tx.createdAt ? new Date(tx.createdAt).toLocaleDateString() : 'N/A'}</td>
+                    <td>
+                      {tx.processed ? (
+                        <span className="dashboard-badge dashboard-badge-success">Processed</span>
+                      ) : (
+                        <span className="dashboard-badge dashboard-badge-warning">Pending</span>
+                      )}
+                    </td>
                   </tr>
-                </thead>
-                <tbody>
-                  {stats.recentTransactions.map((tx) => (
-                    <tr key={tx.id}>
-                      <td>
-                        <span className={`dashboard-badge ${
-                          tx.type === 'purchase' ? 'dashboard-badge-blue' :
-                          tx.type === 'redemption' ? 'dashboard-badge-danger' :
-                          tx.type === 'event' ? 'dashboard-badge-success' :
-                          'dashboard-badge-secondary'
-                        }`}>
-                          {tx.type}
-                        </span>
-                      </td>
-                      <td>
-                        {tx.type === 'redemption' ? '-' : '+'}
-                        {Math.abs(tx.amount)} points
-                      </td>
-                      <td>{tx.createdAt ? new Date(tx.createdAt).toLocaleDateString() : 'N/A'}</td>
-                      <td>
-                        {tx.processed ? (
-                          <span className="dashboard-badge dashboard-badge-success">Processed</span>
-                        ) : (
-                          <span className="dashboard-badge dashboard-badge-warning">Pending</span>
-                        )}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+                )}
+              />
               <div className="dashboard-section-actions">
                 <Link to="/transactions" className="btn btn-secondary">
                   View All Transactions
@@ -522,8 +563,49 @@ const Dashboard = () => {
   if (userRole === 'cashier') {
     return (
       <div className="dashboard-page">
-        <h1>Welcome, {user?.name}!</h1>
+        <div className="dashboard-header-with-badge">
+          <h1>Welcome, {user?.name}!</h1>
+          <button 
+            onClick={() => setShowQRScanner(true)} 
+            className="dashboard-header-badge"
+            style={{ 
+              background: 'var(--primary)', 
+              color: 'white', 
+              border: 'none', 
+              cursor: 'pointer',
+              padding: '6px 14px',
+              fontSize: '13px',
+              fontWeight: 600,
+              borderRadius: '6px',
+              transition: 'all 0.2s ease',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px'
+            }}
+            onMouseEnter={(e) => {
+              e.target.style.opacity = '0.9';
+              e.target.style.transform = 'translateY(-1px)';
+            }}
+            onMouseLeave={(e) => {
+              e.target.style.opacity = '1';
+              e.target.style.transform = 'translateY(0)';
+            }}
+          >
+            <span>📷</span>
+            <span>Scan QR Code</span>
+          </button>
+        </div>
         <div className="dashboard-grid">
+        <Link to="/transactions" className="dashboard-card dashboard-quick-access-card" style={{ textDecoration: 'none', color: 'inherit' }}>
+            <div className="dashboard-quick-access-value">
+              <AnimatedNumber value={stats.pendingRedemptions} />
+            </div>
+            <div className="dashboard-quick-access-content">
+              <div className="dashboard-quick-access-title">Pending Redemptions</div>
+              <div className="dashboard-quick-access-description">Awaiting processing</div>
+            </div>
+            <div className="dashboard-quick-access-arrow">→</div>
+          </Link>
           <Link to="/transactions/create" className="dashboard-card dashboard-quick-access-card" style={{ textDecoration: 'none', color: 'inherit' }}>
             <div className="dashboard-quick-access-icon">➕</div>
             <div className="dashboard-quick-access-content">
@@ -532,13 +614,11 @@ const Dashboard = () => {
             </div>
             <div className="dashboard-quick-access-arrow">→</div>
           </Link>
-          <Link to="/transactions" className="dashboard-card dashboard-quick-access-card" style={{ textDecoration: 'none', color: 'inherit' }}>
-            <div className="dashboard-quick-access-value">
-              <AnimatedNumber value={stats.pendingRedemptions} />
-            </div>
+          <Link to="/users/create" className="dashboard-card dashboard-quick-access-card" style={{ textDecoration: 'none', color: 'inherit' }}>
+            <div className="dashboard-quick-access-icon">👤</div>
             <div className="dashboard-quick-access-content">
-              <div className="dashboard-quick-access-title">Pending Redemptions</div>
-              <div className="dashboard-quick-access-description">Awaiting processing</div>
+              <div className="dashboard-quick-access-title">Create User</div>
+              <div className="dashboard-quick-access-description">Register a new user</div>
             </div>
             <div className="dashboard-quick-access-arrow">→</div>
           </Link>
@@ -551,6 +631,8 @@ const Dashboard = () => {
             <div className="dashboard-quick-access-arrow">→</div>
           </Link>
         </div>
+
+        <QRScannerModal isOpen={showQRScanner} onClose={() => setShowQRScanner(false)} />
 
         {/* Transaction Processing Metrics */}
         {analytics?.transactions && (
@@ -600,7 +682,9 @@ const Dashboard = () => {
                     </p>
                     <SimpleChart
                       type="pie"
-                      data={Object.entries(analytics.typeBreakdown).map(([name, value]) => ({ name, value }))}
+                      data={Object.entries(analytics.typeBreakdown)
+                        .filter(([name]) => name === 'purchase' || name === 'redemption')
+                        .map(([name, value]) => ({ name, value }))}
                       dataKey="value"
                       xKey="name"
                       height={300}
@@ -615,24 +699,27 @@ const Dashboard = () => {
                   title="Most Active Users"
                   className="analytics-card-wide"
                 >
-                  <table className="dashboard-table">
-                    <thead>
-                      <tr>
-                        <th>User</th>
-                        <th>UTORid</th>
-                        <th>Transactions</th>
+                  <SortableTable
+                    data={analytics.topUsers.slice(0, 5)}
+                    columns={[
+                      { key: 'user', label: 'User' },
+                      { key: 'utorid', label: 'UTORid' },
+                      { key: 'transactions', label: 'Transactions' },
+                    ]}
+                    config={{
+                      user: { accessor: (item) => (item.name || '').toLowerCase() },
+                      utorid: { accessor: (item) => (item.utorid || '').toLowerCase() },
+                      transactions: { sortFn: (a, b) => a.transactionCount - b.transactionCount },
+                    }}
+                    className="dashboard-table"
+                    renderRow={(userItem) => (
+                      <tr key={userItem.userId}>
+                        <td>{userItem.name}</td>
+                        <td>{userItem.utorid}</td>
+                        <td>{userItem.transactionCount}</td>
                       </tr>
-                    </thead>
-                    <tbody>
-                      {analytics.topUsers.slice(0, 5).map((userItem) => (
-                        <tr key={userItem.userId}>
-                          <td>{userItem.name}</td>
-                          <td>{userItem.utorid}</td>
-                          <td>{userItem.transactionCount}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
+                    )}
+                  />
                 </AnalyticsCard>
               </div>
             )}
@@ -663,87 +750,37 @@ const Dashboard = () => {
           <div className="dashboard-section">
             <div className="dashboard-section-header">Transaction Types Breakdown</div>
             <div style={{ marginTop: '24px' }}>
-              <table className="dashboard-table">
-                <thead>
-                  <tr>
-                    <th>Transaction Type</th>
-                    <th>Count</th>
+              <SortableTable
+                data={Object.entries(analytics.typeBreakdown)
+                  .filter(([type]) => type === 'purchase' || type === 'redemption')
+                  .map(([type, count]) => ({ type, count }))}
+                columns={[
+                  { key: 'type', label: 'Transaction Type' },
+                  { key: 'count', label: 'Count' },
+                ]}
+                config={{
+                  type: { accessor: (item) => item.type.toLowerCase() },
+                  count: { sortFn: (a, b) => a.count - b.count },
+                }}
+                className="dashboard-table"
+                renderRow={({ type, count }) => (
+                  <tr key={type}>
+                    <td>
+                      <span className={`dashboard-badge ${
+                        type === 'purchase' ? 'dashboard-badge-blue' :
+                        type === 'redemption' ? 'dashboard-badge-danger' :
+                        'dashboard-badge-secondary'
+                      }`}>
+                        {type.charAt(0).toUpperCase() + type.slice(1)}
+                      </span>
+                    </td>
+                    <td>{count}</td>
                   </tr>
-                </thead>
-                <tbody>
-                  {Object.entries(analytics.typeBreakdown).map(([type, count]) => (
-                    <tr key={type}>
-                      <td>
-                        <span className={`dashboard-badge ${
-                          type === 'purchase' ? 'dashboard-badge-blue' :
-                          type === 'adjustment' ? 'dashboard-badge-warning' :
-                          type === 'redemption' ? 'dashboard-badge-danger' :
-                          type === 'event' ? 'dashboard-badge-success' :
-                          'dashboard-badge-secondary'
-                        }`}>
-                          {type.charAt(0).toUpperCase() + type.slice(1)}
-                        </span>
-                      </td>
-                      <td>{count}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+                )}
+              />
             </div>
           </div>
         )}
-
-        <div className="dashboard-section">
-          <div className="dashboard-section-header">Recent Transactions</div>
-          {stats.recentTransactions.length === 0 ? (
-            <div className="dashboard-empty-state">No recent transactions</div>
-          ) : (
-            <>
-              <table className="dashboard-table">
-                <thead>
-                  <tr>
-                    <th>Type</th>
-                    <th>Amount</th>
-                    <th>Date</th>
-                    <th>Status</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {stats.recentTransactions.map((tx) => (
-                    <tr key={tx.id}>
-                      <td>
-                        <span className={`dashboard-badge ${
-                          tx.type === 'purchase' ? 'dashboard-badge-blue' :
-                          tx.type === 'redemption' ? 'dashboard-badge-danger' :
-                          'dashboard-badge-secondary'
-                        }`}>
-                          {tx.type}
-                        </span>
-                      </td>
-                      <td>
-                        {tx.type === 'redemption' ? '-' : '+'}
-                        {Math.abs(tx.amount)} points
-                      </td>
-                      <td>{tx.createdAt ? new Date(tx.createdAt).toLocaleDateString() : 'N/A'}</td>
-                      <td>
-                        {tx.processed ? (
-                          <span className="dashboard-badge dashboard-badge-success">Processed</span>
-                        ) : (
-                          <span className="dashboard-badge dashboard-badge-warning">Pending</span>
-                        )}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-              <div className="dashboard-section-actions">
-                <Link to="/transactions" className="btn btn-secondary">
-                  View All Transactions
-                </Link>
-              </div>
-            </>
-          )}
-        </div>
       </div>
     );
   }
@@ -757,7 +794,38 @@ const Dashboard = () => {
 
     return (
       <div className="dashboard-page">
-        <h1>Welcome, {user?.name}!</h1>
+        <div className="dashboard-header-with-badge">
+          <h1>Welcome, {user?.name}!</h1>
+          <button 
+            onClick={() => setShowQRScanner(true)} 
+            className="dashboard-header-badge"
+            style={{ 
+              background: 'var(--primary)', 
+              color: 'white', 
+              border: 'none', 
+              cursor: 'pointer',
+              padding: '6px 14px',
+              fontSize: '13px',
+              fontWeight: 600,
+              borderRadius: '6px',
+              transition: 'all 0.2s ease',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px'
+            }}
+            onMouseEnter={(e) => {
+              e.target.style.opacity = '0.9';
+              e.target.style.transform = 'translateY(-1px)';
+            }}
+            onMouseLeave={(e) => {
+              e.target.style.opacity = '1';
+              e.target.style.transform = 'translateY(0)';
+            }}
+          >
+            <span>📷</span>
+            <span>Scan QR Code</span>
+          </button>
+        </div>
         <div className="dashboard-grid">
           <Link to="/users" className="dashboard-card dashboard-quick-access-card" style={{ textDecoration: 'none', color: 'inherit' }}>
             <div className="dashboard-quick-access-value">
@@ -800,6 +868,8 @@ const Dashboard = () => {
             <div className="dashboard-quick-access-arrow">→</div>
           </Link>
         </div>
+
+        <QRScannerModal isOpen={showQRScanner} onClose={() => setShowQRScanner(false)} />
 
         {/* Financial Insights */}
         {analytics?.financial && (
@@ -992,57 +1062,65 @@ const Dashboard = () => {
             {analytics.users.topUsersByPoints && analytics.users.topUsersByPoints.length > 0 && (
               <div style={{ marginTop: '24px' }}>
                 <h3 style={{ marginBottom: '16px', fontSize: '18px', fontWeight: 600 }}>Top 5 Users by Points</h3>
-                <table className="dashboard-table">
-                  <thead>
-                    <tr>
-                      <th>Name</th>
-                      <th>UTORid</th>
-                      <th>Points</th>
-                      <th>Status</th>
+                <SortableTable
+                  data={analytics.users.topUsersByPoints.slice(0, 5)}
+                  columns={[
+                    { key: 'name', label: 'Name' },
+                    { key: 'utorid', label: 'UTORid' },
+                    { key: 'points', label: 'Points' },
+                    { key: 'status', label: 'Status' },
+                  ]}
+                  config={{
+                    name: { accessor: (u) => (u.name || '').toLowerCase() },
+                    utorid: { accessor: (u) => (u.utorid || '').toLowerCase() },
+                    points: { sortFn: (a, b) => a.points - b.points },
+                    status: { sortFn: (a, b) => (a.verified ? 1 : 0) - (b.verified ? 1 : 0) },
+                  }}
+                  className="dashboard-table"
+                  renderRow={(u) => (
+                    <tr key={u.id}>
+                      <td>{u.name}</td>
+                      <td>{u.utorid}</td>
+                      <td>{u.points}</td>
+                      <td>
+                        {u.verified ? (
+                          <span className="dashboard-badge dashboard-badge-success">Verified</span>
+                        ) : (
+                          <span className="dashboard-badge dashboard-badge-warning">Unverified</span>
+                        )}
+                      </td>
                     </tr>
-                  </thead>
-                  <tbody>
-                    {analytics.users.topUsersByPoints.slice(0, 5).map((u) => (
-                      <tr key={u.id}>
-                        <td>{u.name}</td>
-                        <td>{u.utorid}</td>
-                        <td>{u.points}</td>
-                        <td>
-                          {u.verified ? (
-                            <span className="dashboard-badge dashboard-badge-success">Verified</span>
-                          ) : (
-                            <span className="dashboard-badge dashboard-badge-warning">Unverified</span>
-                          )}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+                  )}
+                />
               </div>
             )}
             {analytics.users.topUsersByTransactionCount && analytics.users.topUsersByTransactionCount.length > 0 && (
               <div style={{ marginTop: '24px' }}>
                 <h3 style={{ marginBottom: '16px', fontSize: '18px', fontWeight: 600 }}>Top 5 Users by Transaction Count</h3>
-                <table className="dashboard-table">
-                  <thead>
-                    <tr>
-                      <th>Name</th>
-                      <th>UTORid</th>
-                      <th>Transactions</th>
-                      <th>Points</th>
+                <SortableTable
+                  data={analytics.users.topUsersByTransactionCount.slice(0, 5)}
+                  columns={[
+                    { key: 'name', label: 'Name' },
+                    { key: 'utorid', label: 'UTORid' },
+                    { key: 'transactions', label: 'Transactions' },
+                    { key: 'points', label: 'Points' },
+                  ]}
+                  config={{
+                    name: { accessor: (u) => (u.name || '').toLowerCase() },
+                    utorid: { accessor: (u) => (u.utorid || '').toLowerCase() },
+                    transactions: { sortFn: (a, b) => a.transactionCount - b.transactionCount },
+                    points: { sortFn: (a, b) => a.points - b.points },
+                  }}
+                  className="dashboard-table"
+                  renderRow={(u) => (
+                    <tr key={u.userId}>
+                      <td>{u.name}</td>
+                      <td>{u.utorid}</td>
+                      <td>{u.transactionCount}</td>
+                      <td>{u.points}</td>
                     </tr>
-                  </thead>
-                  <tbody>
-                    {analytics.users.topUsersByTransactionCount.slice(0, 5).map((u) => (
-                      <tr key={u.userId}>
-                        <td>{u.name}</td>
-                        <td>{u.utorid}</td>
-                        <td>{u.transactionCount}</td>
-                        <td>{u.points}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+                  )}
+                />
               </div>
             )}
               </>
@@ -1163,24 +1241,31 @@ const Dashboard = () => {
             {analytics.events.popularEvents && analytics.events.popularEvents.length > 0 && (
               <div style={{ marginTop: '24px' }}>
                 <h3 style={{ marginBottom: '16px', fontSize: '18px', fontWeight: 600 }}>Most Popular Events</h3>
-                <table className="dashboard-table">
-                  <thead>
-                    <tr>
-                      <th>Event Name</th>
-                      <th>Guests</th>
-                      <th>Capacity</th>
+                <SortableTable
+                  data={analytics.events.popularEvents}
+                  columns={[
+                    { key: 'name', label: 'Event Name' },
+                    { key: 'guests', label: 'Guests' },
+                    { key: 'capacity', label: 'Capacity' },
+                  ]}
+                  config={{
+                    name: { accessor: (event) => (event.name || '').toLowerCase() },
+                    guests: { sortFn: (a, b) => a.guestCount - b.guestCount },
+                    capacity: { sortFn: (a, b) => {
+                      const aCap = a.capacity || Infinity;
+                      const bCap = b.capacity || Infinity;
+                      return aCap - bCap;
+                    }},
+                  }}
+                  className="dashboard-table"
+                  renderRow={(event) => (
+                    <tr key={event.eventId}>
+                      <td>{event.name}</td>
+                      <td>{event.guestCount}</td>
+                      <td>{event.capacity || 'Unlimited'}</td>
                     </tr>
-                  </thead>
-                  <tbody>
-                    {analytics.events.popularEvents.map((event) => (
-                      <tr key={event.eventId}>
-                        <td>{event.name}</td>
-                        <td>{event.guestCount}</td>
-                        <td>{event.capacity || 'Unlimited'}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+                  )}
+                />
               </div>
             )}
               </>
@@ -1222,30 +1307,33 @@ const Dashboard = () => {
             {analytics.promotions.effectivePromotions && analytics.promotions.effectivePromotions.length > 0 && (
               <div style={{ marginTop: '24px' }}>
                 <h3 style={{ marginBottom: '16px', fontSize: '18px', fontWeight: 600 }}>Most Effective Promotions</h3>
-                <table className="dashboard-table">
-                  <thead>
-                    <tr>
-                      <th>Promotion Name</th>
-                      <th>Type</th>
-                      <th>Usage Count</th>
+                <SortableTable
+                  data={analytics.promotions.effectivePromotions}
+                  columns={[
+                    { key: 'name', label: 'Promotion Name' },
+                    { key: 'type', label: 'Type' },
+                    { key: 'usageCount', label: 'Usage Count' },
+                  ]}
+                  config={{
+                    name: { accessor: (promo) => (promo.name || '').toLowerCase() },
+                    type: { accessor: (promo) => promo.type },
+                    usageCount: { sortFn: (a, b) => a.usageCount - b.usageCount },
+                  }}
+                  className="dashboard-table"
+                  renderRow={(promo) => (
+                    <tr key={promo.promotionId}>
+                      <td>{promo.name}</td>
+                      <td>
+                        <span className={`dashboard-badge ${
+                          promo.type === 'automatic' ? 'dashboard-badge-primary' : 'dashboard-badge-secondary'
+                        }`}>
+                          {promo.type}
+                        </span>
+                      </td>
+                      <td>{promo.usageCount}</td>
                     </tr>
-                  </thead>
-                  <tbody>
-                    {analytics.promotions.effectivePromotions.map((promo) => (
-                      <tr key={promo.promotionId}>
-                        <td>{promo.name}</td>
-                        <td>
-                          <span className={`dashboard-badge ${
-                            promo.type === 'automatic' ? 'dashboard-badge-primary' : 'dashboard-badge-secondary'
-                          }`}>
-                            {promo.type}
-                          </span>
-                        </td>
-                        <td>{promo.usageCount}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+                  )}
+                />
               </div>
             )}
               </>

@@ -1,0 +1,234 @@
+.qr-scanner-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(11, 46, 51, 0.95);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.qr-scanner-content {
+  background: var(--bg-card);
+  border-radius: 16px;
+  padding: 24px;
+  max-width: 600px;
+  width: 90%;
+  max-height: 90vh;
+  box-shadow: 0 8px 32px rgba(11, 46, 51, 0.3);
+  border: 1px solid var(--border-color);
+  position: relative;
+  animation: slideUp 0.3s ease;
+  display: flex;
+  flex-direction: column;
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.qr-scanner-close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  background: rgba(11, 46, 51, 0.8);
+  border: none;
+  font-size: 32px;
+  color: white;
+  cursor: pointer;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+  line-height: 1;
+  z-index: 10;
+}
+
+.qr-scanner-close:hover {
+  background: rgba(11, 46, 51, 1);
+  transform: scale(1.1);
+}
+
+.qr-scanner-header {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.qr-scanner-header h2 {
+  font-size: 24px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0 0 8px 0;
+}
+
+.qr-scanner-subtitle {
+  font-size: 14px;
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+.qr-scanner-video-container {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  background: #000;
+  border-radius: 12px;
+  overflow: hidden;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.qr-scanner-video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.qr-scanner-overlay-frame {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+}
+
+/* Scanning frame corners */
+.qr-scanner-corner {
+  position: absolute;
+  width: 40px;
+  height: 40px;
+  border: 4px solid #4ade80;
+  border-radius: 4px;
+}
+
+.qr-scanner-corner-tl {
+  top: 20%;
+  left: 50%;
+  transform: translateX(-50%) translateY(-50%);
+  border-right: none;
+  border-bottom: none;
+}
+
+.qr-scanner-corner-tr {
+  top: 20%;
+  right: 50%;
+  transform: translateX(50%) translateY(-50%);
+  border-left: none;
+  border-bottom: none;
+}
+
+.qr-scanner-corner-bl {
+  bottom: 20%;
+  left: 50%;
+  transform: translateX(-50%) translateY(50%);
+  border-right: none;
+  border-top: none;
+}
+
+.qr-scanner-corner-br {
+  bottom: 20%;
+  right: 50%;
+  transform: translateX(50%) translateY(50%);
+  border-left: none;
+  border-top: none;
+}
+
+/* Scanning line animation */
+.qr-scanner-scan-line {
+  position: absolute;
+  left: 50%;
+  top: 20%;
+  width: 60%;
+  height: 2px;
+  background: linear-gradient(to right, transparent, #4ade80, transparent);
+  transform: translateX(-50%);
+  animation: scanLine 2s linear infinite;
+  box-shadow: 0 0 10px #4ade80;
+}
+
+@keyframes scanLine {
+  0% {
+    top: 20%;
+    opacity: 1;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    top: 80%;
+    opacity: 0.3;
+  }
+}
+
+.qr-scanner-error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  text-align: center;
+  color: var(--text-primary);
+}
+
+.qr-scanner-error-icon {
+  font-size: 48px;
+  margin-bottom: 16px;
+}
+
+.qr-scanner-error p {
+  color: var(--text-secondary);
+  margin: 0;
+  font-size: 14px;
+}
+
+.qr-scanner-footer {
+  text-align: center;
+}
+
+.qr-scanner-note {
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin: 0;
+  font-style: italic;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .qr-scanner-content {
+    padding: 20px;
+    max-width: 95%;
+  }
+
+  .qr-scanner-corner {
+    width: 30px;
+    height: 30px;
+    border-width: 3px;
+  }
+}
+

@@ -3,6 +3,8 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { userAPI } from '../services/api';
+import useTableSort from '../hooks/useTableSort';
+import SortableTableHeader from '../components/SortableTableHeader';
 import './UserDetail.css';
 
 const UserDetail = () => {
@@ -25,6 +27,24 @@ const UserDetail = () => {
 
   const [editingEmail, setEditingEmail] = useState(false);
   const [email, setEmail] = useState();
+
+  // Define sort config for transactions table
+  const transactionSortConfig = {
+    id: { sortFn: (a, b) => a.id - b.id },
+    type: { accessor: (tx) => tx.type },
+    amount: { sortFn: (a, b) => a.amount - b.amount },
+    date: { accessor: (tx) => tx.createdAt ? new Date(tx.createdAt).getTime() : 0 },
+    status: { sortFn: (a, b) => {
+      const aStatus = a.type === 'redemption' ? (a.processed ? 1 : 0) : 1;
+      const bStatus = b.type === 'redemption' ? (b.processed ? 1 : 0) : 1;
+      return aStatus - bStatus;
+    }},
+    suspicious: { sortFn: (a, b) => (a.suspicious ? 1 : 0) - (b.suspicious ? 1 : 0) },
+    createdBy: { accessor: (tx) => (tx.createdBy || 'N/A').toLowerCase() },
+  };
+
+  // Always call useTableSort hook at top level (Rules of Hooks)
+  const { sortedData, sortConfig: currentSort, handleSort } = useTableSort(transactions, transactionSortConfig);
 
   useEffect(() => {
     loadUser();
@@ -423,53 +443,53 @@ const UserDetail = () => {
           ) : (
             <>
               <table className="user-detail-table">
-                  <thead>
-                    <tr>
-                      <th>ID</th>
-                      <th>Type</th>
-                      <th>Amount</th>
-                      <th>Date</th>
-                      <th>Status</th>
-                      <th>Suspicious</th>
-                      <th>Created By</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {transactions.map((tx) => (
-                      <tr key={tx.id}>
-                        <td>{tx.id}</td>
-                        <td>
-                          <span className={`user-detail-badge ${getTransactionTypeBadge(tx.type)}`}>
-                            {tx.type}
-                          </span>
-                        </td>
-                        <td>
-                          {tx.amount}
-                        </td>
-                        <td>{tx.createdAt ? formatDate(tx.createdAt) : 'N/A'}</td>
-                        <td>
-                          {tx.type === 'redemption' ? (
-                            tx.processed ? (
-                              <span className="user-detail-badge user-detail-badge-success">Processed</span>
-                            ) : (
-                              <span className="user-detail-badge user-detail-badge-warning">Pending</span>
-                            )
-                          ) : (
-                            <span className="user-detail-badge user-detail-badge-success">Processed</span>
-                          )}
-                        </td>
-                        <td>
-                          {tx.suspicious ? (
-                            <span className="user-detail-badge user-detail-badge-danger">Yes</span>
-                          ) : (
-                            <span className="user-detail-badge user-detail-badge-success">No</span>
-                          )}
-                        </td>
-                        <td>{tx.createdBy || 'N/A'}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+                <thead>
+                  <tr>
+                    <SortableTableHeader sortKey="id" currentSortKey={currentSort.key} sortDirection={currentSort.direction} onSort={handleSort}>ID</SortableTableHeader>
+                    <SortableTableHeader sortKey="type" currentSortKey={currentSort.key} sortDirection={currentSort.direction} onSort={handleSort}>Type</SortableTableHeader>
+                    <SortableTableHeader sortKey="amount" currentSortKey={currentSort.key} sortDirection={currentSort.direction} onSort={handleSort}>Amount</SortableTableHeader>
+                    <SortableTableHeader sortKey="date" currentSortKey={currentSort.key} sortDirection={currentSort.direction} onSort={handleSort}>Date</SortableTableHeader>
+                    <SortableTableHeader sortKey="status" currentSortKey={currentSort.key} sortDirection={currentSort.direction} onSort={handleSort}>Status</SortableTableHeader>
+                    <SortableTableHeader sortKey="suspicious" currentSortKey={currentSort.key} sortDirection={currentSort.direction} onSort={handleSort}>Suspicious</SortableTableHeader>
+                    <SortableTableHeader sortKey="createdBy" currentSortKey={currentSort.key} sortDirection={currentSort.direction} onSort={handleSort}>Created By</SortableTableHeader>
+                  </tr>
+                </thead>
+                <tbody>
+                  {sortedData.map((tx) => (
+                  <tr key={tx.id}>
+                    <td>{tx.id}</td>
+                    <td>
+                      <span className={`user-detail-badge ${getTransactionTypeBadge(tx.type)}`}>
+                        {tx.type}
+                      </span>
+                    </td>
+                    <td>
+                      {tx.amount}
+                    </td>
+                    <td>{tx.createdAt ? formatDate(tx.createdAt) : 'N/A'}</td>
+                    <td>
+                      {tx.type === 'redemption' ? (
+                        tx.processed ? (
+                          <span className="user-detail-badge user-detail-badge-success">Processed</span>
+                        ) : (
+                          <span className="user-detail-badge user-detail-badge-warning">Pending</span>
+                        )
+                      ) : (
+                        <span className="user-detail-badge user-detail-badge-success">Processed</span>
+                      )}
+                    </td>
+                    <td>
+                      {tx.suspicious ? (
+                        <span className="user-detail-badge user-detail-badge-danger">Yes</span>
+                      ) : (
+                        <span className="user-detail-badge user-detail-badge-success">No</span>
+                      )}
+                    </td>
+                    <td>{tx.createdBy || 'N/A'}</td>
+                  </tr>
+                  ))}
+                </tbody>
+              </table>
 
               <div className="user-detail-pagination">
                 <button
