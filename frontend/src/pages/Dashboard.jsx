@@ -779,62 +779,6 @@ const Dashboard = () => {
             </div>
           </div>
         )}
-
-        <div className="dashboard-section">
-          <div className="dashboard-section-header">Recent Transactions</div>
-          {stats.recentTransactions.length === 0 ? (
-            <div className="dashboard-empty-state">No recent transactions</div>
-          ) : (
-            <>
-              <SortableTable
-                data={stats.recentTransactions}
-                columns={[
-                  { key: 'type', label: 'Type' },
-                  { key: 'amount', label: 'Amount' },
-                  { key: 'date', label: 'Date' },
-                  { key: 'status', label: 'Status' },
-                ]}
-                config={{
-                  type: { accessor: (tx) => tx.type },
-                  amount: { sortFn: (a, b) => Math.abs(a.amount) - Math.abs(b.amount) },
-                  date: { accessor: (tx) => tx.createdAt ? new Date(tx.createdAt).getTime() : 0 },
-                  status: { sortFn: (a, b) => (a.processed ? 1 : 0) - (b.processed ? 1 : 0) },
-                }}
-                className="dashboard-table"
-                renderRow={(tx) => (
-                  <tr key={tx.id}>
-                    <td>
-                      <span className={`dashboard-badge ${
-                        tx.type === 'purchase' ? 'dashboard-badge-blue' :
-                        tx.type === 'redemption' ? 'dashboard-badge-danger' :
-                        'dashboard-badge-secondary'
-                      }`}>
-                        {tx.type}
-                      </span>
-                    </td>
-                    <td>
-                      {tx.type === 'redemption' ? '-' : '+'}
-                      {Math.abs(tx.amount)} points
-                    </td>
-                    <td>{tx.createdAt ? new Date(tx.createdAt).toLocaleDateString() : 'N/A'}</td>
-                    <td>
-                      {tx.processed ? (
-                        <span className="dashboard-badge dashboard-badge-success">Processed</span>
-                      ) : (
-                        <span className="dashboard-badge dashboard-badge-warning">Pending</span>
-                      )}
-                    </td>
-                  </tr>
-                )}
-              />
-              <div className="dashboard-section-actions">
-                <Link to="/transactions" className="btn btn-secondary">
-                  View All Transactions
-                </Link>
-              </div>
-            </>
-          )}
-        </div>
       </div>
     );
   }
