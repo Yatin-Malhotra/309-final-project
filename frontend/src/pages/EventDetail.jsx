@@ -309,6 +309,24 @@ const EventDetail = () => {
     }
   };
 
+  const handleRemoveOrganizer = async (userId) => {
+    if (!confirm('Remove this organizer from the event?')) return;
+    
+    setActionLoading(true);
+    try {
+      await eventAPI.removeOrganizer(eventId, userId);
+      loadEvent();
+    } catch (err) {
+      alert(err.response?.data?.error || 'Failed to remove organizer.');
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const canRemoveOrganizers = () => {
+    return (hasRole('manager') || hasRole('superuser')) && !isEventPast();
+  };
+
   const canManageGuests = () => {
     return (hasRole('manager') || hasRole('superuser') || isOrganizer()) && !isEventPast();
   };
@@ -474,8 +492,17 @@ const EventDetail = () => {
             {event.organizers && event.organizers.length > 0 && (
               <ul className="event-detail-list">
                 {event.organizers.map((org) => (
-                  <li key={org.id} className="event-detail-list-item">
-                    {org.name} ({org.utorid})
+                  <li key={org.id} className="event-detail-list-item event-detail-list-item-with-action">
+                    <span>{org.name} ({org.utorid})</span>
+                    {canRemoveOrganizers() && (
+                      <button
+                        onClick={() => handleRemoveOrganizer(org.id)}
+                        className="btn btn-danger event-detail-remove-btn"
+                        disabled={actionLoading}
+                      >
+                        Remove
+                      </button>
+                    )}
                   </li>
                 ))}
               </ul>
