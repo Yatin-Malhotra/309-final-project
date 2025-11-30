@@ -122,6 +122,34 @@ const TransactionDetailPanel = ({ transaction, isOpen, onClose, onUpdate, hasRol
     }
   };
 
+  const handleProcessPurchase = async () => {
+    if (!confirm('Process this purchase transaction?')) return;
+    
+    setLoading(true);
+    setError('');
+
+    try {
+      const response = await transactionAPI.processTransaction(transaction.id);
+      // Update state immediately from response
+      if (response.data) {
+        setTransactionDetails(prev => ({
+          ...prev,
+          ...response.data,
+          processed: response.data.processed !== undefined ? response.data.processed : true
+        }));
+      }
+      // Also reload full details to ensure everything is up to date
+      await loadTransactionDetails();
+      if (onUpdate) {
+        onUpdate();
+      }
+    } catch (err) {
+      setError(err.response?.data?.error || 'Failed to process transaction');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleToggleSuspicious = async () => {
     const action = transactionDetails?.suspicious ? 'unmark' : 'mark';
     if (!confirm(`Are you sure you want to ${action} this transaction as suspicious?`)) return;
@@ -130,7 +158,17 @@ const TransactionDetailPanel = ({ transaction, isOpen, onClose, onUpdate, hasRol
     setError('');
 
     try {
-      await transactionAPI.markSuspicious(transaction.id, !transactionDetails?.suspicious);
+      const response = await transactionAPI.markSuspicious(transaction.id, !transactionDetails?.suspicious);
+      // Update state immediately from response
+      if (response.data) {
+        setTransactionDetails(prev => ({
+          ...prev,
+          ...response.data,
+          suspicious: response.data.suspicious !== undefined ? response.data.suspicious : !transactionDetails?.suspicious,
+          processed: response.data.processed !== undefined ? response.data.processed : prev?.processed
+        }));
+      }
+      // Also reload full details to ensure everything is up to date
       await loadTransactionDetails();
       if (onUpdate) {
         onUpdate();
@@ -377,7 +415,39 @@ const TransactionDetailPanel = ({ transaction, isOpen, onClose, onUpdate, hasRol
               </button>
             )}
 
-            {hasRole('manager') && (details.type === 'purchase' || details.type === 'adjustment') && (
+            {hasRole('manager') && details.type === 'purchase' && (
+              <>
+                {!details.processed && !details.suspicious && (
+                  <button
+                    onClick={handleProcessPurchase}
+                    className="btn btn-success"
+                    disabled={loading}
+                  >
+                    Process Transaction
+                  </button>
+                )}
+                {!details.suspicious && (
+                  <button
+                    onClick={handleToggleSuspicious}
+                    className="btn btn-outline-danger"
+                    disabled={loading}
+                  >
+                    Mark Suspicious
+                  </button>
+                )}
+                {details.suspicious && (
+                  <button
+                    onClick={handleToggleSuspicious}
+                    className="btn btn-outline-secondary"
+                    disabled={loading}
+                  >
+                    Clear Suspicious
+                  </button>
+                )}
+              </>
+            )}
+
+            {hasRole('manager') && details.type === 'adjustment' && (
               <button
                 onClick={handleToggleSuspicious}
                 className={`btn ${details.suspicious ? 'btn-outline-secondary' : 'btn-outline-danger'}`}

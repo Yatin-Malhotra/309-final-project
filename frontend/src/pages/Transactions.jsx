@@ -232,6 +232,14 @@ const Transactions = () => {
         return (a.processed ? 1 : 0) - (b.processed ? 1 : 0);
       }
     },
+    suspicious: {
+      sortFn: (a, b) => {
+        // Suspicious = 1, Not suspicious = 0, Undefined = -1
+        const aVal = a.suspicious === true ? 1 : a.suspicious === false ? 0 : -1;
+        const bVal = b.suspicious === true ? 1 : b.suspicious === false ? 0 : -1;
+        return aVal - bVal;
+      }
+    },
   };
 
   const { sortedData, sortConfig: currentSort, handleSort } = useTableSort(transactions, sortConfig);
@@ -425,7 +433,14 @@ const Transactions = () => {
                   >
                     Status
                   </SortableTableHeader>
-                  {(hasRole('manager') || hasRole('cashier')) && <th>Actions</th>}
+                  <SortableTableHeader 
+                    sortKey="suspicious" 
+                    currentSortKey={currentSort.key} 
+                    sortDirection={currentSort.direction}
+                    onSort={handleSort}
+                  >
+                    Suspicious
+                  </SortableTableHeader>
                 </tr>
               </thead>
               <tbody>
@@ -462,57 +477,17 @@ const Transactions = () => {
                         <span className="transactions-badge transactions-badge-warning">Pending</span>
                       )}
                     </td>
-                    {(hasRole('manager') || hasRole('cashier')) && (
-                      <td>
-                        <div className="transactions-actions-container" onClick={(e) => e.stopPropagation()}>
-                          {hasRole('cashier') && !tx.processed && (isCashierOnly || tx.type === 'redemption') && (
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleProcessRedemption(tx.id);
-                              }}
-                              className="btn btn-success transactions-action-btn"
-                            >
-                              Process
-                            </button>
-                          )}
-                          {hasRole('manager') && (tx.type === 'purchase' || tx.type === 'adjustment') && (
-                            <>
-                              {tx.suspicious ? (
-                                <>
-                                  <span className="transactions-badge transactions-badge-danger">Suspicious</span>
-                                  <button
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      handleToggleSuspicious(tx.id, true);
-                                    }}
-                                    className="btn btn-outline-secondary transactions-suspicious-btn"
-                                    title="Unmark as suspicious"
-                                  >
-                                    Clear
-                                  </button>
-                                </>
-                              ) : (
-                                <button
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    handleToggleSuspicious(tx.id, false);
-                                  }}
-                                  className="btn btn-outline-danger transactions-suspicious-btn"
-                                  title="Mark as suspicious"
-                                >
-                                  Mark Suspicious
-                                </button>
-                              )}
-                            </>
-                          )}
-                          {!(hasRole('cashier') && !tx.processed && (isCashierOnly || tx.type === 'redemption')) && 
-                           !(hasRole('manager') && (tx.type === 'purchase' || tx.type === 'adjustment')) && (
-                            <span>-</span>
-                          )}
-                        </div>
-                      </td>
-                    )}
+                    <td>
+                      {tx.suspicious !== undefined ? (
+                        tx.suspicious ? (
+                          <span className="transactions-badge transactions-badge-danger">Yes</span>
+                        ) : (
+                          <span className="transactions-badge transactions-badge-success">No</span>
+                        )
+                      ) : (
+                        <span className="transactions-badge transactions-badge-secondary">N/A</span>
+                      )}
+                    </td>
                   </tr>
                 ))}
               </tbody>
