@@ -1967,6 +1967,24 @@ app.get('/events', optionalAuth, validateQuery(z.object({
                 result.pointsAwarded = e.pointsAllocated - e.pointsRemain;
                 result.published = e.published;
             }
+            // Check if current user is registered for this event
+            // Always include isRegistered field (false if not logged in or not registered)
+            if (req.user && req.user.id) {
+                // When using include: { guests: true }, we get EventGuest objects with userId field
+                // Ensure we compare as numbers since both are integers
+                const userId = Number(req.user.id);
+                // Debug: Check guest structure (remove after testing)
+                if (e.guests.length > 0 && !e.guests[0].hasOwnProperty('userId')) {
+                    console.log('Warning: Guest object structure:', Object.keys(e.guests[0]));
+                }
+                result.isRegistered = e.guests.some(g => {
+                    // Handle both direct userId and potential nested structures
+                    const guestUserId = g.userId !== undefined ? g.userId : (g.user && g.user.id);
+                    return Number(guestUserId) === userId;
+                });
+            } else {
+                result.isRegistered = false;
+            }
             return result;
         });
         

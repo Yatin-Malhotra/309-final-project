@@ -139,6 +139,11 @@ const Events = () => {
                           <span className="events-badge events-badge-primary">
                             {event.pointsRemain} points remaining
                           </span>
+                          {event.isRegistered && (
+                            <span className="events-badge events-badge-success">
+                              Registered
+                            </span>
+                          )}
                           {!event.published && (
                             <span className="events-badge events-badge-warning">
                               Unpublished
@@ -151,6 +156,11 @@ const Events = () => {
                           <span className="events-badge events-badge-secondary">
                             {event.numGuests} / {event.capacity || '∞'} guests
                           </span>
+                          {event.isRegistered && (
+                            <span className="events-badge events-badge-success">
+                              Registered
+                            </span>
+                          )}
                           {isEventFull(event) && (
                             <span className="events-badge events-badge-danger">
                               Full
