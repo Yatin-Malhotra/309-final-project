@@ -101,7 +101,16 @@ const TransactionDetailPanel = ({ transaction, isOpen, onClose, onUpdate, hasRol
     setError('');
 
     try {
-      await transactionAPI.processRedemption(transaction.id);
+      const response = await transactionAPI.processRedemption(transaction.id);
+      // Update state immediately from response
+      if (response.data) {
+        setTransactionDetails(prev => ({
+          ...prev,
+          ...response.data,
+          processed: response.data.processed !== undefined ? response.data.processed : true
+        }));
+      }
+      // Also reload full details to ensure everything is up to date
       await loadTransactionDetails();
       if (onUpdate) {
         onUpdate();

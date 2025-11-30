@@ -309,20 +309,21 @@
   font-weight: 600 !important;
   border-radius: 4px !important;
   transition: all 0.2s ease;
-  border: 1.5px solid rgba(40, 167, 69, 0.4) !important;
-  background-color: transparent !important;
-  background: transparent !important;
-  color: #155724 !important;
+  border: 1.5px solid var(--success) !important;
+  background-color: var(--success-bg) !important;
+  background: var(--success-bg) !important;
+  color: var(--success) !important;
   min-height: auto !important;
   height: auto !important;
   line-height: 1.2 !important;
 }
 
-.transactions-action-btn:hover {
-  background-color: rgba(40, 167, 69, 0.15) !important;
-  border-color: rgba(40, 167, 69, 0.6) !important;
+.transactions-action-btn.btn-success:hover {
+  background-color: var(--success) !important;
+  color: white !important;
+  border-color: var(--success) !important;
   transform: translateY(-1px);
-  box-shadow: 0 2px 4px rgba(40, 167, 69, 0.2);
+  box-shadow: 0 2px 4px rgba(40, 167, 69, 0.3);
 }
 
 .transactions-actions-container {

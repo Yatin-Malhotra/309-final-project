@@ -1306,7 +1306,8 @@ app.get('/transactions/:transactionId', requireRole('cashier'), async (req, res,
             promotionIds: tx.transactionPromotions.map(tp => tp.promotionId),
             remark: tx.remark,
             createdBy: tx.creator.utorid,
-            createdAt: tx.createdAt
+            createdAt: tx.createdAt,
+            processed: tx.processed
         };
         if (tx.spent) result.spent = tx.spent;
         if (tx.relatedId) result.relatedId = tx.relatedId;
@@ -1769,6 +1770,7 @@ app.patch('/transactions/:transactionId/processed', requireRole('cashier'), asyn
             id: updated.id,
             utorid: tx.user.utorid,
             type: 'redemption',
+            processed: updated.processed,
             processedBy: processor.utorid,
             redeemed: Math.abs(updated.amount),  // Return absolute value
             remark: updated.remark,

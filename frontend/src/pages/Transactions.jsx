@@ -239,11 +239,8 @@ const Transactions = () => {
   return (
     <div className="transactions-page">
       <div className="transactions-page-header">
-        <h1>{isCashierOnly ? 'Redemption Transactions' : 'Transactions'}</h1>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', alignItems: 'flex-end' }}>
-          <Link to="/transactions/create" className="btn btn-primary">
-            Create Transaction
-          </Link>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+          <h1>{isCashierOnly ? 'Redemption Transactions' : 'Transactions'}</h1>
           {hasRole('manager') && (
             <button
               type="button"
@@ -263,6 +260,9 @@ const Transactions = () => {
             </button>
           )}
         </div>
+        <Link to="/transactions/create" className="btn btn-primary">
+          Create Transaction
+        </Link>
       </div>
 
       <div className="transactions-filters">
