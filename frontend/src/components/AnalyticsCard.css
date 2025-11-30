@@ -1,0 +1,10 @@
+.analytics-card {
+  /* Uses dashboard-quick-access-card styles from Dashboard.css */
+  min-height: 200px;
+}
+
+.analytics-card-content {
+  margin-top: 16px;
+  width: 100%;
+}
+
