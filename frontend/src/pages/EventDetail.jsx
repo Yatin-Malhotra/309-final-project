@@ -20,6 +20,16 @@ const EventDetail = () => {
   const [addingOrganizer, setAddingOrganizer] = useState(false);
   const [showAddOrganizerForm, setShowAddOrganizerForm] = useState(false);
   const selectRef = useRef(null);
+  
+  // Guest management state
+  const [guestUsers, setGuestUsers] = useState([]);
+  const [guestUserSearch, setGuestUserSearch] = useState('');
+  const [loadingGuestUsers, setLoadingGuestUsers] = useState(false);
+  const [selectedGuestUserId, setSelectedGuestUserId] = useState('');
+  const [addingGuest, setAddingGuest] = useState(false);
+  const [showAddGuestForm, setShowAddGuestForm] = useState(false);
+  const [guestUtorid, setGuestUtorid] = useState('');
+  const guestSelectRef = useRef(null);
 
   useEffect(() => {
     loadEvent();
@@ -49,12 +59,43 @@ const EventDetail = () => {
     }
   }, [userSearch, hasRole, event]);
 
+  const loadGuestUsers = useCallback(async () => {
+    if (!hasRole('manager') && !hasRole('superuser')) return;
+    
+    setLoadingGuestUsers(true);
+    try {
+      const params = { limit: 50 };
+      if (guestUserSearch) {
+        params.name = guestUserSearch;
+      }
+      const response = await userAPI.getUsers(params);
+      // Filter out users who are already organizers or guests
+      const existingOrganizerIds = event?.organizers?.map(o => o.id) || [];
+      const existingGuestIds = event?.guests?.map(g => g.id) || [];
+      const filteredUsers = (response.data.results || []).filter(
+        u => !existingOrganizerIds.includes(u.id) && !existingGuestIds.includes(u.id)
+      );
+      setGuestUsers(filteredUsers);
+    } catch (err) {
+      console.error('Failed to load users:', err);
+    } finally {
+      setLoadingGuestUsers(false);
+    }
+  }, [guestUserSearch, hasRole, event]);
+
   // Load users for organizer selection (only for managers/superusers)
   useEffect(() => {
     if ((hasRole('manager') || hasRole('superuser')) && event) {
       loadUsers();
     }
   }, [userSearch, hasRole, event, loadUsers]);
+
+  // Load users for guest selection (only for managers/superusers)
+  useEffect(() => {
+    if ((hasRole('manager') || hasRole('superuser')) && event && showAddGuestForm) {
+      loadGuestUsers();
+    }
+  }, [guestUserSearch, hasRole, event, showAddGuestForm, loadGuestUsers]);
 
   // Auto-focus dropdown when user starts typing to enable keyboard navigation
   useEffect(() => {
@@ -69,6 +110,19 @@ const EventDetail = () => {
       return () => clearTimeout(timer);
     }
   }, [userSearch, users, showAddOrganizerForm]);
+
+  // Auto-focus dropdown for guest selection when user starts typing
+  useEffect(() => {
+    if (showAddGuestForm && guestUserSearch && guestUserSearch.length > 0 && guestSelectRef.current) {
+      const timer = setTimeout(() => {
+        if (guestSelectRef.current && guestUsers.length > 0) {
+          guestSelectRef.current.focus();
+        }
+      }, 150);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [guestUserSearch, guestUsers, showAddGuestForm]);
 
   const loadEvent = async () => {
     setLoading(true);
@@ -155,6 +209,65 @@ const EventDetail = () => {
     } finally {
       setAddingOrganizer(false);
     }
+  };
+
+  const handleAddGuest = async () => {
+    let utoridToAdd = '';
+    
+    // If manager/superuser, get from selected user
+    if (hasRole('manager') || hasRole('superuser')) {
+      if (!selectedGuestUserId) return;
+      const user = guestUsers.find(u => u.id === parseInt(selectedGuestUserId));
+      if (!user) return;
+      utoridToAdd = user.utorid;
+      
+      if (!confirm(`Add ${user.name} (${user.utorid}) as a guest?`)) return;
+    } else {
+      // Event organizer - use utorid directly
+      if (!guestUtorid || !guestUtorid.trim()) {
+        alert('Please enter a UTORid');
+        return;
+      }
+      utoridToAdd = guestUtorid.trim();
+      
+      if (!confirm(`Add ${utoridToAdd} as a guest?`)) return;
+    }
+
+    setAddingGuest(true);
+    try {
+      await eventAPI.addGuest(eventId, utoridToAdd);
+      setSelectedGuestUserId('');
+      setGuestUserSearch('');
+      setGuestUtorid('');
+      setShowAddGuestForm(false);
+      loadEvent();
+      // Reload guest users to update the list
+      if (hasRole('manager') || hasRole('superuser')) {
+        loadGuestUsers();
+      }
+    } catch (err) {
+      alert(err.response?.data?.error || 'Failed to add guest.');
+    } finally {
+      setAddingGuest(false);
+    }
+  };
+
+  const handleRemoveGuest = async (userId) => {
+    if (!confirm('Remove this guest from the event?')) return;
+    
+    setActionLoading(true);
+    try {
+      await eventAPI.removeGuest(eventId, userId);
+      loadEvent();
+    } catch (err) {
+      alert(err.response?.data?.error || 'Failed to remove guest.');
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const canManageGuests = () => {
+    return (hasRole('manager') || hasRole('superuser') || isOrganizer()) && !isEventPast();
   };
 
   if (loading) {
@@ -257,7 +370,7 @@ const EventDetail = () => {
         </div>
       </div>
 
-      {((event.organizers && event.organizers.length > 0) || (event.guests && event.guests.length > 0) || (hasRole('manager') || hasRole('superuser'))) && (
+      {((event.organizers && event.organizers.length > 0) || (event.guests && event.guests.length > 0) || (hasRole('manager') || hasRole('superuser')) || isOrganizer() || canManageGuests()) && (
         <div className="event-detail-sections-grid">
           <div className="event-detail-section">
             <div className="event-detail-section-header">
@@ -340,18 +453,120 @@ const EventDetail = () => {
             )}
           </div>
 
-          {event.guests && event.guests.length > 0 && (
-            <div className="event-detail-section">
-              <div className="event-detail-section-header">Guests ({event.guests.length})</div>
+          <div className="event-detail-section">
+            <div className="event-detail-section-header">
+              Guests {event.guests && event.guests.length > 0 ? `(${event.guests.length})` : '(0)'}
+              {event.capacity && ` / ${event.capacity}`}
+            </div>
+            {event.guests && event.guests.length > 0 ? (
               <ul className="event-detail-list">
                 {event.guests.map((guest) => (
-                  <li key={guest.id} className="event-detail-list-item">
-                    {guest.name} ({guest.utorid})
+                  <li key={guest.id} className="event-detail-list-item event-detail-list-item-with-action">
+                    <span>{guest.name} ({guest.utorid})</span>
+                    {canManageGuests() && (
+                      <button
+                        onClick={() => handleRemoveGuest(guest.id)}
+                        className="btn btn-danger event-detail-remove-btn"
+                        disabled={actionLoading}
+                      >
+                        Remove
+                      </button>
+                    )}
                   </li>
                 ))}
               </ul>
-            </div>
-          )}
+            ) : (
+              <div style={{ padding: '10px', color: '#666', fontStyle: 'italic' }}>
+                No guests yet
+              </div>
+            )}
+            {canManageGuests() && (
+              <div className="event-detail-add-organizer-section">
+                {!showAddGuestForm ? (
+                  <button
+                    onClick={() => setShowAddGuestForm(true)}
+                    className="btn btn-primary"
+                    disabled={isEventFull()}
+                  >
+                    Add Guest
+                  </button>
+                ) : (
+                  <div className="event-detail-add-organizer-form">
+                    {(hasRole('manager') || hasRole('superuser')) ? (
+                      <>
+                        <div className="form-group">
+                          <input
+                            type="text"
+                            placeholder="Search users by name or UTORid..."
+                            value={guestUserSearch}
+                            onChange={(e) => setGuestUserSearch(e.target.value)}
+                            onFocus={() => {
+                              if (guestSelectRef.current && guestUsers.length > 0) {
+                                setTimeout(() => {
+                                  guestSelectRef.current?.focus();
+                                }, 50);
+                              }
+                            }}
+                          />
+                        </div>
+                        <div className="form-group">
+                          <select
+                            ref={guestSelectRef}
+                            value={selectedGuestUserId}
+                            onChange={(e) => setSelectedGuestUserId(e.target.value)}
+                            disabled={loadingGuestUsers || addingGuest}
+                          >
+                            <option value="">Select a user to add as guest...</option>
+                            {guestUsers.map((u) => (
+                              <option key={u.id} value={u.id}>
+                                {u.name} ({u.utorid})
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+                      </>
+                    ) : (
+                      <div className="form-group">
+                        <input
+                          type="text"
+                          placeholder="Enter UTORid..."
+                          value={guestUtorid}
+                          onChange={(e) => setGuestUtorid(e.target.value)}
+                          disabled={addingGuest}
+                        />
+                      </div>
+                    )}
+                    <div className="event-detail-add-organizer-actions">
+                      <button
+                        onClick={handleAddGuest}
+                        className="btn btn-primary"
+                        disabled={
+                          addingGuest || 
+                          loadingGuestUsers || 
+                          ((hasRole('manager') || hasRole('superuser')) && !selectedGuestUserId) ||
+                          (!hasRole('manager') && !hasRole('superuser') && !guestUtorid.trim())
+                        }
+                      >
+                        {addingGuest ? 'Adding...' : 'Add Guest'}
+                      </button>
+                      <button
+                        onClick={() => {
+                          setShowAddGuestForm(false);
+                          setSelectedGuestUserId('');
+                          setGuestUserSearch('');
+                          setGuestUtorid('');
+                        }}
+                        className="btn btn-secondary"
+                        disabled={addingGuest}
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
         </div>
       )}
     </div>

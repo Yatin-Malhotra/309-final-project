@@ -2559,14 +2559,27 @@ app.post('/events/:eventId/guests', async (req, res, next) => {
             return res.status(403).json({ error: 'Forbidden' });
         }
 
-        // Validate request body (400)
-        const { utorid } = req.body || {};
-        if (!utorid) {
-            return res.status(400).json({ error: 'utorid is required' });
+        // Validate request body (400) - accept either userId or utorid
+        const { utorid, userId } = req.body || {};
+        if (!utorid && !userId) {
+            return res.status(400).json({ error: 'utorid or userId is required' });
+        }
+        if (utorid && userId) {
+            return res.status(400).json({ error: 'Provide either utorid or userId, not both' });
         }
 
         // Load user (404)
-        const user = await prisma.user.findUnique({ where: { utorid } });
+        const whereClause = utorid 
+            ? { utorid } 
+            : /^\d+$/.test(String(userId))
+                ? { id: parseInt(userId, 10) }
+                : null;
+        
+        if (!whereClause) {
+            return res.status(400).json({ error: 'Invalid userId format' });
+        }
+        
+        const user = await prisma.user.findUnique({ where: whereClause });
         if (!user) return res.status(404).json({ error: 'User not found' });
         
         // 400 checks
@@ -2626,12 +2639,27 @@ app.delete('/events/:eventId/guests/me', async (req, res, next) => {
 });
 
 // DELETE /events/:eventId/guests/:userId - Remove guest
-app.delete('/events/:eventId/guests/:userId', requireRole('manager'), async (req, res, next) => {
+app.delete('/events/:eventId/guests/:userId', async (req, res, next) => {
     try {
         const eventId = parseInt(req.params.eventId);
         const userId = parseInt(req.params.userId);
         if (isNaN(eventId)) return res.status(400).json({ error: 'Invalid event ID' });
         if (isNaN(userId)) return res.status(400).json({ error: 'Invalid user ID' });
+        
+        // Load event (404 first)
+        const event = await prisma.event.findUnique({ where: { id: eventId } });
+        if (!event) return res.status(404).json({ error: 'Event not found' });
+        
+        // Authentication (401) and authorization (403)
+        const token = jwtUtils.extractToken(req.headers.authorization);
+        if (!token) return res.status(401).json({ error: 'Unauthorized' });
+        let authUser;
+        try { authUser = jwtUtils.verifyToken(token); } catch (_) { return res.status(401).json({ error: 'Unauthorized' }); }
+        const isManagerOrAbove = ['manager', 'superuser'].includes(authUser.role);
+        const isEventOrganizer = await isOrganizer(eventId, authUser.id);
+        if (!isManagerOrAbove && !isEventOrganizer) {
+            return res.status(403).json({ error: 'Forbidden' });
+        }
         
         const guest = await prisma.eventGuest.findUnique({
             where: { eventId_userId: { eventId, userId } }

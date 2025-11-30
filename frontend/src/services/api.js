@@ -121,8 +121,8 @@ export const eventAPI = {
     api.post(`/events/${eventId}/guests/me`),
   unregisterFromEvent: (eventId) =>
     api.delete(`/events/${eventId}/guests/me`),
-  addGuest: (eventId, userId) =>
-    api.post(`/events/${eventId}/guests`, { userId }),
+  addGuest: (eventId, utorid) =>
+    api.post(`/events/${eventId}/guests`, { utorid }),
   removeGuest: (eventId, userId) =>
     api.delete(`/events/${eventId}/guests/${userId}`),
   createEventTransaction: (eventId, userId) =>
