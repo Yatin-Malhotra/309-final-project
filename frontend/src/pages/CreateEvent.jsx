@@ -1,5 +1,5 @@
 // Create/Edit event page (for managers)
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate, useParams, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { eventAPI, userAPI } from '../services/api';
@@ -27,9 +27,13 @@ const CreateEvent = () => {
   const [isOrganizer, setIsOrganizer] = useState(false);
   const [organizerIds, setOrganizerIds] = useState([]);
   const [originalOrganizerIds, setOriginalOrganizerIds] = useState([]);
+  const [organizerUsers, setOrganizerUsers] = useState([]); // Store organizer user objects for display
   const [users, setUsers] = useState([]);
   const [userSearch, setUserSearch] = useState('');
   const [loadingUsers, setLoadingUsers] = useState(false);
+  const [showOrganizerDropdown, setShowOrganizerDropdown] = useState(false);
+  const organizerInputRef = useRef(null);
+  const organizerDropdownRef = useRef(null);
 
   const loadEvent = useCallback(async () => {
     if (!eventId || !user) return;
@@ -74,8 +78,15 @@ const CreateEvent = () => {
       // Load existing organizers
       if (event.organizers) {
         const orgIds = event.organizers.map(o => o.id);
+        // Store organizer user objects for display (convert from {id, utorid, name} to user format)
+        const orgUsers = event.organizers.map(o => ({
+          id: o.id,
+          utorid: o.utorid,
+          name: o.name
+        }));
         setOrganizerIds(orgIds);
         setOriginalOrganizerIds(orgIds);
+        setOrganizerUsers(orgUsers);
       }
     } catch (err) {
       setError(err.response?.data?.error || 'Failed to load event.');
@@ -95,26 +106,62 @@ const CreateEvent = () => {
     
     setLoadingUsers(true);
     try {
-      const params = { limit: 50 };
-      if (userSearch) {
-        params.name = userSearch;
-      }
+      // Load more users for client-side filtering (like EventDetail)
+      const params = { limit: 100 };
       const response = await userAPI.getUsers(params);
-      setUsers(response.data.results || []);
+      // Filter out users who are already selected as organizers
+      const filteredUsers = (response.data.results || []).filter(
+        u => !organizerIds.includes(u.id)
+      );
+      setUsers(filteredUsers);
     } catch (err) {
       // Silently fail - users list is optional
       console.error('Failed to load users:', err);
     } finally {
       setLoadingUsers(false);
     }
-  }, [userSearch, hasRole]);
+  }, [hasRole, organizerIds]);
 
   // Load users for organizer selection (only for managers/superusers)
   useEffect(() => {
     if (hasRole('manager') || hasRole('superuser')) {
       loadUsers();
     }
-  }, [userSearch, loadUsers, hasRole]);
+  }, [hasRole, loadUsers]);
+
+  // Filter users based on search input (client-side filtering)
+  const filteredOrganizerUsers = userSearch.trim()
+    ? users.filter(u => 
+        u.name.toLowerCase().includes(userSearch.toLowerCase()) ||
+        u.utorid.toLowerCase().includes(userSearch.toLowerCase())
+      )
+    : users;
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (showOrganizerDropdown && 
+          organizerInputRef.current && 
+          organizerDropdownRef.current &&
+          !organizerInputRef.current.contains(event.target) &&
+          !organizerDropdownRef.current.contains(event.target)) {
+        setShowOrganizerDropdown(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [showOrganizerDropdown]);
+
+  const handleOrganizerSelect = (user) => {
+    if (!organizerIds.includes(user.id)) {
+      setOrganizerIds([...organizerIds, user.id]);
+      // Add to organizerUsers for display
+      setOrganizerUsers([...organizerUsers, user]);
+    }
+    setUserSearch('');
+    setShowOrganizerDropdown(false);
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -275,40 +322,59 @@ const CreateEvent = () => {
           {(hasRole('manager') || hasRole('superuser')) && (
             <div className="form-group">
               <label htmlFor="organizers">Organizers (optional)</label>
-              <div style={{ marginBottom: '8px' }}>
+              <div className="form-group" style={{ position: 'relative', marginBottom: '8px' }}>
                 <input
+                  ref={organizerInputRef}
                   type="text"
                   placeholder="Search users by name or UTORid..."
                   value={userSearch}
-                  onChange={(e) => setUserSearch(e.target.value)}
-                  style={{ width: '100%', padding: '8px', marginBottom: '8px' }}
-                />
-                <select
-                  id="organizer-select"
                   onChange={(e) => {
-                    const userId = parseInt(e.target.value);
-                    if (userId && !organizerIds.includes(userId)) {
-                      setOrganizerIds([...organizerIds, userId]);
-                      e.target.value = '';
+                    setUserSearch(e.target.value);
+                    setShowOrganizerDropdown(true);
+                  }}
+                  onFocus={() => {
+                    if (filteredOrganizerUsers.length > 0) {
+                      setShowOrganizerDropdown(true);
                     }
                   }}
-                  style={{ width: '100%', padding: '8px' }}
                   disabled={loadingUsers}
-                >
-                  <option value="">Select a user to add as organizer...</option>
-                  {users
-                    .filter(u => !organizerIds.includes(u.id))
-                    .map((u) => (
-                      <option key={u.id} value={u.id}>
+                  className="event-detail-searchable-input"
+                  style={{ width: '100%', padding: '8px' }}
+                />
+                {showOrganizerDropdown && filteredOrganizerUsers.length > 0 && (
+                  <div 
+                    ref={organizerDropdownRef}
+                    className="event-detail-searchable-dropdown"
+                  >
+                    {filteredOrganizerUsers.map((u) => (
+                      <div
+                        key={u.id}
+                        className="event-detail-dropdown-item"
+                        onClick={() => handleOrganizerSelect(u)}
+                      >
                         {u.name} ({u.utorid})
-                      </option>
+                      </div>
                     ))}
-                </select>
+                  </div>
+                )}
+                {showOrganizerDropdown && filteredOrganizerUsers.length === 0 && userSearch.trim() && (
+                  <div 
+                    ref={organizerDropdownRef}
+                    className="event-detail-searchable-dropdown"
+                  >
+                    <div className="event-detail-dropdown-item event-detail-dropdown-empty">
+                      No users found
+                    </div>
+                  </div>
+                )}
+                {loadingUsers && (
+                  <div className="event-detail-dropdown-loading">Loading users...</div>
+                )}
               </div>
               {organizerIds.length > 0 && (
                 <div style={{ marginTop: '12px' }}>
                   {organizerIds.map((userId) => {
-                    const user = users.find(u => u.id === userId);
+                    const user = organizerUsers.find(u => u.id === userId);
                     return (
                       <div
                         key={userId}
@@ -327,7 +393,14 @@ const CreateEvent = () => {
                         </span>
                         <button
                           type="button"
-                          onClick={() => setOrganizerIds(organizerIds.filter(id => id !== userId))}
+                          onClick={() => {
+                            setOrganizerIds(organizerIds.filter(id => id !== userId));
+                            setOrganizerUsers(organizerUsers.filter(u => u.id !== userId));
+                            // Reload users to include the removed user in the list
+                            if (hasRole('manager') || hasRole('superuser')) {
+                              loadUsers();
+                            }
+                          }}
                           className="btn btn-secondary"
                           style={{ padding: '4px 8px', fontSize: '12px' }}
                         >
