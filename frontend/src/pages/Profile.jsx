@@ -1,7 +1,7 @@
 // User profile page
 import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import { userAPI } from '../services/api';
+import { userAPI, getAvatarUrl } from '../services/api';
 import './Profile.css';
 
 const Profile = () => {
@@ -32,7 +32,7 @@ const Profile = () => {
         birthday: user.birthday || '',
         avatar: null,
       });
-      setAvatarPreview(user.avatarUrl || null);
+      setAvatarPreview(getAvatarUrl(user.avatarUrl) || null);
     }
   }, [user]);
 
@@ -51,6 +51,12 @@ const Profile = () => {
       if (formData.avatar) data.append('avatar', formData.avatar);
 
       const response = await userAPI.updateMe(data);
+      if (response.data.avatarUrl) {
+        setAvatarPreview(getAvatarUrl(response.data.avatarUrl));
+      }
+      if (formData.avatar) {
+        setFormData({ ...formData, avatar: null });
+      }
       updateLocalUser();
       setSuccess('Profile updated successfully!');
     } catch (err) {
@@ -135,6 +141,7 @@ const Profile = () => {
                 >
                   {avatarPreview ? (
                     <img 
+                      key={avatarPreview} 
                       src={avatarPreview} 
                       alt="Avatar" 
                       className="profile-avatar-image"

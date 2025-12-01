@@ -3,6 +3,7 @@ import { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
+import { getAvatarUrl } from '../services/api';
 import './Navbar.css';
 
 const Navbar = () => {
@@ -96,8 +97,12 @@ const Navbar = () => {
                 onClick={() => setDropdownOpen(!dropdownOpen)}
               >
                 <div className="user-avatar">
-                  {user.avatarUrl ? (
-                    <img src={user.avatarUrl} alt={user.name} />
+                  {getAvatarUrl(user.avatarUrl) ? (
+                    <img 
+                      key={user.avatarUrl} 
+                      src={getAvatarUrl(user.avatarUrl)} 
+                      alt={user.name} 
+                    />
                   ) : (
                     getInitials(user.name)
                   )}

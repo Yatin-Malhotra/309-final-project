@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { userAPI } from '../services/api';
+import { userAPI, getAvatarUrl } from '../services/api';
 import useTableSort from '../hooks/useTableSort';
 import SortableTableHeader from '../components/SortableTableHeader';
 import './UserDetail.css';
@@ -237,10 +237,10 @@ const UserDetail = () => {
         <div className="user-detail-section-header">User Information</div>
         <div className="user-detail-info-grid">
           <div>
-            {user.avatarUrl && (
+            {getAvatarUrl(user.avatarUrl) && (
               <div className="user-detail-avatar">
                 <img
-                  src={user.avatarUrl}
+                  src={getAvatarUrl(user.avatarUrl)}
                   alt={`${user.name}'s avatar`}
                 />
               </div>

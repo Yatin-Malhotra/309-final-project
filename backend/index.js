@@ -37,6 +37,11 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 // UTILITIES
 // ============================================
 
+// Avatar URL normalization - returns default avatar if avatarUrl is null/undefined
+const normalizeAvatarUrl = (avatarUrl) => {
+    return avatarUrl || '/uploads/avatars/default.png';
+};
+
 // JWT Utils
 const jwtUtils = {
     generateToken(user) {
@@ -768,7 +773,12 @@ app.get('/users', requireRole('manager'), validateQuery(z.object({
             orderBy: { createdAt: 'desc' }
         });
         
-        res.json({ count, results: users });
+        const normalizedUsers = users.map(user => ({
+            ...user,
+            avatarUrl: normalizeAvatarUrl(user.avatarUrl)
+        }));
+        
+        res.json({ count, results: normalizedUsers });
     } catch (error) { 
         next(error); 
     }
@@ -795,7 +805,7 @@ app.get('/users/me', requireRole('regular'), async (req, res, next) => {
             id: user.id, utorid: user.utorid, name: user.name, email: user.email,
             birthday: user.birthday, role: user.role, points: user.points,
             createdAt: user.createdAt, lastLogin: user.lastLogin, verified: user.verified,
-            avatarUrl: user.avatarUrl, promotions
+            avatarUrl: normalizeAvatarUrl(user.avatarUrl), promotions
         });
     } catch (error) { next(error); }
 });
@@ -856,7 +866,11 @@ app.patch('/users/me', requireRole('regular'), upload.single('avatar'), async (r
                 role: true, points: true, createdAt: true, lastLogin: true, verified: true, avatarUrl: true
             }
         });
-        res.json(user);
+        // Normalize avatar URL to use default if null
+        res.json({
+            ...user,
+            avatarUrl: normalizeAvatarUrl(user.avatarUrl)
+        });
     } catch (error) {
         if (error.code === 'P2002') return res.status(400).json({ error: 'Email already in use' });
         next(error);
@@ -909,7 +923,7 @@ app.get('/users/:userId', requireRole('cashier'), async (req, res, next) => {
             id: user.id, utorid: user.utorid, name: user.name, email: user.email,
             birthday: user.birthday, role: user.role, points: user.points,
             createdAt: user.createdAt, lastLogin: user.lastLogin, verified: user.verified,
-            suspicious: user.suspicious, avatarUrl: user.avatarUrl, promotions
+            suspicious: user.suspicious, avatarUrl: normalizeAvatarUrl(user.avatarUrl), promotions
         });
     } catch (error) { next(error); }
 });
