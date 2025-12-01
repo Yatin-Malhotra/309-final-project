@@ -1,67 +1,95 @@
-// QR Scanner Modal Component - Placeholder scanner with camera access
+// QR Scanner Modal Component - Functional QR code scanner
 import { useEffect, useRef, useState } from 'react';
+import { Html5Qrcode } from 'html5-qrcode';
 import './QRScannerModal.css';
 
-const QRScannerModal = ({ isOpen, onClose }) => {
-  const videoRef = useRef(null);
-  const streamRef = useRef(null);
+const QRScannerModal = ({ isOpen, onClose, onScanSuccess }) => {
+  const scannerRef = useRef(null);
   const [error, setError] = useState(null);
   const [isScanning, setIsScanning] = useState(false);
+  const [scanResult, setScanResult] = useState(null);
 
   useEffect(() => {
     if (!isOpen) {
       // Clean up when modal closes
-      if (streamRef.current) {
-        streamRef.current.getTracks().forEach(track => track.stop());
-        streamRef.current = null;
-      }
-      setIsScanning(false);
+      stopScanning();
       return;
     }
 
-    // Request camera access
-    const startCamera = async () => {
-      try {
-        setError(null);
-        const stream = await navigator.mediaDevices.getUserMedia({
-          video: {
-            facingMode: 'environment', // Use back camera if available
-            width: { ideal: 1280 },
-            height: { ideal: 720 }
-          }
-        });
-
-        if (videoRef.current) {
-          videoRef.current.srcObject = stream;
-          streamRef.current = stream;
-          setIsScanning(true);
-        }
-      } catch (err) {
-        console.error('Error accessing camera:', err);
-        setError('Unable to access camera. Please check permissions.');
-        setIsScanning(false);
-      }
-    };
-
-    startCamera();
+    // Start scanning when modal opens
+    startScanning();
 
     // Cleanup on unmount
     return () => {
-      if (streamRef.current) {
-        streamRef.current.getTracks().forEach(track => track.stop());
-        streamRef.current = null;
-      }
+      stopScanning();
     };
   }, [isOpen]);
 
-  const handleClose = () => {
-    // Stop camera stream
-    if (streamRef.current) {
-      streamRef.current.getTracks().forEach(track => track.stop());
-      streamRef.current = null;
+  const startScanning = async () => {
+    try {
+      setError(null);
+      setScanResult(null);
+      
+      const scanner = new Html5Qrcode('qr-scanner-container');
+      scannerRef.current = scanner;
+
+      await scanner.start(
+        {
+          facingMode: 'environment', // Use back camera if available
+        },
+        {
+          fps: 10,
+          qrbox: { width: 250, height: 250 },
+        },
+        (decodedText, decodedResult) => {
+          // Successfully scanned QR code
+          setScanResult(decodedText);
+          setIsScanning(true);
+          
+          // Stop scanning after successful scan
+          stopScanning();
+          
+          // Call callback if provided
+          if (onScanSuccess) {
+            onScanSuccess(decodedText);
+          }
+        },
+        (errorMessage) => {
+          // Ignore scanning errors (they're frequent while searching)
+        }
+      );
+
+      setIsScanning(true);
+    } catch (err) {
+      console.error('Error starting scanner:', err);
+      setError('Unable to access camera. Please check permissions.');
+      setIsScanning(false);
+    }
+  };
+
+  const stopScanning = async () => {
+    if (scannerRef.current) {
+      try {
+        await scannerRef.current.stop();
+        await scannerRef.current.clear();
+      } catch (err) {
+        // Ignore errors when stopping
+      }
+      scannerRef.current = null;
     }
     setIsScanning(false);
+  };
+
+  const handleClose = () => {
+    stopScanning();
+    setScanResult(null);
     onClose();
+  };
+
+  const handleRetry = () => {
+    setError(null);
+    setScanResult(null);
+    startScanning();
   };
 
   if (!isOpen) return null;
@@ -74,7 +102,9 @@ const QRScannerModal = ({ isOpen, onClose }) => {
         </button>
         <div className="qr-scanner-header">
           <h2>Scan QR Code</h2>
-          <p className="qr-scanner-subtitle">Position QR code within the frame</p>
+          <p className="qr-scanner-subtitle">
+            {scanResult ? 'QR Code scanned successfully!' : 'Position QR code within the frame'}
+          </p>
         </div>
         
         <div className="qr-scanner-video-container">
@@ -84,37 +114,34 @@ const QRScannerModal = ({ isOpen, onClose }) => {
               <p>{error}</p>
               <button 
                 className="btn btn-primary" 
-                onClick={() => window.location.reload()}
+                onClick={handleRetry}
                 style={{ marginTop: '16px' }}
               >
                 Retry
               </button>
             </div>
+          ) : scanResult ? (
+            <div className="qr-scanner-success">
+              <div className="qr-scanner-success-icon">✓</div>
+              <p>Scanned: {scanResult}</p>
+              <button 
+                className="btn btn-primary" 
+                onClick={handleClose}
+                style={{ marginTop: '16px' }}
+              >
+                Continue
+              </button>
+            </div>
           ) : (
-            <>
-              <video
-                ref={videoRef}
-                autoPlay
-                playsInline
-                muted
-                className="qr-scanner-video"
-              />
-              {isScanning && (
-                <div className="qr-scanner-overlay-frame">
-                  <div className="qr-scanner-corner qr-scanner-corner-tl"></div>
-                  <div className="qr-scanner-corner qr-scanner-corner-tr"></div>
-                  <div className="qr-scanner-corner qr-scanner-corner-bl"></div>
-                  <div className="qr-scanner-corner qr-scanner-corner-br"></div>
-                  <div className="qr-scanner-scan-line"></div>
-                </div>
-              )}
-            </>
+            <div id="qr-scanner-container" style={{ width: '100%', minHeight: '300px' }}></div>
           )}
         </div>
 
-        <div className="qr-scanner-footer">
-          <p className="qr-scanner-note">Place the QR code within the frame to scan it</p>
-        </div>
+        {!error && !scanResult && (
+          <div className="qr-scanner-footer">
+            <p className="qr-scanner-note">Place the QR code within the frame to scan it</p>
+          </div>
+        )}
       </div>
     </div>
   );
