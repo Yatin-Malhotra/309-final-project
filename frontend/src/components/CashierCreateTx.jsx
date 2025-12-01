@@ -26,18 +26,60 @@ const CashierCreateTx = () => {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const [promotions, setPromotions] = useState([]); 
-  const [promotionIds, setPromotionIds] = useState([]); 
+  const [allPromotions, setAllPromotions] = useState([]); // All promotions (one-time + automatic)
+  const [promotionIds, setPromotionIds] = useState([]); // Manually selected one-time promotions
 
-  // this uses manager id for now
-  const getPromotions = async () => {
-    const response = await promotionAPI.getPromotions()
-    setPromotions(response.data.results)
+  // Fetch promotions based on the UTORid entered (for purchase transactions)
+  const getPromotions = async (utorid, type) => {
+    try {
+      const params = {};
+      // If UTORid is provided and transaction type is purchase, fetch promotions for that user
+      if (utorid && type === 'purchase') {
+        params.utorid = utorid;
+      }
+      const response = await promotionAPI.getPromotions(params);
+      setAllPromotions(response.data.results || []);
+    } catch (err) {
+      // If user not found, just set empty promotions
+      if (err.response?.status === 404) {
+        setAllPromotions([]);
+      } else {
+        console.error('Failed to load promotions:', err);
+        setAllPromotions([]);
+      }
+    }
   }
 
   useEffect(() => {
-    getPromotions()
-  }, [])
+    getPromotions(formData.utorid, formData.type);
+    // Clear selected promotions when UTORid or type changes, as available promotions may differ
+    setPromotionIds([]);
+  }, [formData.utorid, formData.type])
+
+  // Filter to only show one-time promotions in the dropdown
+  const oneTimePromotions = allPromotions.filter(p => p.type === 'onetime');
+
+  // Calculate applicable automatic promotions based on spent amount
+  const getApplicableAutomaticPromotions = () => {
+    if (formData.type !== 'purchase' || !formData.spent) {
+      return [];
+    }
+    const spent = parseFloat(formData.spent);
+    if (isNaN(spent) || spent <= 0) {
+      return [];
+    }
+    
+    return allPromotions.filter(promo => {
+      if (promo.type !== 'automatic') return false;
+      // Check minimum spending requirement
+      if (promo.minSpending && spent < promo.minSpending) {
+        return false;
+      }
+      return true;
+    });
+  };
+
+  const applicableAutomaticPromotions = getApplicableAutomaticPromotions();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -155,11 +197,25 @@ const CashierCreateTx = () => {
             </>
           )}
           <PromotionSelector
-            promotions={promotions}
+            promotions={oneTimePromotions}
             value={promotionIds}
             onChange={setPromotionIds}
             formData={formData}
           />
+          
+          {/* Display automatic promotions that will be applied */}
+          {formData.type === 'purchase' && applicableAutomaticPromotions.length > 0 && (
+            <div className="form-group">
+              <label>Automatic Promotions (will be applied)</label>
+              <div className="promotion-list">
+                {applicableAutomaticPromotions.map((promo) => (
+                  <div key={promo.id} className="promotion-item">
+                    <span className="promotion-name">{promo.name} (Automatic)</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
           <div className="form-group">
             <label htmlFor="remark">Remark</label>
             <textarea

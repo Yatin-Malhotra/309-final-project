@@ -1145,7 +1145,35 @@ app.post('/transactions', requireRole('cashier'), validate(schemas.createTransac
         if (type === 'purchase') {
             if (!spent || spent <= 0) return res.status(400).json({ error: 'Invalid spent amount' });
             
-            earnedPoints = await calculatePurchasePoints(spent, promotionIds, targetUser.id);
+            // Automatically fetch and include automatic promotions
+            const now = new Date();
+            const automaticPromotions = await prisma.promotion.findMany({
+                where: {
+                    type: 'automatic',
+                    startTime: { lte: now },
+                    endTime: { gte: now }
+                }
+            });
+            
+            // Filter automatic promotions based on user role and minimum spending
+            const applicableAutomaticPromotions = automaticPromotions.filter(promo => {
+                // Check if user role allows this promotion (regular users see all active, managers/superusers see all)
+                const isManagerOrAbove = ['manager', 'superuser'].includes(targetUser.role);
+                // For now, all active automatic promotions are available to all users
+                // Check minimum spending requirement
+                if (promo.minSpending && spent < promo.minSpending) {
+                    return false;
+                }
+                return true;
+            });
+            
+            // Combine manual promotion IDs with automatic promotion IDs
+            const allPromotionIds = [...new Set([
+                ...promotionIds.map(id => parseInt(id)),
+                ...applicableAutomaticPromotions.map(p => p.id)
+            ])];
+            
+            earnedPoints = await calculatePurchasePoints(spent, allPromotionIds, targetUser.id);
             
             const creator = await prisma.user.findUnique({ where: { id: req.user.id } });
             if (!creator) return res.status(404).json({ error: 'Creator not found' });
@@ -1168,14 +1196,14 @@ app.post('/transactions', requireRole('cashier'), validate(schemas.createTransac
                 }
             });
             
-            // Link promotions
-            if (promotionIds && promotionIds.length > 0) {
+            // Link promotions (including automatic ones)
+            if (allPromotionIds && allPromotionIds.length > 0) {
                 await prisma.transactionPromotion.createMany({
-                    data: promotionIds.map(pid => ({ transactionId: transaction.id, promotionId: pid }))
+                    data: allPromotionIds.map(pid => ({ transactionId: transaction.id, promotionId: pid }))
                 });
                 
                 // Mark one-time promotions as used
-                for (const pid of promotionIds) {
+                for (const pid of allPromotionIds) {
                     const promo = await prisma.promotion.findUnique({ where: { id: pid } });
                     if (promo && promo.type === 'onetime') {
                         await prisma.userPromotion.upsert({
@@ -1204,7 +1232,7 @@ app.post('/transactions', requireRole('cashier'), validate(schemas.createTransac
                 spent: transaction.spent,
                 earned: suspicious ? 0 : earnedPoints,
                 remark: transaction.remark,
-                promotionIds: promotionIds || [],
+                promotionIds: allPromotionIds || [],
                 createdBy: creatorUser.utorid
             });
             
@@ -3087,6 +3115,7 @@ app.get('/promotions', optionalAuth, validateQuery(z.object({
     type: z.enum(['automatic', 'onetime']).optional(),
     started: z.string().optional(),
     ended: z.string().optional(),
+    utorid: z.string().optional(),
     page: z.preprocess(
         (val) => (val === undefined || val === null || val === '') ? '1' : val,
         z.string().regex(/^\d+$/)
@@ -3097,7 +3126,7 @@ app.get('/promotions', optionalAuth, validateQuery(z.object({
     )
 })), async (req, res, next) => {
     try {
-        const { name, type, started, ended, page = '1', limit = '10' } = req.validatedQuery;
+        const { name, type, started, ended, utorid, page = '1', limit = '10' } = req.validatedQuery;
         
         if (started && ended) return res.status(400).json({ error: 'Cannot specify both started and ended' });
         
@@ -3113,11 +3142,26 @@ app.get('/promotions', optionalAuth, validateQuery(z.object({
         const skip = (pageNum - 1) * limitNum;
         const now = new Date();
         
+        // Determine which user's role to use for filtering
+        let targetUser = req.user;
+        let targetUserId = req.user?.id;
+        
+        // If utorid is provided, look up that user instead
+        if (utorid) {
+            const userByUtorid = await prisma.user.findUnique({ where: { utorid } });
+            if (!userByUtorid) {
+                return res.status(404).json({ error: 'User not found' });
+            }
+            targetUser = userByUtorid;
+            targetUserId = userByUtorid.id;
+        }
+        
         const where = {};
         if (name) where.name = { contains: name };
         if (type) where.type = type;
         
-        const isManagerOrAbove = req.user && ['manager', 'superuser'].includes(req.user.role);
+        // Use target user's role to determine visibility
+        const isManagerOrAbove = targetUser && ['manager', 'superuser'].includes(targetUser.role);
         
         // Managers see all promotions unless explicitly filtered by time
         if (isManagerOrAbove) {
@@ -3139,18 +3183,18 @@ app.get('/promotions', optionalAuth, validateQuery(z.object({
             where,
             skip,
             take: limitNum,
-            include: req.user ? {
+            include: targetUserId ? {
                 userPromotions: {
-                    where: { userId: req.user.id }
+                    where: { userId: targetUserId }
                 }
             } : false
         });
         
         // Filter out used one-time promotions for regular users
-        if (!isManagerOrAbove && req.user) {
+        if (!isManagerOrAbove && targetUserId) {
             promotions = promotions.filter(p => {
                 if (p.type === 'automatic') return true;
-                const userPromo = p.userPromotions?.find(up => up.userId === req.user.id);
+                const userPromo = p.userPromotions?.find(up => up.userId === targetUserId);
                 return !userPromo || !userPromo.used;
             });
         }
