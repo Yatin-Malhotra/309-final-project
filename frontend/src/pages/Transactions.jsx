@@ -434,14 +434,16 @@ const Transactions = () => {
                   >
                     Status
                   </SortableTableHeader>
-                  <SortableTableHeader 
-                    sortKey="suspicious" 
-                    currentSortKey={currentSort.key} 
-                    sortDirection={currentSort.direction}
-                    onSort={handleSort}
-                  >
-                    Suspicious
-                  </SortableTableHeader>
+                  {(hasRole('manager') || hasRole('superuser')) && (
+                    <SortableTableHeader 
+                      sortKey="suspicious" 
+                      currentSortKey={currentSort.key} 
+                      sortDirection={currentSort.direction}
+                      onSort={handleSort}
+                    >
+                      Suspicious
+                    </SortableTableHeader>
+                  )}
                 </tr>
               </thead>
               <tbody>
@@ -478,17 +480,19 @@ const Transactions = () => {
                         <span className="transactions-badge transactions-badge-warning">Pending</span>
                       )}
                     </td>
-                    <td>
-                      {tx.suspicious !== undefined ? (
-                        tx.suspicious ? (
-                          <span className="transactions-badge transactions-badge-danger">Yes</span>
+                    {(hasRole('manager') || hasRole('superuser')) && (
+                      <td>
+                        {tx.suspicious !== undefined ? (
+                          tx.suspicious ? (
+                            <span className="transactions-badge transactions-badge-danger">Yes</span>
+                          ) : (
+                            <span className="transactions-badge transactions-badge-success">No</span>
+                          )
                         ) : (
-                          <span className="transactions-badge transactions-badge-success">No</span>
-                        )
-                      ) : (
-                        <span className="transactions-badge transactions-badge-secondary">N/A</span>
-                      )}
-                    </td>
+                          <span className="transactions-badge transactions-badge-secondary">N/A</span>
+                        )}
+                      </td>
+                    )}
                   </tr>
                 ))}
               </tbody>

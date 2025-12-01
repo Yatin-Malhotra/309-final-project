@@ -1,6 +1,6 @@
 // Transaction detail sliding panel component
 import { useState, useEffect } from 'react';
-import { transactionAPI } from '../services/api';
+import { transactionAPI, promotionAPI } from '../services/api';
 import './TransactionDetailPanel.css';
 
 const TransactionDetailPanel = ({ transaction, isOpen, onClose, onUpdate, hasRole }) => {
@@ -11,6 +11,7 @@ const TransactionDetailPanel = ({ transaction, isOpen, onClose, onUpdate, hasRol
   const [amount, setAmount] = useState('');
   const [spent, setSpent] = useState('');
   const [transactionDetails, setTransactionDetails] = useState(null);
+  const [promotionNames, setPromotionNames] = useState({});
 
   useEffect(() => {
     if (isOpen && transaction) {
@@ -31,10 +32,39 @@ const TransactionDetailPanel = ({ transaction, isOpen, onClose, onUpdate, hasRol
       setTransactionDetails(response.data);
       setAmount(response.data.amount?.toString() || '');
       setSpent(response.data.spent?.toString() || '');
+      
+      // Load promotion names if promotionIds exist
+      if (response.data.promotionIds && response.data.promotionIds.length > 0) {
+        loadPromotionNames(response.data.promotionIds);
+      }
     } catch (err) {
       console.error('Failed to load transaction details:', err);
       // Fallback to transaction prop if API fails
       setTransactionDetails(transaction);
+      if (transaction.promotionIds && transaction.promotionIds.length > 0) {
+        loadPromotionNames(transaction.promotionIds);
+      }
+    }
+  };
+
+  const loadPromotionNames = async (promotionIds) => {
+    try {
+      const names = {};
+      // Fetch each promotion to get its name
+      await Promise.all(
+        promotionIds.map(async (id) => {
+          try {
+            const response = await promotionAPI.getPromotion(id);
+            names[id] = response.data.name;
+          } catch (err) {
+            // If promotion not found, use ID as fallback
+            names[id] = `#${id}`;
+          }
+        })
+      );
+      setPromotionNames(names);
+    } catch (err) {
+      console.error('Failed to load promotion names:', err);
     }
   };
 
@@ -398,7 +428,12 @@ const TransactionDetailPanel = ({ transaction, isOpen, onClose, onUpdate, hasRol
               <div className="transaction-panel-field">
                 <label>Promotions</label>
                 <div className="transaction-panel-value">
-                  {details.promotionIds.join(', ')}
+                  {details.promotionIds.map((id, index) => (
+                    <span key={id}>
+                      {promotionNames[id] || `#${id}`}
+                      {index < details.promotionIds.length - 1 && ', '}
+                    </span>
+                  ))}
                 </div>
               </div>
             )}
