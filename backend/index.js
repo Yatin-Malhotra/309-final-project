@@ -28,6 +28,7 @@ const { v4: uuidv4 } = require('uuid');
 const multer = require('multer');
 const { z } = require('zod');
 const fs = require('fs');
+const emailjs = require('@emailjs/nodejs');
 
 const prisma = new PrismaClient();
 const app = express();
@@ -70,6 +71,53 @@ const jwtUtils = {
         const parts = authHeader.split(' ');
         if (parts.length !== 2 || parts[0] !== 'Bearer') return null;
         return parts[1];
+    }
+};
+
+// EmailJS Configuration
+const isEmailConfigured = () => {
+    return !!(process.env.EMAILJS_SERVICE_ID && process.env.EMAILJS_TEMPLATE_ID && process.env.EMAILJS_PUBLIC_KEY && process.env.EMAILJS_PRIVATE_KEY);
+};
+
+const emailUtils = {
+    async sendPasswordResetEmail(userEmail, resetToken) {
+        const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
+        const resetLink = `${frontendUrl}/reset-password/${resetToken}`;
+        
+        // If EmailJS is not configured, log to console for development
+        if (!isEmailConfigured()) {
+            console.log('\n========================================');
+            console.log('PASSWORD RESET LINK (Development Mode)');
+            console.log('========================================');
+            console.log(`Email would be sent to: ${userEmail}`);
+            console.log(`Reset Link: ${resetLink}`);
+            console.log('========================================\n');
+            return { messageId: 'console-log', resetLink };
+        }
+        
+        // Send email using EmailJS
+        try {
+            const templateParams = {
+                email: userEmail,
+                link: resetLink,
+            };
+            
+            const response = await emailjs.send(
+                process.env.EMAILJS_SERVICE_ID,
+                process.env.EMAILJS_TEMPLATE_ID,
+                templateParams,
+                {
+                    publicKey: process.env.EMAILJS_PUBLIC_KEY,
+                    privateKey: process.env.EMAILJS_PRIVATE_KEY,
+                }
+            );
+            
+            console.log('Password reset email sent via EmailJS:', response.text);
+            return { messageId: response.text, resetLink };
+        } catch (error) {
+            console.error('Error sending password reset email via EmailJS:', error);
+            throw error;
+        }
     }
 };
 
@@ -530,17 +578,27 @@ app.post('/auth/resets', validate(schemas.resetRequest), async (req, res, next) 
         const { utorid } = req.validatedData;
         const user = await prisma.user.findUnique({ where: { utorid } });
         if (!user) {
-            return res.status(404).json({ error: 'User not found' });
+            // Don't reveal if user exists or not for security
+            return res.status(202).json({ message: 'If the user exists, a password reset email has been sent.' });
         }
         const resetToken = uuidv4();
         const expiresAt = new Date(Date.now() + 3600000);
-        if (user) {
-            await prisma.user.update({
-                where: { id: user.id },
-                data: { resetToken, resetTokenExpiry: expiresAt }
-            });
+        
+        await prisma.user.update({
+            where: { id: user.id },
+            data: { resetToken, resetTokenExpiry: expiresAt }
+        });
+        
+        // Send email with reset link
+        try {
+            await emailUtils.sendPasswordResetEmail(user.email, resetToken);
+        } catch (emailError) {
+            console.error('Failed to send password reset email:', emailError);
+            // Still return success to user for security (don't reveal email issues)
         }
-        res.status(202).json({ expiresAt: expiresAt.toISOString(), resetToken });
+        
+        // Don't return resetToken in response for security
+        res.status(202).json({ message: 'If the user exists, a password reset email has been sent.' });
     } catch (error) { next(error); }
 });
 

@@ -140,7 +140,7 @@ const ResetPassword = () => {
         </div>
         {success ? (
           <div className="reset-password-success-message">
-            Reset token has been sent. Please check your email or contact support.
+            Check email for further instructions
           </div>
         ) : (
           <form onSubmit={handleRequestReset}>
