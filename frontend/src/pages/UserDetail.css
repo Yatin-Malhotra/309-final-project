@@ -162,6 +162,16 @@
   box-shadow: 0 0 0 3px rgba(79, 124, 130, 0.2);
 }
 
+[data-theme="dark"] .user-detail-role-select:focus {
+  background-color: #000000;
+  color: #ffffff;
+}
+
+[data-theme="dark"] .user-detail-role-select:focus option {
+  background-color: #000000;
+  color: #ffffff;
+}
+
 .user-detail-promotions-grid {
   display: grid;
   gap: 12px;
