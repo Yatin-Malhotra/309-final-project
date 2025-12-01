@@ -502,6 +502,7 @@ const Dashboard = () => {
                         tx.type === 'purchase' ? 'dashboard-badge-blue' :
                         tx.type === 'redemption' ? 'dashboard-badge-danger' :
                         tx.type === 'event' ? 'dashboard-badge-success' :
+                        tx.type === 'adjustment' ? 'dashboard-badge-warning' :
                         'dashboard-badge-secondary'
                       }`}>
                         {tx.type}
