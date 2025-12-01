@@ -456,7 +456,7 @@ const EventDetail = () => {
         {hasRole('manager') && (
           <div className="event-detail-info">
             <div className="event-detail-info-item">
-              <strong>Points Remaining:</strong> {event.pointsRemain}
+              <strong>Points Remaining:</strong> {event.pointsRemain || 0}
             </div>
             <div className="event-detail-info-item">
               <strong>Points Awarded:</strong> {event.pointsAwarded || 0}

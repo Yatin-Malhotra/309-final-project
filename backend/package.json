@@ -6,7 +6,9 @@
   "scripts": {
     "createsuperuser": "node prisma/createsu.js",
     "seed": "node prisma/seed.js",
-    "clean": "rm -rf prisma/dev.db* node_modules package-lock.json prisma/migrations/"
+    "clean": "rm -rf prisma/dev.db* node_modules package-lock.json prisma/migrations/",
+    "pretest": "cross-env DATABASE_URL=\"file:./test.db\" npx prisma db push --accept-data-loss",
+    "test": "cross-env DATABASE_URL=\"file:./test.db\" jest --runInBand"
   },
   "author": "CSC309 Student, Winter 2025",
   "license": "ISC",
@@ -23,5 +25,10 @@
     "sqlite3": "^5.1.7",
     "uuid": "^11.1.0",
     "zod": "^3.24.2"
+  },
+  "devDependencies": {
+    "cross-env": "^10.1.0",
+    "jest": "^30.2.0",
+    "supertest": "^7.1.4"
   }
 }

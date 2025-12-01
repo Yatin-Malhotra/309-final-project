@@ -303,8 +303,9 @@ const Transactions = () => {
               </div>
             )}
             <div className="form-group">
-              <label>Type</label>
+              <label htmlFor="transaction-type">Type</label>
               <select
+                id="transaction-type"
                 value={filters.type}
                 onChange={(e) => handleFilterChange('type', e.target.value)}
               >
