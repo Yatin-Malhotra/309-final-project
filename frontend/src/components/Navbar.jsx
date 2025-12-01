@@ -1,6 +1,6 @@
 // Navigation bar component
 import { useState, useEffect, useRef } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
 import './Navbar.css';
@@ -9,6 +9,7 @@ const Navbar = () => {
   const { user, logout, hasRole, allowedRoles, currentRole, setCurrentRole } = useAuth();
   const { theme, toggleTheme } = useTheme();
   const navigate = useNavigate();
+  const location = useLocation();
   const [dropdownOpen, setDropdownOpen] = useState(false);
 
   const [roleMenuOpen, setRoleMenuOpen] = useState(false);
@@ -83,11 +84,11 @@ const Navbar = () => {
 
         {user ? (
           <div className="navbar-links">
-            <Link to="/dashboard">Dashboard</Link>
-            <Link to="/transactions">Transactions</Link>
-            {hasRole('manager') && <Link to="/users">Users</Link>}
-            <Link to="/events">Events</Link>
-            <Link to="/promotions">Promotions</Link>
+            <Link to="/dashboard" className={location.pathname === '/dashboard' || location.pathname === '/' ? 'active' : ''}>Dashboard</Link>
+            <Link to="/transactions" className={location.pathname.startsWith('/transactions') ? 'active' : ''}>Transactions</Link>
+            {hasRole('manager') && <Link to="/users" className={location.pathname.startsWith('/users') ? 'active' : ''}>Users</Link>}
+            <Link to="/events" className={location.pathname.startsWith('/events') ? 'active' : ''}>Events</Link>
+            <Link to="/promotions" className={location.pathname.startsWith('/promotions') ? 'active' : ''}>Promotions</Link>
 
             <div className="navbar-user" ref={dropdownRef}>
               <div

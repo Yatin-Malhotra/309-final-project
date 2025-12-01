@@ -1,5 +1,5 @@
 // Dashboard page - main landing page after login
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { transactionAPI, eventAPI, promotionAPI, userAPI, analyticsAPI } from '../services/api';
 import { Link } from 'react-router-dom';
@@ -8,6 +8,7 @@ import AnimatedNumber from '../components/AnimatedNumber';
 import SimpleChart from '../components/SimpleChart';
 import QRCodeModal from '../components/QRCodeModal';
 import QRScannerModal from '../components/QRScannerModal';
+import TransactionModal from '../components/TransactionModal';
 import SortableTable from '../components/SortableTable';
 import './Dashboard.css';
 
@@ -29,6 +30,8 @@ const Dashboard = () => {
   const [loading, setLoading] = useState(true);
   const [showQRCode, setShowQRCode] = useState(false);
   const [showQRScanner, setShowQRScanner] = useState(false);
+  const [showTransactionModal, setShowTransactionModal] = useState(false);
+  const [transactionModalType, setTransactionModalType] = useState('redemption');
   const [collapsedSections, setCollapsedSections] = useState({
     userAnalytics: false,
     transactionAnalytics: false,
@@ -36,19 +39,18 @@ const Dashboard = () => {
     promotionAnalytics: false,
   });
 
-  useEffect(() => {
-    const loadDashboard = async () => {
-      if (!user || !currentRole) {
-        setLoading(false);
-        return;
-      }
-      
-      setLoading(true);
-      try {
-        const userRole = currentRole;
-        console.log('Loading dashboard for role:', userRole)
-          // For regular users: show points and transactions
-          if (userRole === 'regular') {
+  const loadDashboard = useCallback(async () => {
+    if (!user || !currentRole) {
+      setLoading(false);
+      return;
+    }
+    
+    setLoading(true);
+    try {
+      const userRole = currentRole;
+      console.log('Loading dashboard for role:', userRole)
+        // For regular users: show points and transactions
+        if (userRole === 'regular') {
             const points = user.points || 0;
             const txResponse = await transactionAPI.getMyTransactions({
               limit: 100, // Get more transactions for analytics
@@ -306,15 +308,16 @@ const Dashboard = () => {
               financial: financialAnalytics.data
             });
           }
-      } catch (error) {
-        console.error('Failed to load dashboard:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
+    } catch (error) {
+      console.error('Failed to load dashboard:', error);
+    } finally {
+      setLoading(false);
+    }
+  }, [user, currentRole]);
 
+  useEffect(() => {
     loadDashboard();
-  }, [user?.id, currentRole]); // Only depend on user.id and currentRole to avoid unnecessary reloads
+  }, [loadDashboard]);
 
   const toggleSection = (section) => {
     setCollapsedSections(prev => ({
@@ -386,22 +389,36 @@ const Dashboard = () => {
               <div className="dashboard-quick-access-description">Available points</div>
             </div>
           </div>
-          <Link to="/transactions/create?type=transfer" className="dashboard-card dashboard-quick-access-card" style={{ textDecoration: 'none', color: 'inherit' }}>
+          <div 
+            className="dashboard-card dashboard-quick-access-card" 
+            style={{ textDecoration: 'none', color: 'inherit', cursor: 'pointer' }}
+            onClick={() => {
+              setTransactionModalType('transfer');
+              setShowTransactionModal(true);
+            }}
+          >
             <div className="dashboard-quick-access-icon">↗</div>
             <div className="dashboard-quick-access-content">
               <div className="dashboard-quick-access-title">Transfer Points</div>
               <div className="dashboard-quick-access-description">Send points to other users</div>
             </div>
             <div className="dashboard-quick-access-arrow">→</div>
-          </Link>
-          <Link to="/transactions/create?type=redemption" className="dashboard-card dashboard-quick-access-card" style={{ textDecoration: 'none', color: 'inherit' }}>
+          </div>
+          <div 
+            className="dashboard-card dashboard-quick-access-card" 
+            style={{ textDecoration: 'none', color: 'inherit', cursor: 'pointer' }}
+            onClick={() => {
+              setTransactionModalType('redemption');
+              setShowTransactionModal(true);
+            }}
+          >
             <div className="dashboard-quick-access-icon">🎁</div>
             <div className="dashboard-quick-access-content">
               <div className="dashboard-quick-access-title">Redeem Points</div>
               <div className="dashboard-quick-access-description">Redeem your points for rewards</div>
             </div>
             <div className="dashboard-quick-access-arrow">→</div>
-          </Link>
+          </div>
           <Link to="/events" className="dashboard-card dashboard-quick-access-card" style={{ textDecoration: 'none', color: 'inherit' }}>
             <div className="dashboard-quick-access-icon">📅</div>
             <div className="dashboard-quick-access-content">
@@ -413,6 +430,12 @@ const Dashboard = () => {
         </div>
 
         <QRCodeModal isOpen={showQRCode} onClose={() => setShowQRCode(false)} />
+        <TransactionModal 
+          isOpen={showTransactionModal} 
+          onClose={() => setShowTransactionModal(false)} 
+          defaultType={transactionModalType}
+          onSuccess={loadDashboard}
+        />
 
         {/* Points Activity Analytics */}
         {analytics?.pointsActivity && (

@@ -10,6 +10,7 @@ const Promotions = () => {
   const [promotions, setPromotions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [deletingPromotionId, setDeletingPromotionId] = useState(null);
 
   useEffect(() => {
     loadPromotions();
@@ -43,6 +44,27 @@ const Promotions = () => {
     const start = new Date(promotion.startTime);
     const end = new Date(promotion.endTime);
     return now >= start && now <= end;
+  };
+
+  const canDeletePromotion = (promotion) => {
+    if (!promotion.startTime) return false; // Can't delete if we don't know start time
+    const now = new Date();
+    const start = new Date(promotion.startTime);
+    return now < start; // Can only delete if promotion hasn't started
+  };
+
+  const handleDeletePromotion = async (promotionId, promotionName) => {
+    if (!confirm(`Are you sure you want to delete "${promotionName}"? This action cannot be undone.`)) return;
+    
+    setDeletingPromotionId(promotionId);
+    try {
+      await promotionAPI.deletePromotion(promotionId);
+      loadPromotions(); // Reload the list
+    } catch (err) {
+      alert(err.response?.data?.error || 'Failed to delete promotion.');
+    } finally {
+      setDeletingPromotionId(null);
+    }
   };
 
   return (
@@ -116,14 +138,37 @@ const Promotions = () => {
 
             if (hasRole('manager') || hasRole('superuser')) {
               return (
-                <Link
-                  key={promo.id}
-                  to={`/promotions/${promo.id}/edit`}
-                  className="promotions-card promotions-card-clickable"
-                  style={{ textDecoration: 'none', color: 'inherit' }}
-                >
-                  <CardContent />
-                </Link>
+                <div key={promo.id} className="promotions-card" style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+                  <Link
+                    to={`/promotions/${promo.id}/edit`}
+                    style={{ textDecoration: 'none', color: 'inherit', display: 'flex', flex: 1 }}
+                  >
+                    <CardContent />
+                  </Link>
+                  {canDeletePromotion(promo) && (
+                    <button
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        handleDeletePromotion(promo.id, promo.name);
+                      }}
+                      className="btn btn-danger"
+                      disabled={deletingPromotionId === promo.id}
+                      style={{
+                        padding: '12px 24px',
+                        fontSize: '15px',
+                        fontWeight: '600',
+                        borderRadius: '8px',
+                        marginLeft: '16px',
+                        flexShrink: 0,
+                        whiteSpace: 'nowrap',
+                        transition: 'all 0.2s ease'
+                      }}
+                    >
+                      {deletingPromotionId === promo.id ? 'Deleting...' : 'Delete'}
+                    </button>
+                  )}
+                </div>
               );
             }
 

@@ -1702,9 +1702,13 @@ app.post('/users/:userId/transactions', requireRole('regular'), async (req, res,
         if (!sender.verified) return res.status(403).json({ error: 'Sender not verified' });
         if (sender.points < amount) return res.status(400).json({ error: 'Insufficient points' });
         
-        const recipientId = parseInt(req.params.userId);
-        if (isNaN(recipientId)) return res.status(400).json({ error: 'Invalid recipient ID' });
-        const recipient = await prisma.user.findUnique({ where: { id: recipientId } });
+        // Support both numeric ID and UTORid
+        const identifier = req.params.userId;
+        const whereClause = /^\d+$/.test(identifier)
+            ? { id: parseInt(identifier, 10) }
+            : { utorid: identifier };
+        
+        const recipient = await prisma.user.findUnique({ where: whereClause });
         if (!recipient) return res.status(404).json({ error: 'Recipient not found' });
         
         // Create two transactions
@@ -2931,7 +2935,8 @@ app.post('/events/:eventId/transactions', async (req, res, next) => {
                         amount: amount,
                         relatedId: eventId,
                         remark: event.name,
-                        createdBy: authUser.id
+                        createdBy: authUser.id,
+                        processed: true
                     }
                 });
                 
@@ -2982,7 +2987,8 @@ app.post('/events/:eventId/transactions', async (req, res, next) => {
                 amount: amount,
                 relatedId: eventId,
                 remark: event.name,
-                createdBy: authUser.id
+                createdBy: authUser.id,
+                processed: true
             }
         });
         

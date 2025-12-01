@@ -88,8 +88,8 @@ export const transactionAPI = {
     api.patch(`/transactions/${transactionId}/suspicious`, { suspicious }),
   createRedemption: (amount, remark) =>
     api.post('/users/me/transactions', { type: 'redemption', amount, remark }),
-  createTransfer: (userId, amount, remark) =>
-    api.post(`/users/${userId}/transactions`, {
+  createTransfer: (userIdentifier, amount, remark) =>
+    api.post(`/users/${userIdentifier}/transactions`, {
       type: 'transfer',
       amount,
       remark,
