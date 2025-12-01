@@ -3,7 +3,6 @@ import { useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { promotionAPI, transactionAPI } from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
-import PromotionSelector from './PromotionSelector';
 import '../pages/CreateTransaction.css';
 
 const CashierCreateTx = () => {
@@ -56,30 +55,50 @@ const CashierCreateTx = () => {
     setPromotionIds([]);
   }, [formData.utorid, formData.type])
 
-  // Filter to only show one-time promotions in the dropdown
-  const oneTimePromotions = allPromotions.filter(p => p.type === 'onetime');
-
-  // Calculate applicable automatic promotions based on spent amount
-  const getApplicableAutomaticPromotions = () => {
+  // Calculate eligible promotions based on spent amount
+  const getEligiblePromotions = () => {
     if (formData.type !== 'purchase' || !formData.spent) {
-      return [];
+      return { automatic: [], oneTime: [] };
     }
     const spent = parseFloat(formData.spent);
     if (isNaN(spent) || spent <= 0) {
-      return [];
+      return { automatic: [], oneTime: [] };
     }
     
-    return allPromotions.filter(promo => {
-      if (promo.type !== 'automatic') return false;
+    const eligible = {
+      automatic: [],
+      oneTime: []
+    };
+    
+    allPromotions.forEach(promo => {
       // Check minimum spending requirement
       if (promo.minSpending && spent < promo.minSpending) {
-        return false;
+        return;
       }
-      return true;
+      
+      if (promo.type === 'automatic') {
+        eligible.automatic.push(promo);
+      } else if (promo.type === 'onetime') {
+        eligible.oneTime.push(promo);
+      }
     });
+    
+    return eligible;
   };
 
-  const applicableAutomaticPromotions = getApplicableAutomaticPromotions();
+  const eligiblePromotions = getEligiblePromotions();
+
+  // Handle clicking on a one-time promotion to toggle it
+  const handleToggleOneTimePromotion = (promoId) => {
+    const promoIdStr = String(promoId);
+    if (promotionIds.includes(promoIdStr)) {
+      // Remove if already selected
+      setPromotionIds(promotionIds.filter(id => id !== promoIdStr));
+    } else {
+      // Add if not selected
+      setPromotionIds([...promotionIds, promoIdStr]);
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -196,23 +215,38 @@ const CashierCreateTx = () => {
               </div>
             </>
           )}
-          <PromotionSelector
-            promotions={oneTimePromotions}
-            value={promotionIds}
-            onChange={setPromotionIds}
-            formData={formData}
-          />
-          
-          {/* Display automatic promotions that will be applied */}
-          {formData.type === 'purchase' && applicableAutomaticPromotions.length > 0 && (
+          {/* Display all eligible promotions */}
+          {formData.type === 'purchase' && 
+           (eligiblePromotions.automatic.length > 0 || eligiblePromotions.oneTime.length > 0) && (
             <div className="form-group">
-              <label>Automatic Promotions (will be applied)</label>
+              <label>Available Promotions</label>
               <div className="promotion-list">
-                {applicableAutomaticPromotions.map((promo) => (
-                  <div key={promo.id} className="promotion-item">
+                {/* Automatic promotions - read-only, will be applied automatically */}
+                {eligiblePromotions.automatic.map((promo) => (
+                  <div key={promo.id} className="promotion-item promotion-item-automatic">
                     <span className="promotion-name">{promo.name} (Automatic)</span>
+                    <span className="promotion-checkmark">✓ Applied</span>
                   </div>
                 ))}
+                {/* One-time promotions - clickable to apply */}
+                {eligiblePromotions.oneTime.map((promo) => {
+                  const isSelected = promotionIds.includes(String(promo.id));
+                  return (
+                    <div 
+                      key={promo.id} 
+                      className={`promotion-item promotion-item-onetime ${isSelected ? 'promotion-item-selected' : ''}`}
+                      onClick={() => handleToggleOneTimePromotion(promo.id)}
+                      style={{ cursor: 'pointer' }}
+                    >
+                      <span className="promotion-name">
+                        {promo.name} (One Time{isSelected ? '' : ' - click to apply'})
+                      </span>
+                      {isSelected && (
+                        <span className="promotion-checkmark">✓ Applied</span>
+                      )}
+                    </div>
+                  );
+                })}
               </div>
             </div>
           )}
