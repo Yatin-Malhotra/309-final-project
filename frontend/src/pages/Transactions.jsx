@@ -451,12 +451,10 @@ const Transactions = () => {
                   <tr 
                     key={tx.id}
                     onClick={() => {
-                      if (hasRole('cashier') || hasRole('manager') || hasRole('superuser')) {
-                        setSelectedTransaction(tx);
-                        setIsPanelOpen(true);
-                      }
+                      setSelectedTransaction(tx);
+                      setIsPanelOpen(true);
                     }}
-                    className={(hasRole('cashier') || hasRole('manager') || hasRole('superuser')) ? 'transactions-row-clickable' : ''}
+                    className="transactions-row-clickable"
                   >
                     <td>{tx.id}</td>
                     {(hasRole('manager') || isCashierOnly) && (

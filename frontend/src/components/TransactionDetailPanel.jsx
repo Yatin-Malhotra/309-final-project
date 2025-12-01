@@ -251,7 +251,7 @@ const TransactionDetailPanel = ({ transaction, isOpen, onClose, onUpdate, hasRol
               <div className="transaction-panel-value">{details.id}</div>
             </div>
 
-            {(hasRole('manager') || isCashierOnly) && (
+            {(hasRole('manager') || hasRole('superuser') || isCashierOnly) && (
               <div className="transaction-panel-field">
                 <label>User</label>
                 <div className="transaction-panel-value">
@@ -393,7 +393,7 @@ const TransactionDetailPanel = ({ transaction, isOpen, onClose, onUpdate, hasRol
               </div>
             </div>
 
-            {details.suspicious !== undefined && (
+            {details.suspicious !== undefined && (hasRole('manager') || hasRole('superuser')) && (
               <div className="transaction-panel-field">
                 <label>Suspicious</label>
                 <div className="transaction-panel-value">
@@ -417,7 +417,7 @@ const TransactionDetailPanel = ({ transaction, isOpen, onClose, onUpdate, hasRol
               </div>
             )}
 
-            {details.createdBy && (
+            {details.createdBy && (hasRole('manager') || hasRole('superuser')) && (
               <div className="transaction-panel-field">
                 <label>Created By</label>
                 <div className="transaction-panel-value">{details.createdBy}</div>
