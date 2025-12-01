@@ -6,6 +6,7 @@ import { Link, useSearchParams } from 'react-router-dom';
 import useTableSort from '../hooks/useTableSort';
 import SortableTableHeader from '../components/SortableTableHeader';
 import TransactionDetailPanel from '../components/TransactionDetailPanel';
+import TransactionModal from '../components/TransactionModal';
 import './Transactions.css';
 
 const Transactions = () => {
@@ -34,6 +35,7 @@ const Transactions = () => {
   const [error, setError] = useState('');
   const [selectedTransaction, setSelectedTransaction] = useState(null);
   const [isPanelOpen, setIsPanelOpen] = useState(false);
+  const [showTransactionModal, setShowTransactionModal] = useState(false);
 
   // Check if client-side filtering is active
   const hasClientSideFilters = () => {
@@ -268,9 +270,19 @@ const Transactions = () => {
             </button>
           )}
         </div>
-        <Link to="/transactions/create" className="btn btn-primary">
-          Create Transaction
-        </Link>
+        {!isCashierOnly && (
+          <button 
+            onClick={() => setShowTransactionModal(true)}
+            className="btn btn-primary"
+          >
+            Create Transaction
+          </button>
+        )}
+        {isCashierOnly && (
+          <Link to="/transactions/create" className="btn btn-primary">
+            Create Transaction
+          </Link>
+        )}
       </div>
 
       <div className="transactions-filters">
@@ -536,6 +548,17 @@ const Transactions = () => {
         }}
         hasRole={hasRole}
       />
+
+      {!isCashierOnly && (
+        <TransactionModal 
+          isOpen={showTransactionModal} 
+          onClose={() => setShowTransactionModal(false)} 
+          defaultType="redemption"
+          onSuccess={() => {
+            loadTransactions();
+          }}
+        />
+      )}
     </div>
   );
 };
