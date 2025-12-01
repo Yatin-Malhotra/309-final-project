@@ -2,7 +2,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { transactionAPI, eventAPI, promotionAPI, userAPI, analyticsAPI } from '../services/api';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import AnalyticsCard from '../components/AnalyticsCard';
 import AnimatedNumber from '../components/AnimatedNumber';
 import SimpleChart from '../components/SimpleChart';
@@ -14,6 +14,7 @@ import './Dashboard.css';
 
 const Dashboard = () => {
   const { user, hasRole, currentRole } = useAuth();
+  const navigate = useNavigate();
   const [stats, setStats] = useState({
     totalPoints: 0,
     recentTransactions: [],
@@ -323,6 +324,16 @@ const Dashboard = () => {
       ...prev,
       [section]: !prev[section]
     }));
+  };
+
+  const handleQRScanSuccess = (scannedUtorid) => {
+    // Close the scanner modal
+    setShowQRScanner(false);
+    
+    // Navigate to create transaction page with UTORid in state
+    navigate('/transactions/create', { 
+      state: { utorid: scannedUtorid } 
+    });
   };
 
   if (loading) {
@@ -655,7 +666,11 @@ const Dashboard = () => {
           </Link>
         </div>
 
-        <QRScannerModal isOpen={showQRScanner} onClose={() => setShowQRScanner(false)} />
+        <QRScannerModal 
+          isOpen={showQRScanner} 
+          onClose={() => setShowQRScanner(false)}
+          onScanSuccess={handleQRScanSuccess}
+        />
 
         {/* Transaction Processing Metrics */}
         {analytics?.transactions && (
@@ -892,7 +907,11 @@ const Dashboard = () => {
           </Link>
         </div>
 
-        <QRScannerModal isOpen={showQRScanner} onClose={() => setShowQRScanner(false)} />
+        <QRScannerModal 
+          isOpen={showQRScanner} 
+          onClose={() => setShowQRScanner(false)}
+          onScanSuccess={handleQRScanSuccess}
+        />
 
         {/* Financial Insights */}
         {analytics?.financial && (

@@ -1,6 +1,6 @@
 // Create transaction form (for cashiers and above)
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { promotionAPI, transactionAPI } from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
 import PromotionSelector from './PromotionSelector';
@@ -10,8 +10,13 @@ const CashierCreateTx = () => {
   const { hasRole } = useAuth();
   const isCashierOnly = hasRole('cashier') && !hasRole('manager');
   const navigate = useNavigate();
+  const location = useLocation();
+  
+  // Get UTORid from navigation state (from QR scan)
+  const scannedUtorid = location.state?.utorid || '';
+  
   const [formData, setFormData] = useState({
-    utorid: '',
+    utorid: scannedUtorid,
     type: 'purchase',
     spent: '',
     amount: '',
