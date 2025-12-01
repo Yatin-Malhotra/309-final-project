@@ -23,11 +23,16 @@ api.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-// Handle token expiration
+// Handle token expiration and auth failures
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401) {
+    const originalRequestUrl = error.config?.url || '';
+
+    if (
+      error.response?.status === 401 && 
+      !originalRequestUrl.includes('/auth')
+    ) {
       localStorage.removeItem('token');
       localStorage.removeItem('user');
       window.location.href = '/login';
