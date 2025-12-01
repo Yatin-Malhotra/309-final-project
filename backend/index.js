@@ -79,6 +79,10 @@ const isEmailConfigured = () => {
     return !!(process.env.EMAILJS_SERVICE_ID && process.env.EMAILJS_TEMPLATE_ID && process.env.EMAILJS_PUBLIC_KEY && process.env.EMAILJS_PRIVATE_KEY);
 };
 
+const isWelcomeEmailConfigured = () => {
+    return !!(process.env.EMAILJS_SERVICE_ID && process.env.EMAILJS_WELCOME_TEMPLATE_ID && process.env.EMAILJS_PUBLIC_KEY && process.env.EMAILJS_PRIVATE_KEY);
+};
+
 const emailUtils = {
     async sendPasswordResetEmail(userEmail, resetToken) {
         const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
@@ -116,6 +120,47 @@ const emailUtils = {
             return { messageId: response.text, resetLink };
         } catch (error) {
             console.error('Error sending password reset email via EmailJS:', error);
+            throw error;
+        }
+    },
+    async sendWelcomeEmail(userName, userEmail, resetToken) {
+        const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
+        const resetLink = `${frontendUrl}/reset-password/${resetToken}`;
+        
+        // If EmailJS is not configured, log to console for development
+        if (!isWelcomeEmailConfigured()) {
+            console.log('\n========================================');
+            console.log('WELCOME EMAIL (Development Mode)');
+            console.log('========================================');
+            console.log(`Email would be sent to: ${userEmail}`);
+            console.log(`Name: ${userName}`);
+            console.log(`Reset Link: ${resetLink}`);
+            console.log('========================================\n');
+            return { messageId: 'console-log', resetLink };
+        }
+        
+        // Send email using EmailJS
+        try {
+            const templateParams = {
+                name: userName,
+                email: userEmail,
+                url: resetLink,
+            };
+            
+            const response = await emailjs.send(
+                process.env.EMAILJS_SERVICE_ID,
+                process.env.EMAILJS_WELCOME_TEMPLATE_ID,
+                templateParams,
+                {
+                    publicKey: process.env.EMAILJS_PUBLIC_KEY,
+                    privateKey: process.env.EMAILJS_PRIVATE_KEY,
+                }
+            );
+            
+            console.log('Welcome email sent via EmailJS:', response.text);
+            return { messageId: response.text, resetLink };
+        } catch (error) {
+            console.error('Error sending welcome email via EmailJS:', error);
             throw error;
         }
     }
@@ -629,6 +674,15 @@ app.post('/users', requireRole('cashier'), validate(schemas.createUser), async (
                 resetTokenExpiry: expiresAt 
             }
         });
+        
+        // Send welcome email
+        try {
+            await emailUtils.sendWelcomeEmail(name, email, resetToken);
+        } catch (emailError) {
+            console.error('Failed to send welcome email:', emailError);
+            // Continue even if email fails - don't block user creation
+        }
+        
         res.status(201).json({
             id: user.id, 
             utorid: user.utorid, 
