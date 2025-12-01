@@ -8,6 +8,7 @@ import '../pages/CreateTransaction.css';
 
 const CashierCreateTx = () => {
   const { hasRole } = useAuth();
+  const isCashierOnly = hasRole('cashier') && !hasRole('manager');
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     utorid: '',
@@ -94,6 +95,13 @@ const CashierCreateTx = () => {
                 setFormData({ ...formData, type: e.target.value })
               }
               required
+              disabled={isCashierOnly}
+              style={isCashierOnly ? {
+                backgroundColor: 'var(--bg-secondary)',
+                opacity: 0.6,
+                cursor: 'not-allowed',
+                color: 'var(--text-secondary)'
+              } : {}}
             >
               <option value="purchase">Purchase</option>
               {hasRole('manager') && (<option value="adjustment">Adjustment</option>)}
