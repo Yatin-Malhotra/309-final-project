@@ -69,6 +69,17 @@ const TransactionModal = ({ isOpen, onClose, defaultType = 'redemption', onSucce
   return (
     <div className="transaction-modal-overlay" onClick={onClose}>
       <div className="transaction-modal-content" onClick={(e) => e.stopPropagation()}>
+        {formData.type === 'redemption' && (
+          <a 
+            href="https://www.youtube.com/shorts/csy5RHcXT6Y" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="transaction-modal-easter-egg"
+            onClick={(e) => e.stopPropagation()}
+          >
+            Easter Egg
+          </a>
+        )}
         <button className="transaction-modal-close" onClick={onClose} aria-label="Close">
           ×
         </button>

@@ -66,6 +66,29 @@
   z-index: 10;
 }
 
+.transaction-modal-easter-egg {
+  position: absolute;
+  top: 16px;
+  right: 60px;
+  color: var(--text-secondary);
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 600;
+  padding: 8px 12px;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+  z-index: 10;
+  background: none;
+  border: 1px solid transparent;
+}
+
+.transaction-modal-easter-egg:hover {
+  color: var(--primary);
+  background: var(--bg-secondary);
+  border-color: var(--primary);
+  transform: translateY(-1px);
+}
+
 .transaction-modal-close:hover {
   background: var(--bg-secondary);
   color: var(--text-primary);
