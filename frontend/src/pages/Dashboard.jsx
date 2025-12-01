@@ -48,7 +48,6 @@ const Dashboard = () => {
     setLoading(true);
     try {
       const userRole = currentRole;
-      console.log('Loading dashboard for role:', userRole)
         // For regular users: show points and transactions
         if (userRole === 'regular') {
             const points = user.points || 0;
