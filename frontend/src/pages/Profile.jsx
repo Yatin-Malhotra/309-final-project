@@ -26,6 +26,10 @@ const Profile = () => {
   const [activeTab, setActiveTab] = useState('profile');
 
   useEffect(() => {
+    updateLocalUser();
+  }, []);
+
+  useEffect(() => {
     if (user) {
       setFormData({
         name: user.name || '',

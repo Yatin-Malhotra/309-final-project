@@ -13,7 +13,7 @@ import SortableTable from '../components/SortableTable';
 import './Dashboard.css';
 
 const Dashboard = () => {
-  const { user, hasRole, currentRole } = useAuth();
+  const { user, hasRole, currentRole, updateLocalUser } = useAuth();
   const navigate = useNavigate();
   const [stats, setStats] = useState({
     totalPoints: 0,
@@ -310,6 +310,10 @@ const Dashboard = () => {
       setLoading(false);
     }
   }, [user, currentRole]);
+
+  useEffect(() => {
+    updateLocalUser();
+  }, []);
 
   useEffect(() => {
     loadDashboard();
