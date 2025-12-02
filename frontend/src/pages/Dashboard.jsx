@@ -138,7 +138,9 @@ const Dashboard = () => {
             const upcomingEventsRegistered = allEvents.filter(
               event => new Date(event.startTime) > now && event.isRegistered === true
             );
-            const activePromotions = await promotionAPI.getPromotions();
+            const activePromotions = await promotionAPI.getPromotions({ 
+              utorid: user.utorid 
+            });
             const activePromos = activePromotions.data.results || [];
             // Count events attended this month based on event transactions
             const eventsAttendedMonth = allTransactions.filter(tx => {
