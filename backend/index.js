@@ -1740,6 +1740,11 @@ app.post('/users/:userId/transactions', requireRole('regular'), async (req, res,
         const recipient = await prisma.user.findUnique({ where: whereClause });
         if (!recipient) return res.status(404).json({ error: 'Recipient not found' });
         
+        // Prevent self-transfers
+        if (sender.id === recipient.id) {
+            return res.status(400).json({ error: 'Cannot transfer points to yourself' });
+        }
+        
         // Create two transactions
         const senderTx = await prisma.transaction.create({
             data: {

@@ -179,6 +179,22 @@
   font-weight: 500;
 }
 
+/* Disabled published status styling */
+.create-event-page .form-group.published-disabled .switch-container {
+  pointer-events: none;
+  cursor: not-allowed;
+}
+
+.create-event-page .form-group.published-disabled .switch {
+  cursor: not-allowed;
+  pointer-events: none;
+  opacity: 0.5;
+}
+
+.create-event-page .form-group.published-disabled .switch input[disabled] {
+  cursor: not-allowed;
+}
+
 /* Responsive adjustments */
 @media (max-width: 768px) {
   .create-event-page {

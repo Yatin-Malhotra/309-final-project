@@ -49,6 +49,12 @@ const TransactionModal = ({ isOpen, onClose, defaultType = 'redemption', onSucce
           setLoading(false);
           return;
         }
+        // Prevent self-transfers
+        if (formData.utorid.trim().toLowerCase() === user?.utorid?.toLowerCase()) {
+          setError('Cannot transfer points to yourself');
+          setLoading(false);
+          return;
+        }
         await transactionAPI.createTransfer(formData.utorid.trim(), amount, formData.remark || undefined);
       }
       

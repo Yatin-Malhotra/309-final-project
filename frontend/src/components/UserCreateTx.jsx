@@ -29,6 +29,17 @@ const UserCreateTx = () => {
       if (formData.type === 'redemption') {
         await transactionAPI.createRedemption(amount, formData.remark || undefined)
       } else {
+        // Prevent self-transfers
+        if (!formData.utorid.trim()) {
+          setError('Please enter recipient UTORid');
+          setLoading(false);
+          return;
+        }
+        if (formData.utorid.trim().toLowerCase() === user?.utorid?.toLowerCase()) {
+          setError('Cannot transfer points to yourself');
+          setLoading(false);
+          return;
+        }
         await transactionAPI.createTransfer(formData.utorid, amount, formData.remark || undefined)
       }
       
