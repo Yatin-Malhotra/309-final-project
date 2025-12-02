@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import { toast } from 'react-toastify';
 import { transactionAPI, promotionAPI } from '../services/api';
+import ConfirmationModal from './ConfirmationModal';
 import './TransactionDetailPanel.css';
 
 const TransactionDetailPanel = ({ transaction, isOpen, onClose, onUpdate, hasRole }) => {
@@ -13,6 +14,14 @@ const TransactionDetailPanel = ({ transaction, isOpen, onClose, onUpdate, hasRol
   const [spent, setSpent] = useState('');
   const [transactionDetails, setTransactionDetails] = useState(null);
   const [promotionNames, setPromotionNames] = useState({});
+  const [confirmation, setConfirmation] = useState({
+    isOpen: false,
+    type: '',
+    title: '',
+    message: '',
+    onConfirm: () => {},
+    isDangerous: false
+  });
 
   useEffect(() => {
     if (isOpen && transaction) {
@@ -131,9 +140,7 @@ const TransactionDetailPanel = ({ transaction, isOpen, onClose, onUpdate, hasRol
     }
   };
 
-  const handleProcessRedemption = async () => {
-    if (!confirm('Process this redemption?')) return;
-    
+  const processRedemption = async () => {
     setLoading(true);
     setError('');
 
@@ -162,9 +169,18 @@ const TransactionDetailPanel = ({ transaction, isOpen, onClose, onUpdate, hasRol
     }
   };
 
-  const handleProcessPurchase = async () => {
-    if (!confirm('Process this purchase transaction?')) return;
-    
+  const handleProcessRedemption = () => {
+    setConfirmation({
+      isOpen: true,
+      type: 'redemption',
+      title: 'Process Redemption',
+      message: 'Process this redemption?',
+      onConfirm: processRedemption,
+      isDangerous: false
+    });
+  };
+
+  const processPurchase = async () => {
     setLoading(true);
     setError('');
 
@@ -193,10 +209,18 @@ const TransactionDetailPanel = ({ transaction, isOpen, onClose, onUpdate, hasRol
     }
   };
 
-  const handleToggleSuspicious = async () => {
-    const action = transactionDetails?.suspicious ? 'unmark' : 'mark';
-    if (!confirm(`Are you sure you want to ${action} this transaction as suspicious?`)) return;
-    
+  const handleProcessPurchase = () => {
+    setConfirmation({
+      isOpen: true,
+      type: 'purchase',
+      title: 'Process Transaction',
+      message: 'Process this purchase transaction?',
+      onConfirm: processPurchase,
+      isDangerous: false
+    });
+  };
+
+  const toggleSuspicious = async () => {
     setLoading(true);
     setError('');
 
@@ -225,6 +249,18 @@ const TransactionDetailPanel = ({ transaction, isOpen, onClose, onUpdate, hasRol
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleToggleSuspicious = () => {
+    const action = transactionDetails?.suspicious ? 'unmark' : 'mark';
+    setConfirmation({
+      isOpen: true,
+      type: 'suspicious',
+      title: `${action === 'mark' ? 'Mark' : 'Unmark'} Suspicious`,
+      message: `Are you sure you want to ${action} this transaction as suspicious?`,
+      onConfirm: toggleSuspicious,
+      isDangerous: action === 'mark'
+    });
   };
 
   const formatDate = (dateString) => {
@@ -510,6 +546,15 @@ const TransactionDetailPanel = ({ transaction, isOpen, onClose, onUpdate, hasRol
           </div>
         </div>
       </div>
+      
+      <ConfirmationModal
+        isOpen={confirmation.isOpen}
+        onClose={() => setConfirmation({ ...confirmation, isOpen: false })}
+        onConfirm={confirmation.onConfirm}
+        title={confirmation.title}
+        message={confirmation.message}
+        isDangerous={confirmation.isDangerous}
+      />
     </>
   );
 };

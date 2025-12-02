@@ -6,6 +6,7 @@ import { promotionAPI, savedFilterAPI } from '../services/api';
 import { Link, useSearchParams } from 'react-router-dom';
 import SaveFilterModal from '../components/SaveFilterModal';
 import SavedFiltersModal from '../components/SavedFiltersModal';
+import ConfirmationModal from '../components/ConfirmationModal';
 import './Promotions.css';
 
 const Promotions = () => {
@@ -17,6 +18,11 @@ const Promotions = () => {
   const [deletingPromotionId, setDeletingPromotionId] = useState(null);
   const [isSaveFilterOpen, setIsSaveFilterOpen] = useState(false);
   const [isLoadFilterOpen, setIsLoadFilterOpen] = useState(false);
+  const [deleteModal, setDeleteModal] = useState({
+    isOpen: false,
+    promotionId: null,
+    promotionName: ''
+  });
   const [filters, setFilters] = useState({
     name: searchParams.get('name') || '',
     type: searchParams.get('type') || '',
@@ -104,9 +110,16 @@ const Promotions = () => {
     return now < start; // Can only delete if promotion hasn't started
   };
 
-  const handleDeletePromotion = async (promotionId, promotionName) => {
-    if (!confirm(`Are you sure you want to delete "${promotionName}"? This action cannot be undone.`)) return;
-    
+  const handleDeleteClick = (promotionId, promotionName) => {
+    setDeleteModal({
+      isOpen: true,
+      promotionId,
+      promotionName
+    });
+  };
+
+  const handleConfirmDelete = async () => {
+    const { promotionId } = deleteModal;
     setDeletingPromotionId(promotionId);
     try {
       await promotionAPI.deletePromotion(promotionId);
@@ -117,6 +130,7 @@ const Promotions = () => {
       toast.error(errorMessage);
     } finally {
       setDeletingPromotionId(null);
+      setDeleteModal({ isOpen: false, promotionId: null, promotionName: '' });
     }
   };
 
@@ -276,7 +290,7 @@ const Promotions = () => {
                       onClick={(e) => {
                         e.preventDefault();
                         e.stopPropagation();
-                        handleDeletePromotion(promo.id, promo.name);
+                        handleDeleteClick(promo.id, promo.name);
                       }}
                       className="btn btn-danger"
                       disabled={deletingPromotionId === promo.id}
@@ -306,6 +320,16 @@ const Promotions = () => {
           })}
         </div>
       )}
+      
+      <ConfirmationModal
+        isOpen={deleteModal.isOpen}
+        onClose={() => setDeleteModal({ ...deleteModal, isOpen: false })}
+        onConfirm={handleConfirmDelete}
+        title="Delete Promotion"
+        message={`Are you sure you want to delete "${deleteModal.promotionName}"? This action cannot be undone.`}
+        confirmLabel="Delete"
+        isDangerous={true}
+      />
     </div>
   );
 };

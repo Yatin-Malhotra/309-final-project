@@ -174,34 +174,6 @@ const Transactions = () => {
     setSearchParams(newFilters);
   };
 
-  const handleProcessRedemption = async (transactionId) => {
-    if (!confirm('Process this redemption?')) return;
-
-    try {
-      await transactionAPI.processRedemption(transactionId);
-      toast.success('Redemption processed successfully!');
-      loadTransactions();
-    } catch (err) {
-      const errorMessage = err.response?.data?.error || 'Failed to process redemption.';
-      toast.error(errorMessage);
-    }
-  };
-
-  const handleToggleSuspicious = async (transactionId, currentSuspicious) => {
-    const action = currentSuspicious ? 'unmark' : 'mark';
-    if (!confirm(`Are you sure you want to ${action} this transaction as suspicious?`)) return;
-
-    try {
-      await transactionAPI.markSuspicious(transactionId, !currentSuspicious);
-      const actionMessage = currentSuspicious ? 'cleared' : 'marked';
-      toast.success(`Transaction ${actionMessage} as suspicious successfully!`);
-      loadTransactions();
-    } catch (err) {
-      const errorMessage = err.response?.data?.error || 'Failed to update suspicious status.';
-      toast.error(errorMessage);
-    }
-  };
-
   const formatDate = (dateString) => {
     if (!dateString) return '';
     return new Date(dateString).toLocaleString();

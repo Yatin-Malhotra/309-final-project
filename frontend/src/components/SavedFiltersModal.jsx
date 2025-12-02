@@ -1,11 +1,16 @@
 import { useState, useEffect } from 'react';
 import { toast } from 'react-toastify';
 import { savedFilterAPI } from '../services/api';
+import ConfirmationModal from './ConfirmationModal';
 import './SavedFilters.css';
 
 const SavedFiltersModal = ({ isOpen, onClose, onSelect, page }) => {
   const [filters, setFilters] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [deleteModal, setDeleteModal] = useState({
+    isOpen: false,
+    filterId: null
+  });
 
   useEffect(() => {
     if (isOpen) {
@@ -25,16 +30,24 @@ const SavedFiltersModal = ({ isOpen, onClose, onSelect, page }) => {
     }
   };
 
-  const handleDelete = async (e, id) => {
+  const handleDeleteClick = (e, id) => {
     e.stopPropagation();
-    if (!confirm('Are you sure you want to delete this filter?')) return;
-    
+    setDeleteModal({
+      isOpen: true,
+      filterId: id
+    });
+  };
+
+  const handleConfirmDelete = async () => {
+    const { filterId } = deleteModal;
     try {
-      await savedFilterAPI.deleteSavedFilter(id);
-      setFilters(filters.filter(f => f.id !== id));
+      await savedFilterAPI.deleteSavedFilter(filterId);
+      setFilters(filters.filter(f => f.id !== filterId));
       toast.success('Filter deleted');
     } catch (error) {
       toast.error('Failed to delete filter');
+    } finally {
+      setDeleteModal({ isOpen: false, filterId: null });
     }
   };
 
@@ -75,7 +88,7 @@ const SavedFiltersModal = ({ isOpen, onClose, onSelect, page }) => {
                 </div>
                 <button 
                     className="saved-filter-delete-btn"
-                    onClick={(e) => handleDelete(e, filter.id)}
+                    onClick={(e) => handleDeleteClick(e, filter.id)}
                     title="Delete filter"
                 >
                     Delete
@@ -85,6 +98,16 @@ const SavedFiltersModal = ({ isOpen, onClose, onSelect, page }) => {
           </div>
         )}
       </div>
+      
+      <ConfirmationModal
+        isOpen={deleteModal.isOpen}
+        onClose={() => setDeleteModal({ ...deleteModal, isOpen: false })}
+        onConfirm={handleConfirmDelete}
+        title="Delete Filter"
+        message="Are you sure you want to delete this filter?"
+        confirmLabel="Delete"
+        isDangerous={true}
+      />
     </div>
   );
 };

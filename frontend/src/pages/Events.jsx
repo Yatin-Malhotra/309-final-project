@@ -6,6 +6,7 @@ import { eventAPI, savedFilterAPI } from '../services/api';
 import { Link, useSearchParams } from 'react-router-dom';
 import SaveFilterModal from '../components/SaveFilterModal';
 import SavedFiltersModal from '../components/SavedFiltersModal';
+import ConfirmationModal from '../components/ConfirmationModal';
 import './Events.css';
 
 const Events = () => {
@@ -17,6 +18,11 @@ const Events = () => {
   const [loading, setLoading] = useState(true);
   const [isSaveFilterOpen, setIsSaveFilterOpen] = useState(false);
   const [isLoadFilterOpen, setIsLoadFilterOpen] = useState(false);
+  const [deleteModal, setDeleteModal] = useState({
+    isOpen: false,
+    eventId: null,
+    eventName: ''
+  });
   const [filters, setFilters] = useState({
     name: searchParams.get('name') || '',
     published: searchParams.get('published') || '',
@@ -121,9 +127,16 @@ const Events = () => {
     return (hasRole('manager') || hasRole('superuser')) && !event.published;
   };
 
-  const handleDeleteEvent = async (eventId, eventName) => {
-    if (!confirm(`Are you sure you want to delete "${eventName}"? This action cannot be undone.`)) return;
-    
+  const handleDeleteClick = (eventId, eventName) => {
+    setDeleteModal({
+      isOpen: true,
+      eventId,
+      eventName
+    });
+  };
+
+  const handleConfirmDelete = async () => {
+    const { eventId } = deleteModal;
     setDeletingEventId(eventId);
     try {
       await eventAPI.deleteEvent(eventId);
@@ -134,6 +147,7 @@ const Events = () => {
       toast.error(errorMessage);
     } finally {
       setDeletingEventId(null);
+      setDeleteModal({ isOpen: false, eventId: null, eventName: '' });
     }
   };
 
@@ -365,7 +379,7 @@ const Events = () => {
                         onClick={(e) => {
                           e.preventDefault();
                           e.stopPropagation();
-                          handleDeleteEvent(event.id, event.name);
+                          handleDeleteClick(event.id, event.name);
                         }}
                         className="btn btn-danger"
                         disabled={deletingEventId === event.id}
@@ -442,6 +456,16 @@ const Events = () => {
           </div>
         </>
       )}
+
+      <ConfirmationModal
+        isOpen={deleteModal.isOpen}
+        onClose={() => setDeleteModal({ ...deleteModal, isOpen: false })}
+        onConfirm={handleConfirmDelete}
+        title="Delete Event"
+        message={`Are you sure you want to delete "${deleteModal.eventName}"? This action cannot be undone.`}
+        confirmLabel="Delete"
+        isDangerous={true}
+      />
     </div>
   );
 };

@@ -6,6 +6,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { userAPI, getAvatarUrl } from '../services/api';
 import useTableSort from '../hooks/useTableSort';
 import SortableTableHeader from '../components/SortableTableHeader';
+import ConfirmationModal from '../components/ConfirmationModal';
 import './UserDetail.css';
 
 const UserDetail = () => {
@@ -24,6 +25,13 @@ const UserDetail = () => {
   const [transactionFilters, setTransactionFilters] = useState({
     page: 1,
     limit: 10,
+  });
+  const [confirmation, setConfirmation] = useState({
+    isOpen: false,
+    title: '',
+    message: '',
+    onConfirm: () => {},
+    isDangerous: false
   });
 
   const [editingEmail, setEditingEmail] = useState(false);
@@ -96,13 +104,7 @@ const UserDetail = () => {
     setEmail(user.email);
   };
 
-  const handleSaveEmail = async () => {
-    setEditingEmail(false);
-
-    if (!confirm(`Are you sure you want to change the user's mail?`)) {
-        return;
-    }
-
+  const saveEmail = async () => {
     setActionLoading(true)
 
     try {
@@ -117,11 +119,19 @@ const UserDetail = () => {
     }
   };
 
-  const handleRoleChange = async (userId, newRole) => {
-    if (!confirm(`Are you sure you want to change the user's role to ${newRole}`)) {
-        return;
-    }
+  const handleSaveEmail = async () => {
+    setEditingEmail(false);
 
+    setConfirmation({
+      isOpen: true,
+      title: 'Change Email',
+      message: "Are you sure you want to change the user's mail?",
+      onConfirm: saveEmail,
+      isDangerous: false
+    });
+  };
+
+  const changeRole = async (newRole) => {
     setActionLoading(true)
 
     try {
@@ -136,6 +146,16 @@ const UserDetail = () => {
     }
   };
 
+  const handleRoleChange = async (userId, newRole) => {
+    setConfirmation({
+      isOpen: true,
+      title: 'Change Role',
+      message: `Are you sure you want to change the user's role to ${newRole}?`,
+      onConfirm: () => changeRole(newRole),
+      isDangerous: newRole === 'superuser' || newRole === 'manager'
+    });
+  };
+
   const handleTransactionFilterChange = (key, value) => {
     const newFilters = { ...transactionFilters, [key]: value };
     // Only reset to page 1 if changing a non-page filter
@@ -145,12 +165,8 @@ const UserDetail = () => {
     setTransactionFilters(newFilters);
   };
 
-  const handleToggleSuspicious = async () => {
+  const toggleSuspicious = async () => {
     const newSuspiciousValue = !suspicious;
-    if (!confirm(`Are you sure you want to ${suspicious ? 'clear' : 'set'} the suspicious flag for this user?`)) {
-      return;
-    }
-
     setActionLoading(true);
     try {
       const response = await userAPI.updateUser(userId, { suspicious: newSuspiciousValue });
@@ -167,13 +183,17 @@ const UserDetail = () => {
     }
   };
 
-  const handleToggleVerified = async () => {
-    if (verified) return;
-    
-    if (!confirm('Are you sure you want to verify this user? This action cannot be undone.')) {
-      return;
-    }
+  const handleToggleSuspicious = async () => {
+    setConfirmation({
+      isOpen: true,
+      title: suspicious ? 'Clear Suspicious Flag' : 'Set Suspicious Flag',
+      message: `Are you sure you want to ${suspicious ? 'clear' : 'set'} the suspicious flag for this user?`,
+      onConfirm: toggleSuspicious,
+      isDangerous: !suspicious
+    });
+  };
 
+  const toggleVerified = async () => {
     setActionLoading(true);
     try {
       const response = await userAPI.updateUser(userId, { verified: true });
@@ -186,6 +206,18 @@ const UserDetail = () => {
     } finally {
       setActionLoading(false);
     }
+  };
+
+  const handleToggleVerified = async () => {
+    if (verified) return;
+    
+    setConfirmation({
+      isOpen: true,
+      title: 'Verify User',
+      message: 'Are you sure you want to verify this user? This action cannot be undone.',
+      onConfirm: toggleVerified,
+      isDangerous: false
+    });
   };
 
   const formatDate = (dateString) => {
@@ -490,6 +522,15 @@ const UserDetail = () => {
           )}
         </div>
       )}
+      
+      <ConfirmationModal
+        isOpen={confirmation.isOpen}
+        onClose={() => setConfirmation({ ...confirmation, isOpen: false })}
+        onConfirm={confirmation.onConfirm}
+        title={confirmation.title}
+        message={confirmation.message}
+        isDangerous={confirmation.isDangerous}
+      />
     </div>
   );
 };

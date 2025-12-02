@@ -3,6 +3,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useParams, Link } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { promotionAPI } from '../services/api';
+import ConfirmationModal from '../components/ConfirmationModal';
 import './CreatePromotion.css';
 
 const CreatePromotion = () => {
@@ -24,6 +25,7 @@ const CreatePromotion = () => {
   const [loading, setLoading] = useState(false);
   const [loadingPromotion, setLoadingPromotion] = useState(isEditMode);
   const [deleting, setDeleting] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   const loadPromotion = useCallback(async () => {
     if (!promotionId) return;
@@ -120,6 +122,20 @@ const CreatePromotion = () => {
       toast.error(errorMessage);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    setDeleting(true);
+    try {
+      await promotionAPI.deletePromotion(promotionId);
+      toast.success('Promotion deleted successfully!');
+      navigate('/promotions');
+    } catch (err) {
+      const errorMessage = err.response?.data?.error || 'Failed to delete promotion.';
+      setError(errorMessage);
+      toast.error(errorMessage);
+      setDeleting(false);
     }
   };
 
@@ -265,20 +281,7 @@ const CreatePromotion = () => {
             {isEditMode && (
               <button
                 type="button"
-                onClick={async () => {
-                  if (!confirm('Are you sure you want to delete this promotion? This action cannot be undone.')) return;
-                  setDeleting(true);
-                  try {
-                    await promotionAPI.deletePromotion(promotionId);
-                    toast.success('Promotion deleted successfully!');
-                    navigate('/promotions');
-                  } catch (err) {
-                    const errorMessage = err.response?.data?.error || 'Failed to delete promotion.';
-                    setError(errorMessage);
-                    toast.error(errorMessage);
-                    setDeleting(false);
-                  }
-                }}
+                onClick={() => setShowDeleteConfirm(true)}
                 className="btn btn-danger"
                 disabled={loading || deleting}
                 style={{ marginRight: 'auto' }}
@@ -299,6 +302,16 @@ const CreatePromotion = () => {
           </div>
         </form>
       </div>
+      
+      <ConfirmationModal
+        isOpen={showDeleteConfirm}
+        onClose={() => setShowDeleteConfirm(false)}
+        onConfirm={handleDelete}
+        title="Delete Promotion"
+        message="Are you sure you want to delete this promotion? This action cannot be undone."
+        confirmLabel="Delete"
+        isDangerous={true}
+      />
     </div>
   );
 };

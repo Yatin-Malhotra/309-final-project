@@ -13,7 +13,7 @@
 }
 
 .saved-filters-modal-content {
-  background: var(--bg-card);
+  background: var(--bg-secondary);
   border-radius: 16px;
   padding: 32px;
   max-width: 500px;
