@@ -92,12 +92,18 @@ const CreatePromotion = () => {
 
       if (formData.minSpending) {
         data.minSpending = parseFloat(formData.minSpending);
+      } else {
+        data.minSpending = null;
       }
       if (formData.rate) {
         data.rate = parseFloat(formData.rate);
+      } else {
+        data.rate = null;
       }
       if (formData.points) {
         data.points = parseInt(formData.points);
+      } else {
+        data.points = null;
       }
 
       if (isEditMode) {

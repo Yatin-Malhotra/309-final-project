@@ -369,8 +369,10 @@ const schemas = {
                 if (val === undefined || val === null) return undefined;
                 if (typeof val === 'string') {
                     const num = Number(val);
+                    if (num === 0) return undefined;
                     return Number.isFinite(num) ? num : val;
                 }
+                if (val === 0) return undefined;
                 return val;
             },
             z.number().positive().optional()
@@ -433,12 +435,32 @@ const schemas = {
             z.number().positive().optional()
         ),
         rate: z.preprocess(
-            (val) => val === null || val === undefined ? undefined : val,
-            z.number().positive().optional()
+            (val) => {
+                if (val === undefined) return undefined;
+                if (val === null || val === '') return null;
+                if (val === 0 || val === '0') return null;
+                if (typeof val === 'string') {
+                    const num = Number(val);
+                    if (num === 0) return null;
+                    return Number.isFinite(num) ? num : val;
+                }
+                return val;
+            },
+            z.number().positive().nullable().optional()
         ),
         points: z.preprocess(
-            (val) => val === null || val === undefined ? undefined : val,
-            z.number().nonnegative().int().optional()
+            (val) => {
+                if (val === undefined) return undefined;
+                if (val === null || val === '') return null;
+                if (val === 0 || val === '0') return null;
+                if (typeof val === 'string') {
+                    const num = Number(val);
+                    if (num === 0) return null;
+                    return Number.isFinite(num) ? num : val;
+                }
+                return val;
+            },
+            z.number().positive().int().nullable().optional()
         )
     })
 };
@@ -3322,9 +3344,9 @@ app.patch('/promotions/:promotionId', requireRole('manager'), async (req, res, n
         if (updates.type) finalUpdates.type = updates.type;
         if (updates.startTime) finalUpdates.startTime = new Date(updates.startTime);
         if (updates.endTime) finalUpdates.endTime = new Date(updates.endTime);
-        if (updates.minSpending !== undefined && updates.minSpending !== null) finalUpdates.minSpending = updates.minSpending;
-        if (updates.rate !== undefined && updates.rate !== null) finalUpdates.rate = updates.rate;
-        if (updates.points !== undefined && updates.points !== null) finalUpdates.points = updates.points;
+        if (updates.minSpending !== undefined) finalUpdates.minSpending = updates.minSpending;
+        if (updates.rate !== undefined) finalUpdates.rate = updates.rate;
+        if (updates.points !== undefined) finalUpdates.points = updates.points;
         
         const updated = await prisma.promotion.update({
             where: { id: promotionId },
