@@ -7,6 +7,9 @@ import { Link, useSearchParams } from 'react-router-dom';
 import useTableSort from '../hooks/useTableSort';
 import SortableTableHeader from '../components/SortableTableHeader';
 import TransactionDetailPanel from '../components/TransactionDetailPanel';
+import SaveFilterModal from '../components/SaveFilterModal';
+import SavedFiltersModal from '../components/SavedFiltersModal';
+import { savedFilterAPI } from '../services/api';
 import './Transactions.css';
 
 const Transactions = () => {
@@ -35,6 +38,8 @@ const Transactions = () => {
   const [error, setError] = useState('');
   const [selectedTransaction, setSelectedTransaction] = useState(null);
   const [isPanelOpen, setIsPanelOpen] = useState(false);
+  const [isSaveFilterOpen, setIsSaveFilterOpen] = useState(false);
+  const [isLoadFilterOpen, setIsLoadFilterOpen] = useState(false);
 
   // Check if client-side filtering is active
   const hasClientSideFilters = () => {
@@ -250,6 +255,36 @@ const Transactions = () => {
 
   const { sortedData, sortConfig: currentSort, handleSort } = useTableSort(transactions, sortConfig);
 
+  const handleSaveFilter = async (name) => {
+    try {
+      const filtersToSave = {
+        ...filters,
+        clientFilters: isCashierOnly ? clientFilters : undefined,
+        managerFilters: hasRole('manager') ? managerFilters : undefined
+      };
+      delete filtersToSave.page;
+      
+      await savedFilterAPI.createSavedFilter(name, 'transactions', filtersToSave);
+      toast.success('Filter saved successfully');
+    } catch (error) {
+      console.error(error);
+      toast.error('Failed to save filter');
+    }
+  };
+
+  const handleLoadFilter = (savedFilters) => {
+    const { clientFilters: savedClient, managerFilters: savedManager, ...serverFilters } = savedFilters;
+    
+    if (savedClient) setClientFilters(savedClient);
+    if (savedManager) setManagerFilters(savedManager);
+    
+    const newFilters = { ...serverFilters, page: 1 };
+    setFilters(newFilters);
+    setSearchParams(newFilters);
+    
+    toast.success('Filters loaded');
+  };
+
   return (
     <div className="transactions-page">
       <div className="transactions-page-header">
@@ -370,6 +405,12 @@ const Transactions = () => {
           </select>
         </div>
         <div className="transactions-filters-actions">
+          <button onClick={() => setIsSaveFilterOpen(true)} className="btn btn-outline-secondary" title="Save current filters">
+            Save
+          </button>
+          <button onClick={() => setIsLoadFilterOpen(true)} className="btn btn-outline-secondary" title="Load saved filters">
+            Load
+          </button>
           <button onClick={loadTransactions} className="btn btn-secondary transactions-refresh-btn" title="Refresh">
             Refresh
           </button>
@@ -543,6 +584,19 @@ const Transactions = () => {
           loadTransactions();
         }}
         hasRole={hasRole}
+      />
+
+      <SaveFilterModal 
+        isOpen={isSaveFilterOpen} 
+        onClose={() => setIsSaveFilterOpen(false)} 
+        onSave={handleSaveFilter} 
+      />
+      
+      <SavedFiltersModal 
+        isOpen={isLoadFilterOpen} 
+        onClose={() => setIsLoadFilterOpen(false)} 
+        onSelect={handleLoadFilter} 
+        page="transactions" 
       />
 
     </div>

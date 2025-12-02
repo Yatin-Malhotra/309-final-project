@@ -3401,6 +3401,17 @@ app.get('/analytics/promotions', requireRole('manager'), analyticsRoutes.getProm
 // GET /analytics/financial - Financial insights (Manager)
 app.get('/analytics/financial', requireRole('manager'), analyticsRoutes.getFinancialAnalytics);
 
+const savedFiltersRoutes = require('./routes/savedFilters');
+
+// GET /saved-filters
+app.get('/saved-filters', requireRole('regular'), savedFiltersRoutes.getSavedFilters);
+
+// POST /saved-filters
+app.post('/saved-filters', requireRole('regular'), savedFiltersRoutes.createSavedFilter);
+
+// DELETE /saved-filters/:id
+app.delete('/saved-filters/:id', requireRole('regular'), savedFiltersRoutes.deleteSavedFilter);
+
 // ============================================
 // ERROR HANDLERS
 // ============================================
