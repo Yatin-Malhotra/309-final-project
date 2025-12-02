@@ -134,16 +134,12 @@ const Dashboard = () => {
             // Engagement metrics
             const eventsResponse = await eventAPI.getEvents({ limit: 100 });
             const allEvents = eventsResponse.data.results || [];
-            // Count upcoming events (user may or may not be registered)
-            const upcomingEvents = allEvents.filter(
-              event => new Date(event.startTime) > now
+            // Count upcoming events that the user is registered for
+            const upcomingEventsRegistered = allEvents.filter(
+              event => new Date(event.startTime) > now && event.isRegistered === true
             );
             const activePromotions = await promotionAPI.getPromotions();
-            const activePromos = (activePromotions.data.results || []).filter(promo => {
-              const start = new Date(promo.startTime);
-              const end = new Date(promo.endTime);
-              return now >= start && now <= end;
-            });
+            const activePromos = activePromotions.data.results || [];
             // Count events attended this month based on event transactions
             const eventsAttendedMonth = allTransactions.filter(tx => {
               if (tx.type !== 'event') return false;
@@ -180,7 +176,7 @@ const Dashboard = () => {
                 mostCommonType
               },
               engagement: {
-                upcomingEvents: upcomingEvents.length,
+                upcomingEvents: upcomingEventsRegistered.length,
                 activePromotions: activePromos.length,
                 eventsAttendedMonth
               }

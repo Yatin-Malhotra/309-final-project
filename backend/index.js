@@ -3152,6 +3152,7 @@ app.get('/promotions', optionalAuth, validateQuery(z.object({
         // Determine which user's role to use for filtering
         let targetUser = req.user;
         let targetUserId = req.user?.id;
+        const requesterIsManagerOrAbove = req.user && ['manager', 'superuser'].includes(req.user.role);
         
         // If utorid is provided, look up that user instead
         if (utorid) {
@@ -3170,8 +3171,10 @@ app.get('/promotions', optionalAuth, validateQuery(z.object({
         // Use target user's role to determine visibility
         const isManagerOrAbove = targetUser && ['manager', 'superuser'].includes(targetUser.role);
         
-        // Managers see all promotions unless explicitly filtered by time
-        if (isManagerOrAbove) {
+        if (utorid) {
+            where.startTime = { lte: now };
+            where.endTime = { gte: now };
+        } else if (isManagerOrAbove) {
             // Only apply time filters if explicitly requested with 'true' or 'false'
             if (started === 'true' || started === 'false') {
                 where.startTime = started === 'true' ? { lte: now } : { gt: now };
@@ -3197,8 +3200,7 @@ app.get('/promotions', optionalAuth, validateQuery(z.object({
             } : false
         });
         
-        // Filter out used one-time promotions for regular users
-        if (!isManagerOrAbove && targetUserId) {
+        if (targetUserId && (!requesterIsManagerOrAbove || utorid)) {
             promotions = promotions.filter(p => {
                 if (p.type === 'automatic') return true;
                 const userPromo = p.userPromotions?.find(up => up.userId === targetUserId);
@@ -3220,9 +3222,7 @@ app.get('/promotions', optionalAuth, validateQuery(z.object({
             return result;
         });
         
-        // For managers, use database count (total matching promotions)
-        // For regular users, use filtered count (after removing used promotions)
-        const finalCount = isManagerOrAbove ? dbCount : results.length;
+        const finalCount = (requesterIsManagerOrAbove && !utorid) ? dbCount : results.length;
         
         res.json({ count: finalCount, results });
     } catch (error) { next(error); }
