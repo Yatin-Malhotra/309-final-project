@@ -75,19 +75,7 @@ const CreatePromotion = () => {
 
     // Validation: At least one reward mechanism must be provided
     if (!formData.minSpending && !formData.rate && !formData.points) {
-      setError('Please provide either (minSpending + rate) or points.');
-      return;
-    }
-
-    // If minSpending is provided, rate should also be provided
-    if (formData.minSpending && !formData.rate) {
-      setError('Rate is required when minimum spending is provided.');
-      return;
-    }
-
-    // vice versa
-    if (formData.rate && !formData.minSpending) {
-      setError('Minimum spending is required when rate is provided.');
+      toast.error('Please provide at least one reward mechanism (minSpending, rate, or points).');
       return;
     }
 
@@ -232,9 +220,7 @@ const CreatePromotion = () => {
                 }
                 placeholder="e.g., 50.00"
               />
-              <small>
-                Required if rate is provided
-              </small>
+              
             </div>
             <div className="form-group">
               <label htmlFor="rate">Rate (optional)</label>
@@ -249,9 +235,7 @@ const CreatePromotion = () => {
                 }
                 placeholder="e.g., 1.5"
               />
-              <small>
-                Points multiplier (required if minSpending is provided)
-              </small>
+              
             </div>
           </div>
           <div className="form-group">
@@ -268,7 +252,7 @@ const CreatePromotion = () => {
               placeholder="e.g., 100"
             />
             <small>
-              Provide either (minSpending + rate) OR fixed points. Cannot provide both.
+              Provide minSpending, rate, points, or any combination. At least one reward mechanism is required.
             </small>
           </div>
           <div className="form-actions">
