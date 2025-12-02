@@ -134,12 +134,7 @@ const Events = () => {
     <div className="events-page">
       <div className="events-page-header">
         <h1>Events</h1>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', alignItems: 'flex-end' }}>
-          {hasRole('manager') && (
-            <Link to="/events/create" className="btn btn-primary events-create-btn">
-              Create Event
-            </Link>
-          )}
+        <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
           {canShowMyEventsButton() && (
             <button
               type="button"
@@ -155,6 +150,11 @@ const Events = () => {
             >
               My Events
             </button>
+          )}
+          {hasRole('manager') && (
+            <Link to="/events/create" className="btn btn-primary events-create-btn">
+              Create Event
+            </Link>
           )}
         </div>
       </div>

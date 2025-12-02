@@ -389,34 +389,6 @@ const UserDetail = () => {
         </div>
       </div>
 
-      {user.promotions && user.promotions.length > 0 && (
-        <div className="user-detail-section">
-          <div className="user-detail-section-header">Active Promotions</div>
-          <div className="user-detail-promotions-grid">
-            {user.promotions.map((promotion) => (
-              <div key={promotion.id} className="user-detail-promotion-item">
-                <div className="user-detail-promotion-name">{promotion.name}</div>
-                {promotion.minSpending && (
-                  <div className="user-detail-promotion-detail">
-                    Min Spending: ${promotion.minSpending}
-                  </div>
-                )}
-                {promotion.rate && (
-                  <div className="user-detail-promotion-detail">
-                    Rate: {promotion.rate}x
-                  </div>
-                )}
-                {promotion.points && (
-                  <div className="user-detail-promotion-detail">
-                    Points: {promotion.points}
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
       {hasRole('manager') && (
         <div className="user-detail-section">
           <div className="user-detail-section-header">User Transactions</div>

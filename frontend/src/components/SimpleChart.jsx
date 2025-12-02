@@ -18,10 +18,31 @@ import {
 import { useTheme } from '../contexts/ThemeContext';
 import './SimpleChart.css';
 
-const COLORS = ['#4F7C82', '#93B1B5', '#B8E3E9', '#0B2E33', '#6B9FA3'];
-
 const SimpleChart = ({ type, data, dataKey, xKey = 'date', height = 300, className = '' }) => {
   const { isDark } = useTheme();
+  
+  // Theme-aware colors with good distinction - using varied hues across teal/blue/green spectrum
+  const COLORS = isDark 
+    ? [
+        '#6B9FA3', // Medium teal-blue
+        '#7AB5BA', // Lighter teal-blue  
+        '#5A9BA0', // Medium blue-teal
+        '#8BC4C9', // Light teal-cyan
+        '#4F7C82', // Medium teal
+        '#6FA8B0', // Medium-light teal
+        '#93B1B5', // Light blue-gray
+        '#4A8A94'  // Medium-dark teal-green
+      ]
+    : [
+        '#3D6B72', // Darker teal (distinct dark)
+        '#4F7C82', // Medium teal (distinct medium-dark)
+        '#4A8A94', // Medium-dark teal-green (distinct green-teal)
+        '#5A9BA0', // Medium blue-teal (distinct blue-teal)
+        '#6B9FA3', // Medium teal-blue (distinct medium)
+        '#6FA8B0', // Medium-light teal (distinct lighter)
+        '#7AB5BA', // Lighter teal-blue (distinct light)
+        '#93B1B5'  // Light blue-gray (distinct lightest)
+      ];
   const textColor = isDark ? '#B8E3E9' : '#0B2E33';
   const gridColor = isDark ? 'rgba(184, 227, 233, 0.1)' : 'rgba(11, 46, 51, 0.1)';
   const [activeIndex, setActiveIndex] = useState(null);
