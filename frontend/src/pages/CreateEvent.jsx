@@ -1,6 +1,7 @@
 // Create/Edit event page (for managers)
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate, useParams, Link } from 'react-router-dom';
+import { toast } from 'react-toastify';
 import { useAuth } from '../contexts/AuthContext';
 import { eventAPI, userAPI } from '../services/api';
 import './CreateEvent.css';
@@ -34,6 +35,7 @@ const CreateEvent = () => {
   const [showOrganizerDropdown, setShowOrganizerDropdown] = useState(false);
   const organizerInputRef = useRef(null);
   const organizerDropdownRef = useRef(null);
+  const [originalPublished, setOriginalPublished] = useState(false); // Track original published state
 
   const loadEvent = useCallback(async () => {
     if (!eventId || !user) return;
@@ -64,6 +66,8 @@ const CreateEvent = () => {
         return `${year}-${month}-${day}T${hours}:${minutes}`;
       };
 
+      const publishedState = event.published || false;
+      setOriginalPublished(publishedState);
       setFormData({
         name: event.name || '',
         description: event.description || '',
@@ -72,7 +76,7 @@ const CreateEvent = () => {
         endTime: formatDateTimeLocal(event.endTime),
         capacity: event.capacity ? String(event.capacity) : '',
         points: event.pointsAllocated ? String(event.pointsAllocated) : '',
-        published: event.published || false,
+        published: publishedState,
       });
       
       // Load existing organizers
@@ -194,12 +198,16 @@ const CreateEvent = () => {
 
       if (isEditMode) {
         await eventAPI.updateEvent(eventId, data);
+        toast.success('Event updated successfully!');
       } else {
         await eventAPI.createEvent(data);
+        toast.success('Event created successfully!');
       }
       navigate('/events');
     } catch (err) {
-      setError(err.response?.data?.error || `Failed to ${isEditMode ? 'update' : 'create'} event.`);
+      const errorMessage = err.response?.data?.error || `Failed to ${isEditMode ? 'update' : 'create'} event.`;
+      setError(errorMessage);
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -416,7 +424,7 @@ const CreateEvent = () => {
           )}
 
           {(hasRole('manager') || hasRole('superuser')) && (
-            <div className="form-group">
+            <div className={`form-group ${isEditMode && originalPublished ? 'published-disabled' : ''}`}>
               <label>Published Status</label>
               <div className="switch-container">
                 <label className="switch">
@@ -426,20 +434,22 @@ const CreateEvent = () => {
                     onChange={(e) =>
                       setFormData({ ...formData, published: e.target.checked })
                     }
+                    disabled={isEditMode && originalPublished}
                   />
                   <span className="slider round"></span>
                 </label>
                 <span className="switch-label">{formData.published ? 'Published' : 'Draft'}</span>
               </div>
               <small>
-                {formData.published 
-                  ? 'This event is visible to all users.' 
-                  : 'This event is hidden from regular users.'}
+                {isEditMode && originalPublished 
+                  ? 'Published events cannot be unpublished.'
+                  : formData.published 
+                    ? 'This event is visible to all users.' 
+                    : 'This event is hidden from regular users.'}
               </small>
             </div>
           )}
 
-          {error && <div className="error-message">{error}</div>}
           <div className="form-actions">
             <button
               type="button"

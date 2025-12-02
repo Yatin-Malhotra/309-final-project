@@ -222,6 +222,7 @@
   border-radius: 8px;
   box-shadow: 0 4px 12px var(--shadow-hover), 0 2px 4px var(--shadow);
   min-width: 160px;
+  max-width: calc(100vw - 32px);
   overflow: hidden;
   z-index: 1002;
   border: 1px solid var(--border-light);
@@ -274,6 +275,9 @@
 .navbar-role-menu-item .role-name {
   flex: 1;
   white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
 }
 
 .navbar-role-menu-item.active svg {

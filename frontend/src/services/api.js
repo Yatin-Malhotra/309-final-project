@@ -3,6 +3,15 @@ import axios from 'axios';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
+// Helper function to get full avatar URL
+export const getAvatarUrl = (avatarUrl) => {
+  if (!avatarUrl) return null;
+  if (avatarUrl.startsWith('http://') || avatarUrl.startsWith('https://')) {
+    return avatarUrl;
+  }
+  return `${API_BASE_URL}${avatarUrl}`;
+};
+
 // Create axios instance with default config
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -23,11 +32,16 @@ api.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-// Handle token expiration
+// Handle token expiration and auth failures
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401) {
+    const originalRequestUrl = error.config?.url || '';
+
+    if (
+      error.response?.status === 401 && 
+      !originalRequestUrl.includes('/auth')
+    ) {
       localStorage.removeItem('token');
       localStorage.removeItem('user');
       window.location.href = '/login';
@@ -153,6 +167,13 @@ export const analyticsAPI = {
   getEventAnalytics: () => api.get('/analytics/events'),
   getPromotionAnalytics: () => api.get('/analytics/promotions'),
   getFinancialAnalytics: () => api.get('/analytics/financial'),
+};
+
+// Saved Filters endpoints
+export const savedFilterAPI = {
+  getSavedFilters: (page) => api.get('/saved-filters', { params: { page } }),
+  createSavedFilter: (name, page, filters) => api.post('/saved-filters', { name, page, filters }),
+  deleteSavedFilter: (id) => api.delete(`/saved-filters/${id}`),
 };
 
 export default api;

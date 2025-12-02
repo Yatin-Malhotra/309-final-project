@@ -1,5 +1,6 @@
 // Transaction Modal Component (for transfer and redemption)
 import { useState, useEffect } from "react";
+import { toast } from 'react-toastify';
 import { transactionAPI } from "../services/api";
 import { useAuth } from "../contexts/AuthContext";
 import './TransactionModal.css';
@@ -35,7 +36,9 @@ const TransactionModal = ({ isOpen, onClose, defaultType = 'redemption', onSucce
 
     const amount = parseInt(formData.amount);
     if (isNaN(amount) || amount <= 0) {
-      setError('Please enter a valid amount');
+      const errorMessage = 'Please enter a valid amount';
+      setError(errorMessage);
+      toast.error(errorMessage);
       setLoading(false);
       return;
     }
@@ -43,13 +46,25 @@ const TransactionModal = ({ isOpen, onClose, defaultType = 'redemption', onSucce
     try {
       if (formData.type === 'redemption') {
         await transactionAPI.createRedemption(amount, formData.remark || undefined);
+        toast.success('Redemption request created successfully!');
       } else {
         if (!formData.utorid.trim()) {
-          setError('Please enter recipient UTORid');
+          const errorMessage = 'Please enter recipient UTORid';
+          setError(errorMessage);
+          toast.error(errorMessage);
+          setLoading(false);
+          return;
+        }
+        // Prevent self-transfers
+        if (formData.utorid.trim().toLowerCase() === user?.utorid?.toLowerCase()) {
+          const errorMessage = 'Cannot transfer points to yourself';
+          setError(errorMessage);
+          toast.error(errorMessage);
           setLoading(false);
           return;
         }
         await transactionAPI.createTransfer(formData.utorid.trim(), amount, formData.remark || undefined);
+        toast.success('Points transferred successfully!');
       }
       
       updateLocalUser();
@@ -58,7 +73,9 @@ const TransactionModal = ({ isOpen, onClose, defaultType = 'redemption', onSucce
       }
       onClose();
     } catch (err) {
-      setError(err.response?.data?.error || 'Failed to create transaction.');
+      const errorMessage = err.response?.data?.error || 'Failed to create transaction.';
+      setError(errorMessage);
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -129,7 +146,6 @@ const TransactionModal = ({ isOpen, onClose, defaultType = 'redemption', onSucce
               disabled={loading}
             />
           </div>
-          {error && <div className="error-message">{error}</div>}
           <div className="form-actions">
             <button
               type="button"

@@ -1,7 +1,9 @@
 // Main App component with routing
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import { AuthProvider } from './contexts/AuthContext';
-import { ThemeProvider } from './contexts/ThemeContext';
+import { ThemeProvider, useTheme } from './contexts/ThemeContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import Navbar from './components/Navbar';
 
@@ -22,14 +24,29 @@ import CreateUser from './pages/CreateUser';
 import UserDetail from './pages/UserDetail';
 
 import './App.css';
+import './Toast.css';
 
 function AppContent() {
   const location = useLocation();
+  const { theme } = useTheme();
   const hideNavbar = location.pathname === '/login' || location.pathname.startsWith('/reset-password');
 
   return (
     <div className="app">
       {!hideNavbar && <Navbar />}
+      <ToastContainer
+        position="top-right"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme={theme}
+        className="custom-toast-container"
+      />
       <div className="app-content">
             <Routes>
               <Route path="/login" element={<Login />} />

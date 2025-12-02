@@ -309,6 +309,12 @@
   .events-filters .form-group {
     width: 100%;
   }
+  
+  .events-filters-actions {
+    margin-left: 0;
+    width: 100%;
+    justify-content: flex-end;
+  }
 
   .events-card-content {
     flex-direction: column;
@@ -318,5 +324,11 @@
   .events-page-header h1 {
     font-size: 24px;
   }
+}
+
+.events-filters-actions {
+  display: flex;
+  gap: 10px;
+  margin-left: auto;
 }
 

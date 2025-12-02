@@ -1,7 +1,8 @@
 // User profile page
 import { useState, useEffect, useRef } from 'react';
+import { toast } from 'react-toastify';
 import { useAuth } from '../contexts/AuthContext';
-import { userAPI } from '../services/api';
+import { userAPI, getAvatarUrl } from '../services/api';
 import './Profile.css';
 
 const Profile = () => {
@@ -32,7 +33,7 @@ const Profile = () => {
         birthday: user.birthday || '',
         avatar: null,
       });
-      setAvatarPreview(user.avatarUrl || null);
+      setAvatarPreview(getAvatarUrl(user.avatarUrl) || null);
     }
   }, [user]);
 
@@ -51,10 +52,19 @@ const Profile = () => {
       if (formData.avatar) data.append('avatar', formData.avatar);
 
       const response = await userAPI.updateMe(data);
+      if (response.data.avatarUrl) {
+        setAvatarPreview(getAvatarUrl(response.data.avatarUrl));
+      }
+      if (formData.avatar) {
+        setFormData({ ...formData, avatar: null });
+      }
       updateLocalUser();
       setSuccess('Profile updated successfully!');
+      toast.success('Profile updated successfully!');
     } catch (err) {
-      setError(err.response?.data?.error || 'Failed to update profile.');
+      const errorMessage = err.response?.data?.error || 'Failed to update profile.';
+      setError(errorMessage);
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -84,9 +94,12 @@ const Profile = () => {
     try {
       await userAPI.changePassword(passwordData.old, passwordData.new);
       setSuccess('Password changed successfully!');
+      toast.success('Password changed successfully!');
       setPasswordData({ old: '', new: '', confirm: '' });
     } catch (err) {
-      setError(err.response?.data?.error || 'Failed to change password.');
+      const errorMessage = err.response?.data?.error || 'Failed to change password.';
+      setError(errorMessage);
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -135,6 +148,7 @@ const Profile = () => {
                 >
                   {avatarPreview ? (
                     <img 
+                      key={avatarPreview} 
                       src={avatarPreview} 
                       alt="Avatar" 
                       className="profile-avatar-image"
@@ -208,8 +222,6 @@ const Profile = () => {
               />
             </div>
             
-            {error && <div className="error-message">{error}</div>}
-            {success && <div className="success-message">{success}</div>}
             <div className="form-actions">
               <button
                 type="submit"
@@ -267,8 +279,6 @@ const Profile = () => {
                 required
               />
             </div>
-            {error && <div className="error-message">{error}</div>}
-            {success && <div className="success-message">{success}</div>}
             <div className="form-actions">
               <button
                 type="submit"

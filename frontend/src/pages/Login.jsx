@@ -1,6 +1,7 @@
 // Login page component
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import { toast } from 'react-toastify';
 import { useAuth } from '../contexts/AuthContext';
 import { authAPI, userAPI } from '../services/api';
 import './Login.css';
@@ -30,7 +31,8 @@ const Login = () => {
       login(token, userData);
       navigate('/dashboard');
     } catch (err) {
-      setError(err.response?.data?.error || 'Login failed. Please try again.');
+      const errorMessage = err.response?.data?.error || 'Login failed. Please try again.';
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -69,7 +71,6 @@ const Login = () => {
               required
             />
           </div>
-          {error && <div className="login-error-message">{error}</div>}
           <div className="login-form-actions">
             <button type="submit" className="login-btn-primary" disabled={loading}>
               {loading ? 'Logging in...' : 'Login'}

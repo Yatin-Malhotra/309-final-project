@@ -1,6 +1,7 @@
 // Create user page (for cashiers)
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
 import { userAPI } from '../services/api';
 import './CreateUser.css';
 
@@ -23,12 +24,14 @@ const CreateUser = () => {
 
     try {
       const response = await userAPI.createUser(formData);
-      setSuccess(
-        `User created successfully! Reset token: ${response.data.resetToken}`
-      );
+      const successMessage = `User created successfully! Reset token: ${response.data.resetToken}`;
+      setSuccess(successMessage);
+      toast.success('User created successfully!');
       setTimeout(() => navigate('/users'), 2000);
     } catch (err) {
-      setError(err.response?.data?.error || 'Failed to create user.');
+      const errorMessage = err.response?.data?.error || 'Failed to create user.';
+      setError(errorMessage);
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -82,8 +85,6 @@ const CreateUser = () => {
               title="Must be a UofT email (@utoronto.ca or @mail.utoronto.ca)"
             />
           </div>
-          {error && <div className="error-message">{error}</div>}
-          {success && <div className="success-message">{success}</div>}
           <div className="form-actions">
             <button
               type="button"

@@ -3,6 +3,7 @@ import { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
+import { getAvatarUrl } from '../services/api';
 import './Navbar.css';
 
 const Navbar = () => {
@@ -42,16 +43,62 @@ const Navbar = () => {
     };
   }, [dropdownOpen, roleMenuOpen]);
 
-  // Position the role menu dynamically
-  useEffect(() => {
+  // Position the role menu dynamically with responsive handling
+  const positionRoleMenu = () => {
     if (roleMenuOpen && roleMenuRef.current) {
       const roleItem = roleMenuRef.current.querySelector('.navbar-dropdown-role');
       const roleMenu = roleMenuRef.current.querySelector('.navbar-role-menu');
       if (roleItem && roleMenu) {
-        const rect = roleItem.getBoundingClientRect();
-        roleMenu.style.left = `${rect.right + 8}px`;
-        roleMenu.style.top = `${rect.top}px`;
+        requestAnimationFrame(() => {
+          const rect = roleItem.getBoundingClientRect();
+          const menuRect = roleMenu.getBoundingClientRect();
+          const viewportWidth = window.innerWidth;
+          const viewportHeight = window.innerHeight;
+          
+          let left = rect.right + 8;
+          let top = rect.top;
+          
+          // Check if menu would overflow on the right
+          if (left + menuRect.width > viewportWidth - 16) {
+            left = rect.left - menuRect.width - 8;
+          }
+          
+          // Ensure menu doesn't go off the left edge
+          if (left < 16) {
+            left = 16;
+            isLeftSide = false;
+          }
+          
+          // overflow on the bottom
+          if (top + menuRect.height > viewportHeight - 16) {
+            top = Math.max(16, viewportHeight - menuRect.height - 16);
+          }
+          
+          // Ensure menu doesn't go off the top edge
+          if (top < 16) {
+            top = 16;
+          }
+          
+          roleMenu.style.left = `${left}px`;
+          roleMenu.style.top = `${top}px`;
+        });
       }
+    }
+  };
+
+  useEffect(() => {
+    positionRoleMenu();
+    
+    // Reposition on window resize
+    const handleResize = () => {
+      positionRoleMenu();
+    };
+    
+    if (roleMenuOpen) {
+      window.addEventListener('resize', handleResize);
+      return () => {
+        window.removeEventListener('resize', handleResize);
+      };
     }
   }, [roleMenuOpen]);
 
@@ -96,8 +143,12 @@ const Navbar = () => {
                 onClick={() => setDropdownOpen(!dropdownOpen)}
               >
                 <div className="user-avatar">
-                  {user.avatarUrl ? (
-                    <img src={user.avatarUrl} alt={user.name} />
+                  {getAvatarUrl(user.avatarUrl) ? (
+                    <img 
+                      key={user.avatarUrl} 
+                      src={getAvatarUrl(user.avatarUrl)} 
+                      alt={user.name} 
+                    />
                   ) : (
                     getInitials(user.name)
                   )}

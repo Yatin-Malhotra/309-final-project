@@ -2,7 +2,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { transactionAPI, eventAPI, promotionAPI, userAPI, analyticsAPI } from '../services/api';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import AnalyticsCard from '../components/AnalyticsCard';
 import AnimatedNumber from '../components/AnimatedNumber';
 import SimpleChart from '../components/SimpleChart';
@@ -14,6 +14,7 @@ import './Dashboard.css';
 
 const Dashboard = () => {
   const { user, hasRole, currentRole } = useAuth();
+  const navigate = useNavigate();
   const [stats, setStats] = useState({
     totalPoints: 0,
     recentTransactions: [],
@@ -48,7 +49,6 @@ const Dashboard = () => {
     setLoading(true);
     try {
       const userRole = currentRole;
-      console.log('Loading dashboard for role:', userRole)
         // For regular users: show points and transactions
         if (userRole === 'regular') {
             const points = user.points || 0;
@@ -134,16 +134,12 @@ const Dashboard = () => {
             // Engagement metrics
             const eventsResponse = await eventAPI.getEvents({ limit: 100 });
             const allEvents = eventsResponse.data.results || [];
-            // Count upcoming events (user may or may not be registered)
-            const upcomingEvents = allEvents.filter(
-              event => new Date(event.startTime) > now
+            // Count upcoming events that the user is registered for
+            const upcomingEventsRegistered = allEvents.filter(
+              event => new Date(event.startTime) > now && event.isRegistered === true
             );
             const activePromotions = await promotionAPI.getPromotions();
-            const activePromos = (activePromotions.data.results || []).filter(promo => {
-              const start = new Date(promo.startTime);
-              const end = new Date(promo.endTime);
-              return now >= start && now <= end;
-            });
+            const activePromos = activePromotions.data.results || [];
             // Count events attended this month based on event transactions
             const eventsAttendedMonth = allTransactions.filter(tx => {
               if (tx.type !== 'event') return false;
@@ -180,7 +176,7 @@ const Dashboard = () => {
                 mostCommonType
               },
               engagement: {
-                upcomingEvents: upcomingEvents.length,
+                upcomingEvents: upcomingEventsRegistered.length,
                 activePromotions: activePromos.length,
                 eventsAttendedMonth
               }
@@ -324,6 +320,16 @@ const Dashboard = () => {
       ...prev,
       [section]: !prev[section]
     }));
+  };
+
+  const handleQRScanSuccess = (scannedUtorid) => {
+    // Close the scanner modal
+    setShowQRScanner(false);
+    
+    // Navigate to create transaction page with UTORid in state
+    navigate('/transactions/create', { 
+      state: { utorid: scannedUtorid } 
+    });
   };
 
   if (loading) {
@@ -503,6 +509,7 @@ const Dashboard = () => {
                         tx.type === 'purchase' ? 'dashboard-badge-blue' :
                         tx.type === 'redemption' ? 'dashboard-badge-danger' :
                         tx.type === 'event' ? 'dashboard-badge-success' :
+                        tx.type === 'adjustment' ? 'dashboard-badge-warning' :
                         'dashboard-badge-secondary'
                       }`}>
                         {tx.type}
@@ -655,7 +662,11 @@ const Dashboard = () => {
           </Link>
         </div>
 
-        <QRScannerModal isOpen={showQRScanner} onClose={() => setShowQRScanner(false)} />
+        <QRScannerModal 
+          isOpen={showQRScanner} 
+          onClose={() => setShowQRScanner(false)}
+          onScanSuccess={handleQRScanSuccess}
+        />
 
         {/* Transaction Processing Metrics */}
         {analytics?.transactions && (
@@ -892,7 +903,11 @@ const Dashboard = () => {
           </Link>
         </div>
 
-        <QRScannerModal isOpen={showQRScanner} onClose={() => setShowQRScanner(false)} />
+        <QRScannerModal 
+          isOpen={showQRScanner} 
+          onClose={() => setShowQRScanner(false)}
+          onScanSuccess={handleQRScanSuccess}
+        />
 
         {/* Financial Insights */}
         {analytics?.financial && (

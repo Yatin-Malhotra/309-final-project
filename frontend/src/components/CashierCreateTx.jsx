@@ -1,16 +1,22 @@
 // Create transaction form (for cashiers and above)
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { toast } from 'react-toastify';
 import { promotionAPI, transactionAPI } from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
-import PromotionSelector from './PromotionSelector';
 import '../pages/CreateTransaction.css';
 
 const CashierCreateTx = () => {
   const { hasRole } = useAuth();
+  const isCashierOnly = hasRole('cashier') && !hasRole('manager');
   const navigate = useNavigate();
+  const location = useLocation();
+  
+  // Get UTORid from navigation state (from QR scan)
+  const scannedUtorid = location.state?.utorid || '';
+  
   const [formData, setFormData] = useState({
-    utorid: '',
+    utorid: scannedUtorid,
     type: 'purchase',
     spent: '',
     amount: '',
@@ -20,18 +26,80 @@ const CashierCreateTx = () => {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const [promotions, setPromotions] = useState([]); 
-  const [promotionIds, setPromotionIds] = useState([]); 
+  const [allPromotions, setAllPromotions] = useState([]); // All promotions (one-time + automatic)
+  const [promotionIds, setPromotionIds] = useState([]); // Manually selected one-time promotions
 
-  // this uses manager id for now
-  const getPromotions = async () => {
-    const response = await promotionAPI.getPromotions()
-    setPromotions(response.data.results)
+  // Fetch promotions based on the UTORid entered (for purchase transactions)
+  const getPromotions = async (utorid, type) => {
+    try {
+      const params = {};
+      // If UTORid is provided and transaction type is purchase, fetch promotions for that user
+      if (utorid && type === 'purchase') {
+        params.utorid = utorid;
+      }
+      const response = await promotionAPI.getPromotions(params);
+      setAllPromotions(response.data.results || []);
+    } catch (err) {
+      // If user not found, just set empty promotions
+      if (err.response?.status === 404) {
+        setAllPromotions([]);
+      } else {
+        console.error('Failed to load promotions:', err);
+        setAllPromotions([]);
+      }
+    }
   }
 
   useEffect(() => {
-    getPromotions()
-  }, [])
+    getPromotions(formData.utorid, formData.type);
+    // Clear selected promotions when UTORid or type changes, as available promotions may differ
+    setPromotionIds([]);
+  }, [formData.utorid, formData.type])
+
+  // Calculate eligible promotions based on spent amount
+  const getEligiblePromotions = () => {
+    if (formData.type !== 'purchase' || !formData.spent) {
+      return { automatic: [], oneTime: [] };
+    }
+    const spent = parseFloat(formData.spent);
+    if (isNaN(spent) || spent <= 0) {
+      return { automatic: [], oneTime: [] };
+    }
+    
+    const eligible = {
+      automatic: [],
+      oneTime: []
+    };
+    
+    allPromotions.forEach(promo => {
+      // Check minimum spending requirement
+      if (promo.minSpending && spent < promo.minSpending) {
+        return;
+      }
+      
+      if (promo.type === 'automatic') {
+        eligible.automatic.push(promo);
+      } else if (promo.type === 'onetime') {
+        eligible.oneTime.push(promo);
+      }
+    });
+    
+    return eligible;
+  };
+
+  const eligiblePromotions = getEligiblePromotions();
+
+  // Handle clicking on a one-time promotion to toggle it
+  const handleToggleOneTimePromotion = (promoId) => {
+    const promoIdStr = String(promoId);
+    if (promotionIds.includes(promoIdStr)) {
+      // Remove if already selected
+      setPromotionIds(promotionIds.filter(id => id !== promoIdStr));
+    } else {
+      // Add if not selected
+      setPromotionIds([...promotionIds, promoIdStr]);
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -58,9 +126,12 @@ const CashierCreateTx = () => {
       
 
       await transactionAPI.createTransaction(data);
+      toast.success('Transaction created successfully!');
       navigate('/transactions');
     } catch (err) {
-      setError(err.response?.data?.error || 'Failed to create transaction.');
+      const errorMessage = err.response?.data?.error || 'Failed to create transaction.';
+      setError(errorMessage);
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -94,6 +165,13 @@ const CashierCreateTx = () => {
                 setFormData({ ...formData, type: e.target.value })
               }
               required
+              disabled={isCashierOnly}
+              style={isCashierOnly ? {
+                backgroundColor: 'var(--bg-secondary)',
+                opacity: 0.6,
+                cursor: 'not-allowed',
+                color: 'var(--text-secondary)'
+              } : {}}
             >
               <option value="purchase">Purchase</option>
               {hasRole('manager') && (<option value="adjustment">Adjustment</option>)}
@@ -141,12 +219,41 @@ const CashierCreateTx = () => {
               </div>
             </>
           )}
-          <PromotionSelector
-            promotions={promotions}
-            value={promotionIds}
-            onChange={setPromotionIds}
-            formData={formData}
-          />
+          {/* Display all eligible promotions */}
+          {formData.type === 'purchase' && 
+           (eligiblePromotions.automatic.length > 0 || eligiblePromotions.oneTime.length > 0) && (
+            <div className="form-group">
+              <label>Available Promotions</label>
+              <div className="promotion-list">
+                {/* Automatic promotions - read-only, will be applied automatically */}
+                {eligiblePromotions.automatic.map((promo) => (
+                  <div key={promo.id} className="promotion-item promotion-item-automatic">
+                    <span className="promotion-name">{promo.name} (Automatic)</span>
+                    <span className="promotion-checkmark">✓ Applied</span>
+                  </div>
+                ))}
+                {/* One-time promotions - clickable to apply */}
+                {eligiblePromotions.oneTime.map((promo) => {
+                  const isSelected = promotionIds.includes(String(promo.id));
+                  return (
+                    <div 
+                      key={promo.id} 
+                      className={`promotion-item promotion-item-onetime ${isSelected ? 'promotion-item-selected' : ''}`}
+                      onClick={() => handleToggleOneTimePromotion(promo.id)}
+                      style={{ cursor: 'pointer' }}
+                    >
+                      <span className="promotion-name">
+                        {promo.name} (One Time{isSelected ? '' : ' - click to apply'})
+                      </span>
+                      {isSelected && (
+                        <span className="promotion-checkmark">✓ Applied</span>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
           <div className="form-group">
             <label htmlFor="remark">Remark</label>
             <textarea
@@ -158,7 +265,6 @@ const CashierCreateTx = () => {
               rows="3"
             />
           </div>
-          {error && <div className="error-message">{error}</div>}
           <div className="form-actions">
             <button
               type="button"

@@ -188,6 +188,45 @@
   border-color: rgba(79, 124, 130, 0.3);
 }
 
+.promotion-item-automatic {
+  opacity: 0.8;
+  cursor: default;
+}
+
+.promotion-item-onetime {
+  cursor: pointer;
+  background-color: rgba(184, 227, 233, 0.15);
+  border-color: rgba(147, 177, 181, 0.3);
+}
+
+.promotion-item-onetime:hover {
+  background-color: rgba(184, 227, 233, 0.25);
+  border-color: rgba(79, 124, 130, 0.5);
+  transform: translateY(-1px);
+}
+
+.promotion-item-selected {
+  background-color: rgba(79, 124, 130, 0.25);
+  border-color: rgba(79, 124, 130, 0.7);
+  border-width: 2px;
+  box-shadow: 0 2px 4px rgba(79, 124, 130, 0.2);
+}
+
+.promotion-item-selected:hover {
+  background-color: rgba(79, 124, 130, 0.3);
+  border-color: rgba(79, 124, 130, 0.8);
+}
+
+.promotion-checkmark {
+  color: var(--primary);
+  font-weight: 600;
+  font-size: 13px;
+}
+
+[data-theme="dark"] .promotion-checkmark {
+  color: #ffffff;
+}
+
 .promotion-name {
   flex: 1;
   font-weight: 500;

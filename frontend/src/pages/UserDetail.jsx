@@ -1,10 +1,12 @@
 // User detail page
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
+import { toast } from 'react-toastify';
 import { useAuth } from '../contexts/AuthContext';
-import { userAPI } from '../services/api';
+import { userAPI, getAvatarUrl } from '../services/api';
 import useTableSort from '../hooks/useTableSort';
 import SortableTableHeader from '../components/SortableTableHeader';
+import ConfirmationModal from '../components/ConfirmationModal';
 import './UserDetail.css';
 
 const UserDetail = () => {
@@ -23,6 +25,13 @@ const UserDetail = () => {
   const [transactionFilters, setTransactionFilters] = useState({
     page: 1,
     limit: 10,
+  });
+  const [confirmation, setConfirmation] = useState({
+    isOpen: false,
+    title: '',
+    message: '',
+    onConfirm: () => {},
+    isDangerous: false
   });
 
   const [editingEmail, setEditingEmail] = useState(false);
@@ -95,40 +104,56 @@ const UserDetail = () => {
     setEmail(user.email);
   };
 
-  const handleSaveEmail = async () => {
-    setEditingEmail(false);
-
-    if (!confirm(`Are you sure you want to change the user's mail?`)) {
-        return;
-    }
-
+  const saveEmail = async () => {
     setActionLoading(true)
 
     try {
         const _ = await userAPI.updateUser(user.id, { email } )
         setUser({...user, email})
+        toast.success('Email updated successfully!');
       } catch (err) {
-        alert(err.response?.data?.error || 'Failed to modify email.');
+        const errorMessage = err.response?.data?.error || 'Failed to modify email.';
+        toast.error(errorMessage);
+    } finally {
+       setActionLoading(false)
+    }
+  };
+
+  const handleSaveEmail = async () => {
+    setEditingEmail(false);
+
+    setConfirmation({
+      isOpen: true,
+      title: 'Change Email',
+      message: "Are you sure you want to change the user's mail?",
+      onConfirm: saveEmail,
+      isDangerous: false
+    });
+  };
+
+  const changeRole = async (newRole) => {
+    setActionLoading(true)
+
+    try {
+      const _ = await userAPI.updateUser(user.id, { role : newRole })
+      setUser({...user, role : newRole})
+      toast.success(`User role updated to ${newRole} successfully!`);
+    } catch (err) {
+        const errorMessage = err.response?.data?.error || 'Failed to modify role.';
+        toast.error(errorMessage);
     } finally {
        setActionLoading(false)
     }
   };
 
   const handleRoleChange = async (userId, newRole) => {
-    if (!confirm(`Are you sure you want to change the user's role to ${newRole}`)) {
-        return;
-    }
-
-    setActionLoading(true)
-
-    try {
-      const _ = await userAPI.updateUser(user.id, { role : newRole })
-      setUser({...user, role : newRole})
-    } catch (err) {
-        alert(err.response?.data?.error || 'Failed to modify email.');
-    } finally {
-       setActionLoading(false)
-    }
+    setConfirmation({
+      isOpen: true,
+      title: 'Change Role',
+      message: `Are you sure you want to change the user's role to ${newRole}?`,
+      onConfirm: () => changeRole(newRole),
+      isDangerous: newRole === 'superuser' || newRole === 'manager'
+    });
   };
 
   const handleTransactionFilterChange = (key, value) => {
@@ -140,12 +165,8 @@ const UserDetail = () => {
     setTransactionFilters(newFilters);
   };
 
-  const handleToggleSuspicious = async () => {
+  const toggleSuspicious = async () => {
     const newSuspiciousValue = !suspicious;
-    if (!confirm(`Are you sure you want to ${suspicious ? 'clear' : 'set'} the suspicious flag for this user?`)) {
-      return;
-    }
-
     setActionLoading(true);
     try {
       const response = await userAPI.updateUser(userId, { suspicious: newSuspiciousValue });
@@ -153,8 +174,35 @@ const UserDetail = () => {
       const updatedSuspicious = response.data.suspicious ?? newSuspiciousValue;
       setSuspicious(updatedSuspicious);
       setUser({ ...user, suspicious: updatedSuspicious });
+      toast.success(`Suspicious flag ${newSuspiciousValue ? 'set' : 'cleared'} successfully!`);
     } catch (err) {
-      alert(err.response?.data?.error || 'Failed to update suspicious status.');
+      const errorMessage = err.response?.data?.error || 'Failed to update suspicious status.';
+      toast.error(errorMessage);
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleToggleSuspicious = async () => {
+    setConfirmation({
+      isOpen: true,
+      title: suspicious ? 'Clear Suspicious Flag' : 'Set Suspicious Flag',
+      message: `Are you sure you want to ${suspicious ? 'clear' : 'set'} the suspicious flag for this user?`,
+      onConfirm: toggleSuspicious,
+      isDangerous: !suspicious
+    });
+  };
+
+  const toggleVerified = async () => {
+    setActionLoading(true);
+    try {
+      const response = await userAPI.updateUser(userId, { verified: true });
+      setVerified(true);
+      setUser({ ...user, verified: true });
+      toast.success('User verified successfully!');
+    } catch (err) {
+      const errorMessage = err.response?.data?.error || 'Failed to verify user.';
+      toast.error(errorMessage);
     } finally {
       setActionLoading(false);
     }
@@ -163,20 +211,13 @@ const UserDetail = () => {
   const handleToggleVerified = async () => {
     if (verified) return;
     
-    if (!confirm('Are you sure you want to verify this user? This action cannot be undone.')) {
-      return;
-    }
-
-    setActionLoading(true);
-    try {
-      const response = await userAPI.updateUser(userId, { verified: true });
-      setVerified(true);
-      setUser({ ...user, verified: true });
-    } catch (err) {
-      alert(err.response?.data?.error || 'Failed to verify user.');
-    } finally {
-      setActionLoading(false);
-    }
+    setConfirmation({
+      isOpen: true,
+      title: 'Verify User',
+      message: 'Are you sure you want to verify this user? This action cannot be undone.',
+      onConfirm: toggleVerified,
+      isDangerous: false
+    });
   };
 
   const formatDate = (dateString) => {
@@ -213,13 +254,10 @@ const UserDetail = () => {
     );
   }
 
-  if (error || !user) {
+  if (!user) {
     return (
       <div className="user-detail-page">
-        <div className="user-detail-error-message">{error || 'User not found'}</div>
-        <Link to="/users" className="btn btn-secondary user-detail-back-btn" style={{ marginTop: '20px' }}>
-          Back to Users
-        </Link>
+        <div className="user-detail-loading">Loading user...</div>
       </div>
     );
   }
@@ -237,10 +275,10 @@ const UserDetail = () => {
         <div className="user-detail-section-header">User Information</div>
         <div className="user-detail-info-grid">
           <div>
-            {user.avatarUrl && (
+            {getAvatarUrl(user.avatarUrl) && (
               <div className="user-detail-avatar">
                 <img
-                  src={user.avatarUrl}
+                  src={getAvatarUrl(user.avatarUrl)}
                   alt={`${user.name}'s avatar`}
                 />
               </div>
@@ -389,34 +427,6 @@ const UserDetail = () => {
         </div>
       </div>
 
-      {user.promotions && user.promotions.length > 0 && (
-        <div className="user-detail-section">
-          <div className="user-detail-section-header">Active Promotions</div>
-          <div className="user-detail-promotions-grid">
-            {user.promotions.map((promotion) => (
-              <div key={promotion.id} className="user-detail-promotion-item">
-                <div className="user-detail-promotion-name">{promotion.name}</div>
-                {promotion.minSpending && (
-                  <div className="user-detail-promotion-detail">
-                    Min Spending: ${promotion.minSpending}
-                  </div>
-                )}
-                {promotion.rate && (
-                  <div className="user-detail-promotion-detail">
-                    Rate: {promotion.rate}x
-                  </div>
-                )}
-                {promotion.points && (
-                  <div className="user-detail-promotion-detail">
-                    Points: {promotion.points}
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
       {hasRole('manager') && (
         <div className="user-detail-section">
           <div className="user-detail-section-header">User Transactions</div>
@@ -512,6 +522,15 @@ const UserDetail = () => {
           )}
         </div>
       )}
+      
+      <ConfirmationModal
+        isOpen={confirmation.isOpen}
+        onClose={() => setConfirmation({ ...confirmation, isOpen: false })}
+        onConfirm={confirmation.onConfirm}
+        title={confirmation.title}
+        message={confirmation.message}
+        isDangerous={confirmation.isDangerous}
+      />
     </div>
   );
 };

@@ -1,8 +1,12 @@
 // Events management page
 import { useState, useEffect } from 'react';
+import { toast } from 'react-toastify';
 import { useAuth } from '../contexts/AuthContext';
-import { eventAPI } from '../services/api';
+import { eventAPI, savedFilterAPI } from '../services/api';
 import { Link, useSearchParams } from 'react-router-dom';
+import SaveFilterModal from '../components/SaveFilterModal';
+import SavedFiltersModal from '../components/SavedFiltersModal';
+import ConfirmationModal from '../components/ConfirmationModal';
 import './Events.css';
 
 const Events = () => {
@@ -12,6 +16,13 @@ const Events = () => {
   const [allEvents, setAllEvents] = useState([]);
   const [count, setCount] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [isSaveFilterOpen, setIsSaveFilterOpen] = useState(false);
+  const [isLoadFilterOpen, setIsLoadFilterOpen] = useState(false);
+  const [deleteModal, setDeleteModal] = useState({
+    isOpen: false,
+    eventId: null,
+    eventName: ''
+  });
   const [filters, setFilters] = useState({
     name: searchParams.get('name') || '',
     published: searchParams.get('published') || '',
@@ -116,30 +127,73 @@ const Events = () => {
     return (hasRole('manager') || hasRole('superuser')) && !event.published;
   };
 
-  const handleDeleteEvent = async (eventId, eventName) => {
-    if (!confirm(`Are you sure you want to delete "${eventName}"? This action cannot be undone.`)) return;
-    
+  const handleDeleteClick = (eventId, eventName) => {
+    setDeleteModal({
+      isOpen: true,
+      eventId,
+      eventName
+    });
+  };
+
+  const handleConfirmDelete = async () => {
+    const { eventId } = deleteModal;
     setDeletingEventId(eventId);
     try {
       await eventAPI.deleteEvent(eventId);
+      toast.success('Event deleted successfully!');
       loadEvents(); // Reload the list
     } catch (err) {
-      alert(err.response?.data?.error || 'Failed to delete event.');
+      const errorMessage = err.response?.data?.error || 'Failed to delete event.';
+      toast.error(errorMessage);
     } finally {
       setDeletingEventId(null);
+      setDeleteModal({ isOpen: false, eventId: null, eventName: '' });
     }
+  };
+
+  const handleSaveFilter = async (name) => {
+    try {
+      const filtersToSave = { ...filters, showMyEvents };
+      delete filtersToSave.page;
+      await savedFilterAPI.createSavedFilter(name, 'events', filtersToSave);
+      toast.success('Filter saved successfully');
+    } catch (error) {
+      console.error(error);
+      toast.error('Failed to save filter');
+    }
+  };
+
+  const handleLoadFilter = (savedFilters) => {
+    const { showMyEvents: savedShowMyEvents, ...otherFilters } = savedFilters;
+    
+    if (savedShowMyEvents !== undefined) {
+      setShowMyEvents(savedShowMyEvents);
+    }
+    
+    const newFilters = { ...otherFilters, page: 1 };
+    setFilters(newFilters);
+    setSearchParams(newFilters);
+    toast.success('Filters loaded');
   };
 
   return (
     <div className="events-page">
+      <SaveFilterModal 
+        isOpen={isSaveFilterOpen} 
+        onClose={() => setIsSaveFilterOpen(false)} 
+        onSave={handleSaveFilter} 
+      />
+      
+      <SavedFiltersModal 
+        isOpen={isLoadFilterOpen} 
+        onClose={() => setIsLoadFilterOpen(false)} 
+        onSelect={handleLoadFilter} 
+        page="events" 
+      />
+
       <div className="events-page-header">
         <h1>Events</h1>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', alignItems: 'flex-end' }}>
-          {hasRole('manager') && (
-            <Link to="/events/create" className="btn btn-primary events-create-btn">
-              Create Event
-            </Link>
-          )}
+        <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
           {canShowMyEventsButton() && (
             <button
               type="button"
@@ -155,6 +209,11 @@ const Events = () => {
             >
               My Events
             </button>
+          )}
+          {hasRole('manager') && (
+            <Link to="/events/create" className="btn btn-primary events-create-btn">
+              Create Event
+            </Link>
           )}
         </div>
       </div>
@@ -219,9 +278,16 @@ const Events = () => {
             <option value="50">50</option>
           </select>
         </div>
+        <div className="events-filters-actions">
+          <button onClick={() => setIsSaveFilterOpen(true)} className="btn btn-outline-secondary" title="Save current filters">
+            Save
+          </button>
+          <button onClick={() => setIsLoadFilterOpen(true)} className="btn btn-outline-secondary" title="Load saved filters">
+            Load
+          </button>
+        </div>
       </div>
 
-      {error && <div className="events-error-message">{error}</div>}
 
       {loading ? (
         <div className="events-loading">Loading events...</div>
@@ -313,7 +379,7 @@ const Events = () => {
                         onClick={(e) => {
                           e.preventDefault();
                           e.stopPropagation();
-                          handleDeleteEvent(event.id, event.name);
+                          handleDeleteClick(event.id, event.name);
                         }}
                         className="btn btn-danger"
                         disabled={deletingEventId === event.id}
@@ -390,6 +456,16 @@ const Events = () => {
           </div>
         </>
       )}
+
+      <ConfirmationModal
+        isOpen={deleteModal.isOpen}
+        onClose={() => setDeleteModal({ ...deleteModal, isOpen: false })}
+        onConfirm={handleConfirmDelete}
+        title="Delete Event"
+        message={`Are you sure you want to delete "${deleteModal.eventName}"? This action cannot be undone.`}
+        confirmLabel="Delete"
+        isDangerous={true}
+      />
     </div>
   );
 };

@@ -1,10 +1,13 @@
 // Users management page (for managers)
 import { useState, useEffect } from 'react';
+import { toast } from 'react-toastify';
 import { useAuth } from '../contexts/AuthContext';
-import { userAPI } from '../services/api';
+import { userAPI, savedFilterAPI } from '../services/api';
 import { Link, useSearchParams, useNavigate } from 'react-router-dom';
 import useTableSort from '../hooks/useTableSort';
 import SortableTableHeader from '../components/SortableTableHeader';
+import SaveFilterModal from '../components/SaveFilterModal';
+import SavedFiltersModal from '../components/SavedFiltersModal';
 import './Users.css';
 
 const Users = () => {
@@ -14,6 +17,8 @@ const Users = () => {
   const [users, setUsers] = useState([]);
   const [count, setCount] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [isSaveFilterOpen, setIsSaveFilterOpen] = useState(false);
+  const [isLoadFilterOpen, setIsLoadFilterOpen] = useState(false);
   const [filters, setFilters] = useState({
     name: searchParams.get('name') || '',
     role: searchParams.get('role') || '',
@@ -40,7 +45,8 @@ const Users = () => {
       setUsers(response.data.results || []);
       setCount(response.data.count || 0);
     } catch (err) {
-      setError(err.response?.data?.error || 'Failed to load users.');
+      const errorMessage = err.response?.data?.error || 'Failed to load users.';
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -79,8 +85,40 @@ const Users = () => {
 
   const { sortedData, sortConfig: currentSort, handleSort } = useTableSort(users, sortConfig);
 
+  const handleSaveFilter = async (name) => {
+    try {
+      const filtersToSave = { ...filters };
+      delete filtersToSave.page;
+      await savedFilterAPI.createSavedFilter(name, 'users', filtersToSave);
+      toast.success('Filter saved successfully');
+    } catch (error) {
+      console.error(error);
+      toast.error('Failed to save filter');
+    }
+  };
+
+  const handleLoadFilter = (savedFilters) => {
+    const newFilters = { ...savedFilters, page: 1 };
+    setFilters(newFilters);
+    setSearchParams(newFilters);
+    toast.success('Filters loaded');
+  };
+
   return (
     <div className="users-page">
+      <SaveFilterModal 
+        isOpen={isSaveFilterOpen} 
+        onClose={() => setIsSaveFilterOpen(false)} 
+        onSave={handleSaveFilter} 
+      />
+      
+      <SavedFiltersModal 
+        isOpen={isLoadFilterOpen} 
+        onClose={() => setIsLoadFilterOpen(false)} 
+        onSelect={handleLoadFilter} 
+        page="users" 
+      />
+      
       <div className="users-page-header">
         <h1>Users</h1>
         {hasRole('cashier') && (
@@ -135,9 +173,16 @@ const Users = () => {
             <option value="50">50</option>
           </select>
         </div>
+        <div className="users-filters-actions">
+          <button onClick={() => setIsSaveFilterOpen(true)} className="btn btn-outline-secondary" title="Save current filters">
+            Save
+          </button>
+          <button onClick={() => setIsLoadFilterOpen(true)} className="btn btn-outline-secondary" title="Load saved filters">
+            Load
+          </button>
+        </div>
       </div>
 
-      {error && <div className="users-error-message">{error}</div>}
 
       {loading ? (
         <div className="users-loading">Loading users...</div>

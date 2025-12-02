@@ -1,6 +1,8 @@
 // Transaction detail sliding panel component
 import { useState, useEffect } from 'react';
-import { transactionAPI } from '../services/api';
+import { toast } from 'react-toastify';
+import { transactionAPI, promotionAPI } from '../services/api';
+import ConfirmationModal from './ConfirmationModal';
 import './TransactionDetailPanel.css';
 
 const TransactionDetailPanel = ({ transaction, isOpen, onClose, onUpdate, hasRole }) => {
@@ -11,6 +13,15 @@ const TransactionDetailPanel = ({ transaction, isOpen, onClose, onUpdate, hasRol
   const [amount, setAmount] = useState('');
   const [spent, setSpent] = useState('');
   const [transactionDetails, setTransactionDetails] = useState(null);
+  const [promotionNames, setPromotionNames] = useState({});
+  const [confirmation, setConfirmation] = useState({
+    isOpen: false,
+    type: '',
+    title: '',
+    message: '',
+    onConfirm: () => {},
+    isDangerous: false
+  });
 
   useEffect(() => {
     if (isOpen && transaction) {
@@ -31,10 +42,39 @@ const TransactionDetailPanel = ({ transaction, isOpen, onClose, onUpdate, hasRol
       setTransactionDetails(response.data);
       setAmount(response.data.amount?.toString() || '');
       setSpent(response.data.spent?.toString() || '');
+      
+      // Load promotion names if promotionIds exist
+      if (response.data.promotionIds && response.data.promotionIds.length > 0) {
+        loadPromotionNames(response.data.promotionIds);
+      }
     } catch (err) {
       console.error('Failed to load transaction details:', err);
       // Fallback to transaction prop if API fails
       setTransactionDetails(transaction);
+      if (transaction.promotionIds && transaction.promotionIds.length > 0) {
+        loadPromotionNames(transaction.promotionIds);
+      }
+    }
+  };
+
+  const loadPromotionNames = async (promotionIds) => {
+    try {
+      const names = {};
+      // Fetch each promotion to get its name
+      await Promise.all(
+        promotionIds.map(async (id) => {
+          try {
+            const response = await promotionAPI.getPromotion(id);
+            names[id] = response.data.name;
+          } catch (err) {
+            // If promotion not found, use ID as fallback
+            names[id] = `#${id}`;
+          }
+        })
+      );
+      setPromotionNames(names);
+    } catch (err) {
+      console.error('Failed to load promotion names:', err);
     }
   };
 
@@ -52,6 +92,7 @@ const TransactionDetailPanel = ({ transaction, isOpen, onClose, onUpdate, hasRol
 
     try {
       await transactionAPI.updateTransactionAmount(transaction.id, newAmount);
+      toast.success('Transaction amount updated successfully!');
       setEditingAmount(false);
       // Reload transaction details
       await loadTransactionDetails();
@@ -60,7 +101,9 @@ const TransactionDetailPanel = ({ transaction, isOpen, onClose, onUpdate, hasRol
         onUpdate();
       }
     } catch (err) {
-      setError(err.response?.data?.error || 'Failed to update amount');
+      const errorMessage = err.response?.data?.error || 'Failed to update amount';
+      setError(errorMessage);
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -80,6 +123,7 @@ const TransactionDetailPanel = ({ transaction, isOpen, onClose, onUpdate, hasRol
 
     try {
       await transactionAPI.updateTransactionSpent(transaction.id, newSpent);
+      toast.success('Transaction spent amount updated successfully!');
       setEditingSpent(false);
       // Reload transaction details
       await loadTransactionDetails();
@@ -88,15 +132,15 @@ const TransactionDetailPanel = ({ transaction, isOpen, onClose, onUpdate, hasRol
         onUpdate();
       }
     } catch (err) {
-      setError(err.response?.data?.error || 'Failed to update spent amount');
+      const errorMessage = err.response?.data?.error || 'Failed to update spent amount';
+      setError(errorMessage);
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleProcessRedemption = async () => {
-    if (!confirm('Process this redemption?')) return;
-    
+  const processRedemption = async () => {
     setLoading(true);
     setError('');
 
@@ -112,19 +156,31 @@ const TransactionDetailPanel = ({ transaction, isOpen, onClose, onUpdate, hasRol
       }
       // Also reload full details to ensure everything is up to date
       await loadTransactionDetails();
+      toast.success('Redemption processed successfully!');
       if (onUpdate) {
         onUpdate();
       }
     } catch (err) {
-      setError(err.response?.data?.error || 'Failed to process redemption');
+      const errorMessage = err.response?.data?.error || 'Failed to process redemption';
+      setError(errorMessage);
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleProcessPurchase = async () => {
-    if (!confirm('Process this purchase transaction?')) return;
-    
+  const handleProcessRedemption = () => {
+    setConfirmation({
+      isOpen: true,
+      type: 'redemption',
+      title: 'Process Redemption',
+      message: 'Process this redemption?',
+      onConfirm: processRedemption,
+      isDangerous: false
+    });
+  };
+
+  const processPurchase = async () => {
     setLoading(true);
     setError('');
 
@@ -140,20 +196,31 @@ const TransactionDetailPanel = ({ transaction, isOpen, onClose, onUpdate, hasRol
       }
       // Also reload full details to ensure everything is up to date
       await loadTransactionDetails();
+      toast.success('Transaction processed successfully!');
       if (onUpdate) {
         onUpdate();
       }
     } catch (err) {
-      setError(err.response?.data?.error || 'Failed to process transaction');
+      const errorMessage = err.response?.data?.error || 'Failed to process transaction';
+      setError(errorMessage);
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleToggleSuspicious = async () => {
-    const action = transactionDetails?.suspicious ? 'unmark' : 'mark';
-    if (!confirm(`Are you sure you want to ${action} this transaction as suspicious?`)) return;
-    
+  const handleProcessPurchase = () => {
+    setConfirmation({
+      isOpen: true,
+      type: 'purchase',
+      title: 'Process Transaction',
+      message: 'Process this purchase transaction?',
+      onConfirm: processPurchase,
+      isDangerous: false
+    });
+  };
+
+  const toggleSuspicious = async () => {
     setLoading(true);
     setError('');
 
@@ -170,14 +237,30 @@ const TransactionDetailPanel = ({ transaction, isOpen, onClose, onUpdate, hasRol
       }
       // Also reload full details to ensure everything is up to date
       await loadTransactionDetails();
+      const actionMessage = transactionDetails?.suspicious ? 'cleared' : 'marked';
+      toast.success(`Transaction ${actionMessage} as suspicious successfully!`);
       if (onUpdate) {
         onUpdate();
       }
     } catch (err) {
-      setError(err.response?.data?.error || 'Failed to update suspicious status');
+      const errorMessage = err.response?.data?.error || 'Failed to update suspicious status';
+      setError(errorMessage);
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleToggleSuspicious = () => {
+    const action = transactionDetails?.suspicious ? 'unmark' : 'mark';
+    setConfirmation({
+      isOpen: true,
+      type: 'suspicious',
+      title: `${action === 'mark' ? 'Mark' : 'Unmark'} Suspicious`,
+      message: `Are you sure you want to ${action} this transaction as suspicious?`,
+      onConfirm: toggleSuspicious,
+      isDangerous: action === 'mark'
+    });
   };
 
   const formatDate = (dateString) => {
@@ -213,7 +296,6 @@ const TransactionDetailPanel = ({ transaction, isOpen, onClose, onUpdate, hasRol
         </div>
 
         <div className="transaction-panel-content">
-          {error && <div className="transaction-panel-error">{error}</div>}
 
           <div className="transaction-panel-section">
             <div className="transaction-panel-field">
@@ -221,7 +303,7 @@ const TransactionDetailPanel = ({ transaction, isOpen, onClose, onUpdate, hasRol
               <div className="transaction-panel-value">{details.id}</div>
             </div>
 
-            {(hasRole('manager') || isCashierOnly) && (
+            {(hasRole('manager') || hasRole('superuser') || isCashierOnly) && (
               <div className="transaction-panel-field">
                 <label>User</label>
                 <div className="transaction-panel-value">
@@ -363,7 +445,7 @@ const TransactionDetailPanel = ({ transaction, isOpen, onClose, onUpdate, hasRol
               </div>
             </div>
 
-            {details.suspicious !== undefined && (
+            {details.suspicious !== undefined && (hasRole('manager') || hasRole('superuser')) && (
               <div className="transaction-panel-field">
                 <label>Suspicious</label>
                 <div className="transaction-panel-value">
@@ -387,7 +469,7 @@ const TransactionDetailPanel = ({ transaction, isOpen, onClose, onUpdate, hasRol
               </div>
             )}
 
-            {details.createdBy && (
+            {details.createdBy && (hasRole('manager') || hasRole('superuser')) && (
               <div className="transaction-panel-field">
                 <label>Created By</label>
                 <div className="transaction-panel-value">{details.createdBy}</div>
@@ -398,7 +480,12 @@ const TransactionDetailPanel = ({ transaction, isOpen, onClose, onUpdate, hasRol
               <div className="transaction-panel-field">
                 <label>Promotions</label>
                 <div className="transaction-panel-value">
-                  {details.promotionIds.join(', ')}
+                  {details.promotionIds.map((id, index) => (
+                    <span key={id}>
+                      {promotionNames[id] || `#${id}`}
+                      {index < details.promotionIds.length - 1 && ', '}
+                    </span>
+                  ))}
                 </div>
               </div>
             )}
@@ -459,6 +546,15 @@ const TransactionDetailPanel = ({ transaction, isOpen, onClose, onUpdate, hasRol
           </div>
         </div>
       </div>
+      
+      <ConfirmationModal
+        isOpen={confirmation.isOpen}
+        onClose={() => setConfirmation({ ...confirmation, isOpen: false })}
+        onConfirm={confirmation.onConfirm}
+        title={confirmation.title}
+        message={confirmation.message}
+        isDangerous={confirmation.isDangerous}
+      />
     </>
   );
 };

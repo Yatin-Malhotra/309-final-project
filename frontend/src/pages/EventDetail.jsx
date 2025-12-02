@@ -1,8 +1,10 @@
 // Event detail page
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
+import { toast } from 'react-toastify';
 import { useAuth } from '../contexts/AuthContext';
 import { eventAPI, userAPI } from '../services/api';
+import ConfirmationModal from '../components/ConfirmationModal';
 import './EventDetail.css';
 
 const EventDetail = () => {
@@ -22,6 +24,13 @@ const EventDetail = () => {
   const [showOrganizerDropdown, setShowOrganizerDropdown] = useState(false);
   const organizerInputRef = useRef(null);
   const organizerDropdownRef = useRef(null);
+  const [confirmation, setConfirmation] = useState({
+    isOpen: false,
+    title: '',
+    message: '',
+    onConfirm: () => {},
+    isDangerous: false
+  });
   
   // Guest management state
   const [guestUsers, setGuestUsers] = useState([]);
@@ -171,30 +180,52 @@ const EventDetail = () => {
     }
   };
 
-  const handleRegister = async () => {
-    if (!confirm('Register for this event?')) return;
+  const register = async () => {
     setActionLoading(true);
     try {
       await eventAPI.registerForEvent(eventId);
+      toast.success('Successfully registered for event!');
       loadEvent();
     } catch (err) {
-      alert(err.response?.data?.error || 'Failed to register for event.');
+      const errorMessage = err.response?.data?.error || 'Failed to register for event.';
+      toast.error(errorMessage);
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleRegister = async () => {
+    setConfirmation({
+      isOpen: true,
+      title: 'Register for Event',
+      message: 'Register for this event?',
+      onConfirm: register,
+      isDangerous: false
+    });
+  };
+
+  const unregister = async () => {
+    setActionLoading(true);
+    try {
+      await eventAPI.unregisterFromEvent(eventId);
+      toast.success('Successfully unregistered from event!');
+      loadEvent();
+    } catch (err) {
+      const errorMessage = err.response?.data?.error || 'Failed to unregister from event.';
+      toast.error(errorMessage);
     } finally {
       setActionLoading(false);
     }
   };
 
   const handleUnregister = async () => {
-    if (!confirm('Unregister from this event?')) return;
-    setActionLoading(true);
-    try {
-      await eventAPI.unregisterFromEvent(eventId);
-      loadEvent();
-    } catch (err) {
-      alert(err.response?.data?.error || 'Failed to unregister from event.');
-    } finally {
-      setActionLoading(false);
-    }
+    setConfirmation({
+      isOpen: true,
+      title: 'Unregister from Event',
+      message: 'Unregister from this event?',
+      onConfirm: unregister,
+      isDangerous: true
+    });
   };
 
   const isRegistered = () => {
@@ -219,14 +250,11 @@ const EventDetail = () => {
     return event && new Date(event.endTime) < new Date();
   };
 
-  const handleAddOrganizer = async () => {
-    if (!selectedUserId) return;
-
-    if (!confirm(`Add ${selectedUserId.name} (${selectedUserId.utorid}) as an organizer?`)) return;
-
+  const addOrganizer = async () => {
     setAddingOrganizer(true);
     try {
       await eventAPI.addOrganizer(eventId, selectedUserId.utorid);
+      toast.success(`Organizer ${selectedUserId.name} added successfully!`);
       setSelectedUserId(null);
       setUserSearch('');
       setShowOrganizerDropdown(false);
@@ -237,10 +265,23 @@ const EventDetail = () => {
         loadUsers();
       }
     } catch (err) {
-      alert(err.response?.data?.error || 'Failed to add organizer.');
+      const errorMessage = err.response?.data?.error || 'Failed to add organizer.';
+      toast.error(errorMessage);
     } finally {
       setAddingOrganizer(false);
     }
+  };
+
+  const handleAddOrganizer = async () => {
+    if (!selectedUserId) return;
+
+    setConfirmation({
+      isOpen: true,
+      title: 'Add Organizer',
+      message: `Add ${selectedUserId.name} (${selectedUserId.utorid}) as an organizer?`,
+      onConfirm: addOrganizer,
+      isDangerous: false
+    });
   };
 
   const handleOrganizerSelect = (user) => {
@@ -249,29 +290,11 @@ const EventDetail = () => {
     setShowOrganizerDropdown(false);
   };
 
-  const handleAddGuest = async () => {
-    let utoridToAdd = '';
-    
-    // If manager/superuser, get from selected user
-    if (hasRole('manager') || hasRole('superuser')) {
-      if (!selectedGuestUserId) return;
-      utoridToAdd = selectedGuestUserId.utorid;
-      
-      if (!confirm(`Add ${selectedGuestUserId.name} (${selectedGuestUserId.utorid}) as a guest?`)) return;
-    } else {
-      // Event organizer - use utorid directly
-      if (!guestUtorid || !guestUtorid.trim()) {
-        alert('Please enter a UTORid');
-        return;
-      }
-      utoridToAdd = guestUtorid.trim();
-      
-      if (!confirm(`Add ${utoridToAdd} as a guest?`)) return;
-    }
-
+  const addGuest = async (utoridToAdd) => {
     setAddingGuest(true);
     try {
       await eventAPI.addGuest(eventId, utoridToAdd);
+      toast.success(`Guest added successfully!`);
       setSelectedGuestUserId(null);
       setGuestUserSearch('');
       setGuestUtorid('');
@@ -283,10 +306,39 @@ const EventDetail = () => {
         loadGuestUsers();
       }
     } catch (err) {
-      alert(err.response?.data?.error || 'Failed to add guest.');
+      const errorMessage = err.response?.data?.error || 'Failed to add guest.';
+      toast.error(errorMessage);
     } finally {
       setAddingGuest(false);
     }
+  };
+
+  const handleAddGuest = async () => {
+    let utoridToAdd = '';
+    let confirmMessage = '';
+    
+    // If manager/superuser, get from selected user
+    if (hasRole('manager') || hasRole('superuser')) {
+      if (!selectedGuestUserId) return;
+      utoridToAdd = selectedGuestUserId.utorid;
+      confirmMessage = `Add ${selectedGuestUserId.name} (${selectedGuestUserId.utorid}) as a guest?`;
+    } else {
+      // Event organizer - use utorid directly
+      if (!guestUtorid || !guestUtorid.trim()) {
+        toast.error('Please enter a UTORid');
+        return;
+      }
+      utoridToAdd = guestUtorid.trim();
+      confirmMessage = `Add ${utoridToAdd} as a guest?`;
+    }
+    
+    setConfirmation({
+      isOpen: true,
+      title: 'Add Guest',
+      message: confirmMessage,
+      onConfirm: () => addGuest(utoridToAdd),
+      isDangerous: false
+    });
   };
 
   const handleGuestSelect = (user) => {
@@ -295,50 +347,80 @@ const EventDetail = () => {
     setShowGuestDropdown(false);
   };
 
-  const handleRemoveGuest = async (userId) => {
-    if (!confirm('Remove this guest from the event?')) return;
-    
+  const removeGuest = async (userId) => {
     setActionLoading(true);
     try {
       await eventAPI.removeGuest(eventId, userId);
+      toast.success('Guest removed successfully!');
       loadEvent();
     } catch (err) {
-      alert(err.response?.data?.error || 'Failed to remove guest.');
+      const errorMessage = err.response?.data?.error || 'Failed to remove guest.';
+      toast.error(errorMessage);
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleRemoveGuest = async (userId) => {
+    setConfirmation({
+      isOpen: true,
+      title: 'Remove Guest',
+      message: 'Remove this guest from the event?',
+      onConfirm: () => removeGuest(userId),
+      isDangerous: true
+    });
+  };
+
+  const removeOrganizer = async (userId) => {
+    setActionLoading(true);
+    try {
+      await eventAPI.removeOrganizer(eventId, userId);
+      toast.success('Organizer removed successfully!');
+      loadEvent();
+    } catch (err) {
+      const errorMessage = err.response?.data?.error || 'Failed to remove organizer.';
+      toast.error(errorMessage);
     } finally {
       setActionLoading(false);
     }
   };
 
   const handleRemoveOrganizer = async (userId) => {
-    if (!confirm('Remove this organizer from the event?')) return;
-    
-    setActionLoading(true);
-    try {
-      await eventAPI.removeOrganizer(eventId, userId);
-      loadEvent();
-    } catch (err) {
-      alert(err.response?.data?.error || 'Failed to remove organizer.');
-    } finally {
-      setActionLoading(false);
-    }
+    setConfirmation({
+      isOpen: true,
+      title: 'Remove Organizer',
+      message: 'Remove this organizer from the event?',
+      onConfirm: () => removeOrganizer(userId),
+      isDangerous: true
+    });
   };
 
   const canRemoveOrganizers = () => {
     return (hasRole('manager') || hasRole('superuser')) && !isEventPast();
   };
 
-  const handleDeleteEvent = async () => {
-    if (!confirm(`Are you sure you want to delete "${event.name}"? This action cannot be undone.`)) return;
-    
+  const deleteEvent = async () => {
     setActionLoading(true);
     try {
       await eventAPI.deleteEvent(eventId);
+      toast.success('Event deleted successfully!');
       navigate('/events');
     } catch (err) {
-      alert(err.response?.data?.error || 'Failed to delete event.');
+      const errorMessage = err.response?.data?.error || 'Failed to delete event.';
+      toast.error(errorMessage);
     } finally {
       setActionLoading(false);
     }
+  };
+
+  const handleDeleteEvent = async () => {
+    setConfirmation({
+      isOpen: true,
+      title: 'Delete Event',
+      message: `Are you sure you want to delete "${event.name}"? This action cannot be undone.`,
+      onConfirm: deleteEvent,
+      isDangerous: true
+    });
   };
 
   const canDeleteEvent = () => {
@@ -357,24 +439,50 @@ const EventDetail = () => {
     return (hasRole('manager') || hasRole('superuser') || isOrganizer()) && !isEventPast();
   };
 
-  const handleAwardPoints = async (guest) => {
-    if (!pointsAmount || parseInt(pointsAmount) <= 0) {
-      alert('Please enter a valid points amount');
-      return;
-    }
-
-    const amount = parseInt(pointsAmount);
-    if (!confirm(`Award ${amount} points to ${guest.name} (${guest.utorid})?`)) return;
-
+  const awardPoints = async (guest, amount) => {
     setAllocatingPoints(true);
     try {
       await eventAPI.awardPointsToGuest(eventId, guest.utorid, amount);
+      toast.success(`${amount} points awarded to ${guest.name} successfully!`);
       setPointsAmount('');
       setSelectedGuestForPoints(null);
       setShowPointsForm(false);
       loadEvent(); // Reload to update points remaining
     } catch (err) {
-      alert(err.response?.data?.error || 'Failed to award points.');
+      const errorMessage = err.response?.data?.error || 'Failed to award points.';
+      toast.error(errorMessage);
+    } finally {
+      setAllocatingPoints(false);
+    }
+  };
+
+  const handleAwardPoints = async (guest) => {
+    if (!pointsAmount || parseInt(pointsAmount) <= 0) {
+      toast.error('Please enter a valid points amount');
+      return;
+    }
+
+    const amount = parseInt(pointsAmount);
+    setConfirmation({
+      isOpen: true,
+      title: 'Award Points',
+      message: `Award ${amount} points to ${guest.name} (${guest.utorid})?`,
+      onConfirm: () => awardPoints(guest, amount),
+      isDangerous: false
+    });
+  };
+
+  const awardPointsToAll = async (amount) => {
+    setAllocatingPoints(true);
+    try {
+      await eventAPI.awardPointsToAllGuests(eventId, amount);
+      toast.success(`${amount} points awarded to all guests successfully!`);
+      setPointsAmount('');
+      setShowPointsForm(false);
+      loadEvent(); // Reload to update points remaining
+    } catch (err) {
+      const errorMessage = err.response?.data?.error || 'Failed to award points.';
+      toast.error(errorMessage);
     } finally {
       setAllocatingPoints(false);
     }
@@ -382,25 +490,20 @@ const EventDetail = () => {
 
   const handleAwardPointsToAll = async () => {
     if (!pointsAmount || parseInt(pointsAmount) <= 0) {
-      alert('Please enter a valid points amount');
+      toast.error('Please enter a valid points amount');
       return;
     }
 
     const amount = parseInt(pointsAmount);
     const totalPoints = amount * (event.guests?.length || 0);
-    if (!confirm(`Award ${amount} points to all ${event.guests?.length || 0} guests (${totalPoints} total points)?`)) return;
-
-    setAllocatingPoints(true);
-    try {
-      await eventAPI.awardPointsToAllGuests(eventId, amount);
-      setPointsAmount('');
-      setShowPointsForm(false);
-      loadEvent(); // Reload to update points remaining
-    } catch (err) {
-      alert(err.response?.data?.error || 'Failed to award points.');
-    } finally {
-      setAllocatingPoints(false);
-    }
+    
+    setConfirmation({
+      isOpen: true,
+      title: 'Award Points to All',
+      message: `Award ${amount} points to all ${event.guests?.length || 0} guests (${totalPoints} total points)?`,
+      onConfirm: () => awardPointsToAll(amount),
+      isDangerous: false
+    });
   };
 
   if (loading) {
@@ -411,13 +514,10 @@ const EventDetail = () => {
     );
   }
 
-  if (error || !event) {
+  if (!event) {
     return (
       <div className="event-detail-page">
-        <div className="event-detail-error-message">{error || 'Event not found'}</div>
-        <Link to="/events" className="btn btn-secondary event-detail-back-btn">
-          Back to Events
-        </Link>
+        <div className="event-detail-loading">Loading event...</div>
       </div>
     );
   }
@@ -855,6 +955,15 @@ const EventDetail = () => {
           )}
         </div>
       )}
+      
+      <ConfirmationModal
+        isOpen={confirmation.isOpen}
+        onClose={() => setConfirmation({ ...confirmation, isOpen: false })}
+        onConfirm={confirmation.onConfirm}
+        title={confirmation.title}
+        message={confirmation.message}
+        isDangerous={confirmation.isDangerous}
+      />
     </div>
   );
 };

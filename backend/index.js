@@ -37,6 +37,11 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 // UTILITIES
 // ============================================
 
+// Avatar URL normalization - returns default avatar if avatarUrl is null/undefined
+const normalizeAvatarUrl = (avatarUrl) => {
+    return avatarUrl || '/uploads/avatars/default.png';
+};
+
 // JWT Utils
 const jwtUtils = {
     generateToken(user) {
@@ -364,8 +369,10 @@ const schemas = {
                 if (val === undefined || val === null) return undefined;
                 if (typeof val === 'string') {
                     const num = Number(val);
+                    if (num === 0) return undefined;
                     return Number.isFinite(num) ? num : val;
                 }
+                if (val === 0) return undefined;
                 return val;
             },
             z.number().positive().optional()
@@ -428,12 +435,32 @@ const schemas = {
             z.number().positive().optional()
         ),
         rate: z.preprocess(
-            (val) => val === null || val === undefined ? undefined : val,
-            z.number().positive().optional()
+            (val) => {
+                if (val === undefined) return undefined;
+                if (val === null || val === '') return null;
+                if (val === 0 || val === '0') return null;
+                if (typeof val === 'string') {
+                    const num = Number(val);
+                    if (num === 0) return null;
+                    return Number.isFinite(num) ? num : val;
+                }
+                return val;
+            },
+            z.number().positive().nullable().optional()
         ),
         points: z.preprocess(
-            (val) => val === null || val === undefined ? undefined : val,
-            z.number().nonnegative().int().optional()
+            (val) => {
+                if (val === undefined) return undefined;
+                if (val === null || val === '') return null;
+                if (val === 0 || val === '0') return null;
+                if (typeof val === 'string') {
+                    const num = Number(val);
+                    if (num === 0) return null;
+                    return Number.isFinite(num) ? num : val;
+                }
+                return val;
+            },
+            z.number().positive().int().nullable().optional()
         )
     })
 };
@@ -768,7 +795,12 @@ app.get('/users', requireRole('manager'), validateQuery(z.object({
             orderBy: { createdAt: 'desc' }
         });
         
-        res.json({ count, results: users });
+        const normalizedUsers = users.map(user => ({
+            ...user,
+            avatarUrl: normalizeAvatarUrl(user.avatarUrl)
+        }));
+        
+        res.json({ count, results: normalizedUsers });
     } catch (error) { 
         next(error); 
     }
@@ -795,7 +827,7 @@ app.get('/users/me', requireRole('regular'), async (req, res, next) => {
             id: user.id, utorid: user.utorid, name: user.name, email: user.email,
             birthday: user.birthday, role: user.role, points: user.points,
             createdAt: user.createdAt, lastLogin: user.lastLogin, verified: user.verified,
-            avatarUrl: user.avatarUrl, promotions
+            avatarUrl: normalizeAvatarUrl(user.avatarUrl), promotions
         });
     } catch (error) { next(error); }
 });
@@ -856,7 +888,11 @@ app.patch('/users/me', requireRole('regular'), upload.single('avatar'), async (r
                 role: true, points: true, createdAt: true, lastLogin: true, verified: true, avatarUrl: true
             }
         });
-        res.json(user);
+        // Normalize avatar URL to use default if null
+        res.json({
+            ...user,
+            avatarUrl: normalizeAvatarUrl(user.avatarUrl)
+        });
     } catch (error) {
         if (error.code === 'P2002') return res.status(400).json({ error: 'Email already in use' });
         next(error);
@@ -909,7 +945,7 @@ app.get('/users/:userId', requireRole('cashier'), async (req, res, next) => {
             id: user.id, utorid: user.utorid, name: user.name, email: user.email,
             birthday: user.birthday, role: user.role, points: user.points,
             createdAt: user.createdAt, lastLogin: user.lastLogin, verified: user.verified,
-            suspicious: user.suspicious, avatarUrl: user.avatarUrl, promotions
+            suspicious: user.suspicious, avatarUrl: normalizeAvatarUrl(user.avatarUrl), promotions
         });
     } catch (error) { next(error); }
 });
@@ -1131,7 +1167,35 @@ app.post('/transactions', requireRole('cashier'), validate(schemas.createTransac
         if (type === 'purchase') {
             if (!spent || spent <= 0) return res.status(400).json({ error: 'Invalid spent amount' });
             
-            earnedPoints = await calculatePurchasePoints(spent, promotionIds, targetUser.id);
+            // Automatically fetch and include automatic promotions
+            const now = new Date();
+            const automaticPromotions = await prisma.promotion.findMany({
+                where: {
+                    type: 'automatic',
+                    startTime: { lte: now },
+                    endTime: { gte: now }
+                }
+            });
+            
+            // Filter automatic promotions based on user role and minimum spending
+            const applicableAutomaticPromotions = automaticPromotions.filter(promo => {
+                // Check if user role allows this promotion (regular users see all active, managers/superusers see all)
+                const isManagerOrAbove = ['manager', 'superuser'].includes(targetUser.role);
+                // For now, all active automatic promotions are available to all users
+                // Check minimum spending requirement
+                if (promo.minSpending && spent < promo.minSpending) {
+                    return false;
+                }
+                return true;
+            });
+            
+            // Combine manual promotion IDs with automatic promotion IDs
+            const allPromotionIds = [...new Set([
+                ...promotionIds.map(id => parseInt(id)),
+                ...applicableAutomaticPromotions.map(p => p.id)
+            ])];
+            
+            earnedPoints = await calculatePurchasePoints(spent, allPromotionIds, targetUser.id);
             
             const creator = await prisma.user.findUnique({ where: { id: req.user.id } });
             if (!creator) return res.status(404).json({ error: 'Creator not found' });
@@ -1154,14 +1218,14 @@ app.post('/transactions', requireRole('cashier'), validate(schemas.createTransac
                 }
             });
             
-            // Link promotions
-            if (promotionIds && promotionIds.length > 0) {
+            // Link promotions (including automatic ones)
+            if (allPromotionIds && allPromotionIds.length > 0) {
                 await prisma.transactionPromotion.createMany({
-                    data: promotionIds.map(pid => ({ transactionId: transaction.id, promotionId: pid }))
+                    data: allPromotionIds.map(pid => ({ transactionId: transaction.id, promotionId: pid }))
                 });
                 
                 // Mark one-time promotions as used
-                for (const pid of promotionIds) {
+                for (const pid of allPromotionIds) {
                     const promo = await prisma.promotion.findUnique({ where: { id: pid } });
                     if (promo && promo.type === 'onetime') {
                         await prisma.userPromotion.upsert({
@@ -1190,7 +1254,7 @@ app.post('/transactions', requireRole('cashier'), validate(schemas.createTransac
                 spent: transaction.spent,
                 earned: suspicious ? 0 : earnedPoints,
                 remark: transaction.remark,
-                promotionIds: promotionIds || [],
+                promotionIds: allPromotionIds || [],
                 createdBy: creatorUser.utorid
             });
             
@@ -1230,7 +1294,8 @@ app.post('/transactions', requireRole('cashier'), validate(schemas.createTransac
                     amount,
                     relatedId: relatedIdNum,
                     remark: remark || '',
-                    createdBy: req.user.id
+                    createdBy: req.user.id,
+                    processed: true  // Adjustments are applied immediately, so they're processed
                 }
             });
             
@@ -1256,7 +1321,8 @@ app.post('/transactions', requireRole('cashier'), validate(schemas.createTransac
                 relatedId: transaction.relatedId,
                 remark: transaction.remark,
                 promotionIds: promotionIds || [],
-                createdBy: creatorUser.utorid
+                createdBy: creatorUser.utorid,
+                processed: transaction.processed
             });
         } else {
             return res.status(400).json({ error: 'Invalid transaction type' });
@@ -1697,6 +1763,11 @@ app.post('/users/:userId/transactions', requireRole('regular'), async (req, res,
         
         const recipient = await prisma.user.findUnique({ where: whereClause });
         if (!recipient) return res.status(404).json({ error: 'Recipient not found' });
+        
+        // Prevent self-transfers
+        if (sender.id === recipient.id) {
+            return res.status(400).json({ error: 'Cannot transfer points to yourself' });
+        }
         
         // Create two transactions
         const senderTx = await prisma.transaction.create({
@@ -3073,6 +3144,7 @@ app.get('/promotions', optionalAuth, validateQuery(z.object({
     type: z.enum(['automatic', 'onetime']).optional(),
     started: z.string().optional(),
     ended: z.string().optional(),
+    utorid: z.string().optional(),
     page: z.preprocess(
         (val) => (val === undefined || val === null || val === '') ? '1' : val,
         z.string().regex(/^\d+$/)
@@ -3083,7 +3155,7 @@ app.get('/promotions', optionalAuth, validateQuery(z.object({
     )
 })), async (req, res, next) => {
     try {
-        const { name, type, started, ended, page = '1', limit = '10' } = req.validatedQuery;
+        const { name, type, started, ended, utorid, page = '1', limit = '10' } = req.validatedQuery;
         
         if (started && ended) return res.status(400).json({ error: 'Cannot specify both started and ended' });
         
@@ -3099,14 +3171,32 @@ app.get('/promotions', optionalAuth, validateQuery(z.object({
         const skip = (pageNum - 1) * limitNum;
         const now = new Date();
         
+        // Determine which user's role to use for filtering
+        let targetUser = req.user;
+        let targetUserId = req.user?.id;
+        const requesterIsManagerOrAbove = req.user && ['manager', 'superuser'].includes(req.user.role);
+        
+        // If utorid is provided, look up that user instead
+        if (utorid) {
+            const userByUtorid = await prisma.user.findUnique({ where: { utorid } });
+            if (!userByUtorid) {
+                return res.status(404).json({ error: 'User not found' });
+            }
+            targetUser = userByUtorid;
+            targetUserId = userByUtorid.id;
+        }
+        
         const where = {};
         if (name) where.name = { contains: name };
         if (type) where.type = type;
         
-        const isManagerOrAbove = req.user && ['manager', 'superuser'].includes(req.user.role);
+        // Use target user's role to determine visibility
+        const isManagerOrAbove = targetUser && ['manager', 'superuser'].includes(targetUser.role);
         
-        // Managers see all promotions unless explicitly filtered by time
-        if (isManagerOrAbove) {
+        if (utorid) {
+            where.startTime = { lte: now };
+            where.endTime = { gte: now };
+        } else if (isManagerOrAbove) {
             // Only apply time filters if explicitly requested with 'true' or 'false'
             if (started === 'true' || started === 'false') {
                 where.startTime = started === 'true' ? { lte: now } : { gt: now };
@@ -3125,18 +3215,17 @@ app.get('/promotions', optionalAuth, validateQuery(z.object({
             where,
             skip,
             take: limitNum,
-            include: req.user ? {
+            include: targetUserId ? {
                 userPromotions: {
-                    where: { userId: req.user.id }
+                    where: { userId: targetUserId }
                 }
             } : false
         });
         
-        // Filter out used one-time promotions for regular users
-        if (!isManagerOrAbove && req.user) {
+        if (targetUserId && (!requesterIsManagerOrAbove || utorid)) {
             promotions = promotions.filter(p => {
                 if (p.type === 'automatic') return true;
-                const userPromo = p.userPromotions?.find(up => up.userId === req.user.id);
+                const userPromo = p.userPromotions?.find(up => up.userId === targetUserId);
                 return !userPromo || !userPromo.used;
             });
         }
@@ -3155,9 +3244,7 @@ app.get('/promotions', optionalAuth, validateQuery(z.object({
             return result;
         });
         
-        // For managers, use database count (total matching promotions)
-        // For regular users, use filtered count (after removing used promotions)
-        const finalCount = isManagerOrAbove ? dbCount : results.length;
+        const finalCount = (requesterIsManagerOrAbove && !utorid) ? dbCount : results.length;
         
         res.json({ count: finalCount, results });
     } catch (error) { next(error); }
@@ -3257,9 +3344,9 @@ app.patch('/promotions/:promotionId', requireRole('manager'), async (req, res, n
         if (updates.type) finalUpdates.type = updates.type;
         if (updates.startTime) finalUpdates.startTime = new Date(updates.startTime);
         if (updates.endTime) finalUpdates.endTime = new Date(updates.endTime);
-        if (updates.minSpending !== undefined && updates.minSpending !== null) finalUpdates.minSpending = updates.minSpending;
-        if (updates.rate !== undefined && updates.rate !== null) finalUpdates.rate = updates.rate;
-        if (updates.points !== undefined && updates.points !== null) finalUpdates.points = updates.points;
+        if (updates.minSpending !== undefined) finalUpdates.minSpending = updates.minSpending;
+        if (updates.rate !== undefined) finalUpdates.rate = updates.rate;
+        if (updates.points !== undefined) finalUpdates.points = updates.points;
         
         const updated = await prisma.promotion.update({
             where: { id: promotionId },
@@ -3335,6 +3422,17 @@ app.get('/analytics/promotions', requireRole('manager'), analyticsRoutes.getProm
 
 // GET /analytics/financial - Financial insights (Manager)
 app.get('/analytics/financial', requireRole('manager'), analyticsRoutes.getFinancialAnalytics);
+
+const savedFiltersRoutes = require('./routes/savedFilters');
+
+// GET /saved-filters
+app.get('/saved-filters', requireRole('regular'), savedFiltersRoutes.getSavedFilters);
+
+// POST /saved-filters
+app.post('/saved-filters', requireRole('regular'), savedFiltersRoutes.createSavedFilter);
+
+// DELETE /saved-filters/:id
+app.delete('/saved-filters/:id', requireRole('regular'), savedFiltersRoutes.deleteSavedFilter);
 
 // ============================================
 // ERROR HANDLERS

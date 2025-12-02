@@ -1,7 +1,9 @@
 // Create/Edit promotion page (for managers)
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useParams, Link } from 'react-router-dom';
+import { toast } from 'react-toastify';
 import { promotionAPI } from '../services/api';
+import ConfirmationModal from '../components/ConfirmationModal';
 import './CreatePromotion.css';
 
 const CreatePromotion = () => {
@@ -23,6 +25,7 @@ const CreatePromotion = () => {
   const [loading, setLoading] = useState(false);
   const [loadingPromotion, setLoadingPromotion] = useState(isEditMode);
   const [deleting, setDeleting] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   const loadPromotion = useCallback(async () => {
     if (!promotionId) return;
@@ -74,19 +77,7 @@ const CreatePromotion = () => {
 
     // Validation: At least one reward mechanism must be provided
     if (!formData.minSpending && !formData.rate && !formData.points) {
-      setError('Please provide either (minSpending + rate) or points.');
-      return;
-    }
-
-    // If minSpending is provided, rate should also be provided
-    if (formData.minSpending && !formData.rate) {
-      setError('Rate is required when minimum spending is provided.');
-      return;
-    }
-
-    // vice versa
-    if (formData.rate && !formData.minSpending) {
-      setError('Minimum spending is required when rate is provided.');
+      toast.error('Please provide at least one reward mechanism (minSpending, rate, or points).');
       return;
     }
 
@@ -103,24 +94,48 @@ const CreatePromotion = () => {
 
       if (formData.minSpending) {
         data.minSpending = parseFloat(formData.minSpending);
+      } else {
+        data.minSpending = null;
       }
       if (formData.rate) {
         data.rate = parseFloat(formData.rate);
+      } else {
+        data.rate = null;
       }
       if (formData.points) {
         data.points = parseInt(formData.points);
+      } else {
+        data.points = null;
       }
 
       if (isEditMode) {
         await promotionAPI.updatePromotion(promotionId, data);
+        toast.success('Promotion updated successfully!');
       } else {
         await promotionAPI.createPromotion(data);
+        toast.success('Promotion created successfully!');
       }
       navigate('/promotions');
     } catch (err) {
-      setError(err.response?.data?.error || `Failed to ${isEditMode ? 'update' : 'create'} promotion.`);
+      const errorMessage = err.response?.data?.error || `Failed to ${isEditMode ? 'update' : 'create'} promotion.`;
+      setError(errorMessage);
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    setDeleting(true);
+    try {
+      await promotionAPI.deletePromotion(promotionId);
+      toast.success('Promotion deleted successfully!');
+      navigate('/promotions');
+    } catch (err) {
+      const errorMessage = err.response?.data?.error || 'Failed to delete promotion.';
+      setError(errorMessage);
+      toast.error(errorMessage);
+      setDeleting(false);
     }
   };
 
@@ -227,9 +242,7 @@ const CreatePromotion = () => {
                 }
                 placeholder="e.g., 50.00"
               />
-              <small>
-                Required if rate is provided
-              </small>
+              
             </div>
             <div className="form-group">
               <label htmlFor="rate">Rate (optional)</label>
@@ -244,9 +257,7 @@ const CreatePromotion = () => {
                 }
                 placeholder="e.g., 1.5"
               />
-              <small>
-                Points multiplier (required if minSpending is provided)
-              </small>
+              
             </div>
           </div>
           <div className="form-group">
@@ -263,25 +274,14 @@ const CreatePromotion = () => {
               placeholder="e.g., 100"
             />
             <small>
-              Provide either (minSpending + rate) OR fixed points. Cannot provide both.
+              Provide minSpending, rate, points, or any combination. At least one reward mechanism is required.
             </small>
           </div>
-          {error && <div className="error-message">{error}</div>}
           <div className="form-actions">
             {isEditMode && (
               <button
                 type="button"
-                onClick={async () => {
-                  if (!confirm('Are you sure you want to delete this promotion? This action cannot be undone.')) return;
-                  setDeleting(true);
-                  try {
-                    await promotionAPI.deletePromotion(promotionId);
-                    navigate('/promotions');
-                  } catch (err) {
-                    setError(err.response?.data?.error || 'Failed to delete promotion.');
-                    setDeleting(false);
-                  }
-                }}
+                onClick={() => setShowDeleteConfirm(true)}
                 className="btn btn-danger"
                 disabled={loading || deleting}
                 style={{ marginRight: 'auto' }}
@@ -302,6 +302,16 @@ const CreatePromotion = () => {
           </div>
         </form>
       </div>
+      
+      <ConfirmationModal
+        isOpen={showDeleteConfirm}
+        onClose={() => setShowDeleteConfirm(false)}
+        onConfirm={handleDelete}
+        title="Delete Promotion"
+        message="Are you sure you want to delete this promotion? This action cannot be undone."
+        confirmLabel="Delete"
+        isDangerous={true}
+      />
     </div>
   );
 };
