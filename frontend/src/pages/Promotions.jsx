@@ -2,32 +2,82 @@
 import { useState, useEffect } from 'react';
 import { toast } from 'react-toastify';
 import { useAuth } from '../contexts/AuthContext';
-import { promotionAPI } from '../services/api';
-import { Link } from 'react-router-dom';
+import { promotionAPI, savedFilterAPI } from '../services/api';
+import { Link, useSearchParams } from 'react-router-dom';
+import SaveFilterModal from '../components/SaveFilterModal';
+import SavedFiltersModal from '../components/SavedFiltersModal';
 import './Promotions.css';
 
 const Promotions = () => {
   const { hasRole } = useAuth();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [promotions, setPromotions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [deletingPromotionId, setDeletingPromotionId] = useState(null);
+  const [isSaveFilterOpen, setIsSaveFilterOpen] = useState(false);
+  const [isLoadFilterOpen, setIsLoadFilterOpen] = useState(false);
+  const [filters, setFilters] = useState({
+    name: searchParams.get('name') || '',
+    type: searchParams.get('type') || '',
+    // For managers to filter active/expired
+    started: searchParams.get('started') || '', 
+    ended: searchParams.get('ended') || '',
+  });
 
   useEffect(() => {
     loadPromotions();
-  }, []);
+  }, [filters]);
 
   const loadPromotions = async () => {
     setLoading(true);
     setError('');
     try {
-      const response = await promotionAPI.getPromotions();
+      const params = { ...filters };
+      Object.keys(params).forEach((key) => {
+        if (!params[key]) delete params[key];
+      });
+      
+      const response = await promotionAPI.getPromotions(params);
       setPromotions(response.data.results || []);
     } catch (err) {
       setError(err.response?.data?.error || 'Failed to load promotions.');
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleFilterChange = (key, value) => {
+    const newFilters = { ...filters, [key]: value };
+    // If mutually exclusive filters are set (started/ended), handle them?
+    // Backend says: "if (started && ended) return res.status(400)"
+    // So we should prevent setting both.
+    
+    if (key === 'started' && value !== '') {
+      newFilters.ended = '';
+    }
+    if (key === 'ended' && value !== '') {
+      newFilters.started = '';
+    }
+
+    setFilters(newFilters);
+    setSearchParams(newFilters);
+  };
+
+  const handleSaveFilter = async (name) => {
+    try {
+      await savedFilterAPI.createSavedFilter(name, 'promotions', filters);
+      toast.success('Filter saved successfully');
+    } catch (error) {
+      console.error(error);
+      toast.error('Failed to save filter');
+    }
+  };
+
+  const handleLoadFilter = (savedFilters) => {
+    setFilters(savedFilters);
+    setSearchParams(savedFilters);
+    toast.success('Filters loaded');
   };
 
   const formatDate = (dateString) => {
@@ -72,6 +122,19 @@ const Promotions = () => {
 
   return (
     <div className="promotions-page">
+      <SaveFilterModal 
+        isOpen={isSaveFilterOpen} 
+        onClose={() => setIsSaveFilterOpen(false)} 
+        onSave={handleSaveFilter} 
+      />
+      
+      <SavedFiltersModal 
+        isOpen={isLoadFilterOpen} 
+        onClose={() => setIsLoadFilterOpen(false)} 
+        onSelect={handleLoadFilter} 
+        page="promotions" 
+      />
+
       <div className="promotions-page-header">
         <h1>Promotions</h1>
         {hasRole('manager') && (
@@ -79,6 +142,67 @@ const Promotions = () => {
             Create Promotion
           </Link>
         )}
+      </div>
+
+      <div className="promotions-filters">
+        <div className="form-group">
+          <label>Search</label>
+          <input
+            type="text"
+            value={filters.name}
+            onChange={(e) => handleFilterChange('name', e.target.value)}
+            placeholder="Search by name..."
+          />
+        </div>
+        <div className="form-group">
+          <label>Type</label>
+          <select
+            value={filters.type}
+            onChange={(e) => handleFilterChange('type', e.target.value)}
+          >
+            <option value="">All</option>
+            <option value="automatic">Automatic</option>
+            <option value="onetime">One-time</option>
+          </select>
+        </div>
+        {(hasRole('manager') || hasRole('superuser')) && (
+          <>
+            <div className="form-group">
+              <label>Status</label>
+              <select
+                value={filters.started === 'true' ? 'active' : filters.started === 'false' ? 'upcoming' : filters.ended === 'true' ? 'ended' : ''}
+                onChange={(e) => {
+                   const val = e.target.value;
+                   if (val === 'active') {
+                     handleFilterChange('started', 'true');
+                   } else if (val === 'upcoming') {
+                     handleFilterChange('started', 'false');
+                   } else if (val === 'ended') {
+                     handleFilterChange('ended', 'true');
+                   } else {
+                     // Clear both
+                     const newFilters = { ...filters, started: '', ended: '' };
+                     setFilters(newFilters);
+                     setSearchParams(newFilters);
+                   }
+                }}
+              >
+                <option value="">All</option>
+                <option value="active">Active / Past Start</option>
+                <option value="upcoming">Upcoming</option>
+                <option value="ended">Ended</option>
+              </select>
+            </div>
+          </>
+        )}
+        <div className="promotions-filters-actions">
+          <button onClick={() => setIsSaveFilterOpen(true)} className="btn btn-outline-secondary" title="Save current filters">
+            Save
+          </button>
+          <button onClick={() => setIsLoadFilterOpen(true)} className="btn btn-outline-secondary" title="Load saved filters">
+            Load
+          </button>
+        </div>
       </div>
 
 
