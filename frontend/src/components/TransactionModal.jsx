@@ -146,7 +146,6 @@ const TransactionModal = ({ isOpen, onClose, defaultType = 'redemption', onSucce
               disabled={loading}
             />
           </div>
-          {error && <div className="error-message">{error}</div>}
           <div className="form-actions">
             <button
               type="button"

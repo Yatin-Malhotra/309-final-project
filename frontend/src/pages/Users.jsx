@@ -1,5 +1,6 @@
 // Users management page (for managers)
 import { useState, useEffect } from 'react';
+import { toast } from 'react-toastify';
 import { useAuth } from '../contexts/AuthContext';
 import { userAPI } from '../services/api';
 import { Link, useSearchParams, useNavigate } from 'react-router-dom';
@@ -40,7 +41,8 @@ const Users = () => {
       setUsers(response.data.results || []);
       setCount(response.data.count || 0);
     } catch (err) {
-      setError(err.response?.data?.error || 'Failed to load users.');
+      const errorMessage = err.response?.data?.error || 'Failed to load users.';
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -137,7 +139,6 @@ const Users = () => {
         </div>
       </div>
 
-      {error && <div className="users-error-message">{error}</div>}
 
       {loading ? (
         <div className="users-loading">Loading users...</div>

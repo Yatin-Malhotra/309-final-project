@@ -111,7 +111,6 @@ const UserDetail = () => {
         toast.success('Email updated successfully!');
       } catch (err) {
         const errorMessage = err.response?.data?.error || 'Failed to modify email.';
-        alert(errorMessage);
         toast.error(errorMessage);
     } finally {
        setActionLoading(false)
@@ -131,7 +130,6 @@ const UserDetail = () => {
       toast.success(`User role updated to ${newRole} successfully!`);
     } catch (err) {
         const errorMessage = err.response?.data?.error || 'Failed to modify role.';
-        alert(errorMessage);
         toast.error(errorMessage);
     } finally {
        setActionLoading(false)
@@ -163,7 +161,6 @@ const UserDetail = () => {
       toast.success(`Suspicious flag ${newSuspiciousValue ? 'set' : 'cleared'} successfully!`);
     } catch (err) {
       const errorMessage = err.response?.data?.error || 'Failed to update suspicious status.';
-      alert(errorMessage);
       toast.error(errorMessage);
     } finally {
       setActionLoading(false);
@@ -185,7 +182,6 @@ const UserDetail = () => {
       toast.success('User verified successfully!');
     } catch (err) {
       const errorMessage = err.response?.data?.error || 'Failed to verify user.';
-      alert(errorMessage);
       toast.error(errorMessage);
     } finally {
       setActionLoading(false);
@@ -226,13 +222,10 @@ const UserDetail = () => {
     );
   }
 
-  if (error || !user) {
+  if (!user) {
     return (
       <div className="user-detail-page">
-        <div className="user-detail-error-message">{error || 'User not found'}</div>
-        <Link to="/users" className="btn btn-secondary user-detail-back-btn" style={{ marginTop: '20px' }}>
-          Back to Users
-        </Link>
+        <div className="user-detail-loading">Loading user...</div>
       </div>
     );
   }

@@ -1,5 +1,6 @@
 // Promotions page
 import { useState, useEffect } from 'react';
+import { toast } from 'react-toastify';
 import { useAuth } from '../contexts/AuthContext';
 import { promotionAPI } from '../services/api';
 import { Link } from 'react-router-dom';
@@ -59,9 +60,11 @@ const Promotions = () => {
     setDeletingPromotionId(promotionId);
     try {
       await promotionAPI.deletePromotion(promotionId);
+      toast.success('Promotion deleted successfully!');
       loadPromotions(); // Reload the list
     } catch (err) {
-      alert(err.response?.data?.error || 'Failed to delete promotion.');
+      const errorMessage = err.response?.data?.error || 'Failed to delete promotion.';
+      toast.error(errorMessage);
     } finally {
       setDeletingPromotionId(null);
     }
@@ -78,7 +81,6 @@ const Promotions = () => {
         )}
       </div>
 
-      {error && <div className="promotions-error-message">{error}</div>}
 
       {loading ? (
         <div className="promotions-loading">Loading promotions...</div>

@@ -181,7 +181,6 @@ const EventDetail = () => {
       loadEvent();
     } catch (err) {
       const errorMessage = err.response?.data?.error || 'Failed to register for event.';
-      alert(errorMessage);
       toast.error(errorMessage);
     } finally {
       setActionLoading(false);
@@ -197,7 +196,6 @@ const EventDetail = () => {
       loadEvent();
     } catch (err) {
       const errorMessage = err.response?.data?.error || 'Failed to unregister from event.';
-      alert(errorMessage);
       toast.error(errorMessage);
     } finally {
       setActionLoading(false);
@@ -246,7 +244,6 @@ const EventDetail = () => {
       }
     } catch (err) {
       const errorMessage = err.response?.data?.error || 'Failed to add organizer.';
-      alert(errorMessage);
       toast.error(errorMessage);
     } finally {
       setAddingOrganizer(false);
@@ -271,7 +268,7 @@ const EventDetail = () => {
     } else {
       // Event organizer - use utorid directly
       if (!guestUtorid || !guestUtorid.trim()) {
-        alert('Please enter a UTORid');
+        toast.error('Please enter a UTORid');
         return;
       }
       utoridToAdd = guestUtorid.trim();
@@ -295,7 +292,6 @@ const EventDetail = () => {
       }
     } catch (err) {
       const errorMessage = err.response?.data?.error || 'Failed to add guest.';
-      alert(errorMessage);
       toast.error(errorMessage);
     } finally {
       setAddingGuest(false);
@@ -318,7 +314,6 @@ const EventDetail = () => {
       loadEvent();
     } catch (err) {
       const errorMessage = err.response?.data?.error || 'Failed to remove guest.';
-      alert(errorMessage);
       toast.error(errorMessage);
     } finally {
       setActionLoading(false);
@@ -335,7 +330,6 @@ const EventDetail = () => {
       loadEvent();
     } catch (err) {
       const errorMessage = err.response?.data?.error || 'Failed to remove organizer.';
-      alert(errorMessage);
       toast.error(errorMessage);
     } finally {
       setActionLoading(false);
@@ -356,7 +350,6 @@ const EventDetail = () => {
       navigate('/events');
     } catch (err) {
       const errorMessage = err.response?.data?.error || 'Failed to delete event.';
-      alert(errorMessage);
       toast.error(errorMessage);
     } finally {
       setActionLoading(false);
@@ -381,7 +374,7 @@ const EventDetail = () => {
 
   const handleAwardPoints = async (guest) => {
     if (!pointsAmount || parseInt(pointsAmount) <= 0) {
-      alert('Please enter a valid points amount');
+      toast.error('Please enter a valid points amount');
       return;
     }
 
@@ -398,7 +391,6 @@ const EventDetail = () => {
       loadEvent(); // Reload to update points remaining
     } catch (err) {
       const errorMessage = err.response?.data?.error || 'Failed to award points.';
-      alert(errorMessage);
       toast.error(errorMessage);
     } finally {
       setAllocatingPoints(false);
@@ -407,7 +399,7 @@ const EventDetail = () => {
 
   const handleAwardPointsToAll = async () => {
     if (!pointsAmount || parseInt(pointsAmount) <= 0) {
-      alert('Please enter a valid points amount');
+      toast.error('Please enter a valid points amount');
       return;
     }
 
@@ -424,7 +416,6 @@ const EventDetail = () => {
       loadEvent(); // Reload to update points remaining
     } catch (err) {
       const errorMessage = err.response?.data?.error || 'Failed to award points.';
-      alert(errorMessage);
       toast.error(errorMessage);
     } finally {
       setAllocatingPoints(false);
@@ -439,13 +430,10 @@ const EventDetail = () => {
     );
   }
 
-  if (error || !event) {
+  if (!event) {
     return (
       <div className="event-detail-page">
-        <div className="event-detail-error-message">{error || 'Event not found'}</div>
-        <Link to="/events" className="btn btn-secondary event-detail-back-btn">
-          Back to Events
-        </Link>
+        <div className="event-detail-loading">Loading event...</div>
       </div>
     );
   }

@@ -450,7 +450,6 @@ const CreateEvent = () => {
             </div>
           )}
 
-          {error && <div className="error-message">{error}</div>}
           <div className="form-actions">
             <button
               type="button"

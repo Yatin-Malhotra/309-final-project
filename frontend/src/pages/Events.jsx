@@ -127,7 +127,6 @@ const Events = () => {
       loadEvents(); // Reload the list
     } catch (err) {
       const errorMessage = err.response?.data?.error || 'Failed to delete event.';
-      alert(errorMessage);
       toast.error(errorMessage);
     } finally {
       setDeletingEventId(null);
@@ -225,7 +224,6 @@ const Events = () => {
         </div>
       </div>
 
-      {error && <div className="events-error-message">{error}</div>}
 
       {loading ? (
         <div className="events-loading">Loading events...</div>

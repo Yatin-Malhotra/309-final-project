@@ -271,7 +271,6 @@ const CreatePromotion = () => {
               Provide either (minSpending + rate) OR fixed points. Cannot provide both.
             </small>
           </div>
-          {error && <div className="error-message">{error}</div>}
           <div className="form-actions">
             {isEditMode && (
               <button

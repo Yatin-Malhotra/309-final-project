@@ -1,6 +1,7 @@
 // Password reset page component
 import { useState } from 'react';
 import { useNavigate, useParams, Link } from 'react-router-dom';
+import { toast } from 'react-toastify';
 import { authAPI } from '../services/api';
 import './ResetPassword.css';
 
@@ -28,8 +29,10 @@ const ResetPassword = () => {
     try {
       await authAPI.requestReset(utorid);
       setSuccess(true);
+      toast.success('Password reset request sent! Check your email for further instructions.');
     } catch (err) {
-      setError(err.response?.data?.error || 'Failed to request password reset.');
+      const errorMessage = err.response?.data?.error || 'Failed to request password reset.';
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -40,14 +43,12 @@ const ResetPassword = () => {
     setError('');
 
     if (!validatePassword(password)) {
-      setError(
-        'Password must be 8-20 characters and contain uppercase, lowercase, digit, and special character.'
-      );
+      toast.error('Password must be 8-20 characters and contain uppercase, lowercase, digit, and special character.');
       return;
     }
 
     if (password !== confirmPassword) {
-      setError('Passwords do not match.');
+      toast.error('Passwords do not match.');
       return;
     }
 
@@ -56,9 +57,11 @@ const ResetPassword = () => {
     try {
       await authAPI.resetPassword(resetToken, utorid, password);
       setSuccess(true);
+      toast.success('Password reset successful! Redirecting to login...');
       setTimeout(() => navigate('/login'), 2000);
     } catch (err) {
-      setError(err.response?.data?.error || 'Failed to reset password.');
+      const errorMessage = err.response?.data?.error || 'Failed to reset password.';
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -116,7 +119,6 @@ const ResetPassword = () => {
                   required
                 />
               </div>
-              {error && <div className="reset-password-error-message">{error}</div>}
               <div className="reset-password-form-actions">
                 <button type="submit" className="reset-password-btn-primary" disabled={loading}>
                   {loading ? 'Resetting...' : 'Reset Password'}
@@ -155,7 +157,6 @@ const ResetPassword = () => {
                 autoFocus
               />
             </div>
-            {error && <div className="reset-password-error-message">{error}</div>}
             <div className="reset-password-form-actions">
               <button type="submit" className="reset-password-btn-primary" disabled={loading}>
                 {loading ? 'Sending...' : 'Request Reset'}

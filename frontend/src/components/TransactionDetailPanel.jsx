@@ -260,7 +260,6 @@ const TransactionDetailPanel = ({ transaction, isOpen, onClose, onUpdate, hasRol
         </div>
 
         <div className="transaction-panel-content">
-          {error && <div className="transaction-panel-error">{error}</div>}
 
           <div className="transaction-panel-section">
             <div className="transaction-panel-field">

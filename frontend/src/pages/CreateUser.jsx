@@ -85,8 +85,6 @@ const CreateUser = () => {
               title="Must be a UofT email (@utoronto.ca or @mail.utoronto.ca)"
             />
           </div>
-          {error && <div className="error-message">{error}</div>}
-          {success && <div className="success-message">{success}</div>}
           <div className="form-actions">
             <button
               type="button"

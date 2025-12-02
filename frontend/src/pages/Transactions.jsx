@@ -178,7 +178,6 @@ const Transactions = () => {
       loadTransactions();
     } catch (err) {
       const errorMessage = err.response?.data?.error || 'Failed to process redemption.';
-      alert(errorMessage);
       toast.error(errorMessage);
     }
   };
@@ -194,7 +193,6 @@ const Transactions = () => {
       loadTransactions();
     } catch (err) {
       const errorMessage = err.response?.data?.error || 'Failed to update suspicious status.';
-      alert(errorMessage);
       toast.error(errorMessage);
     }
   };
@@ -378,7 +376,6 @@ const Transactions = () => {
         </div>
       </div>
 
-      {error && <div className="transactions-error-message">{error}</div>}
 
       {loading ? (
         <div className="transactions-loading">Loading transactions...</div>

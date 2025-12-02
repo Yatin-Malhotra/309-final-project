@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { toast } from 'react-toastify';
 
 const PromotionSelector = ({ promotions, value, onChange,
     formData
@@ -12,11 +13,11 @@ const PromotionSelector = ({ promotions, value, onChange,
     
     if (formData.type === "purchase") {
         if (!formData.spent) {
-            setPromoError(`Please enter an amount first.`)
+            toast.error('Please enter an amount first.');
             return;
         }
         if (promo.minSpending && promo.minSpending > formData.spent) {
-            setPromoError(`Minimum Spending amount is ${promo.minSpending}`)
+            toast.error(`Minimum Spending amount is ${promo.minSpending}`);
             return;
         }
     }
@@ -74,7 +75,6 @@ const PromotionSelector = ({ promotions, value, onChange,
           })}
         </div>
       )}
-      {promoError && <div className="error-message">{promoError}</div>}
 
       <input
         type="hidden"

@@ -120,7 +120,6 @@ const UserCreateTx = () => {
               rows="3"
             />
           </div>
-          {error && <div className="error-message">{error}</div>}
           <div className="form-actions">
             <button
               type="button"

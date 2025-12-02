@@ -222,8 +222,6 @@ const Profile = () => {
               />
             </div>
             
-            {error && <div className="error-message">{error}</div>}
-            {success && <div className="success-message">{success}</div>}
             <div className="form-actions">
               <button
                 type="submit"
@@ -281,8 +279,6 @@ const Profile = () => {
                 required
               />
             </div>
-            {error && <div className="error-message">{error}</div>}
-            {success && <div className="success-message">{success}</div>}
             <div className="form-actions">
               <button
                 type="submit"
