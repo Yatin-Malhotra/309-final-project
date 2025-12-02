@@ -289,6 +289,12 @@
   .users-filters .form-group {
     width: 100%;
   }
+  
+  .users-filters-actions {
+    margin-left: 0;
+    width: 100%;
+    justify-content: flex-end;
+  }
 
   .users-section {
     padding: 20px;
@@ -307,5 +313,11 @@
   .users-page-header h1 {
     font-size: 24px;
   }
+}
+
+.users-filters-actions {
+  display: flex;
+  gap: 10px;
+  margin-left: auto;
 }
 

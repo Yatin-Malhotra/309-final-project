@@ -2,8 +2,10 @@
 import { useState, useEffect } from 'react';
 import { toast } from 'react-toastify';
 import { useAuth } from '../contexts/AuthContext';
-import { eventAPI } from '../services/api';
+import { eventAPI, savedFilterAPI } from '../services/api';
 import { Link, useSearchParams } from 'react-router-dom';
+import SaveFilterModal from '../components/SaveFilterModal';
+import SavedFiltersModal from '../components/SavedFiltersModal';
 import './Events.css';
 
 const Events = () => {
@@ -13,6 +15,8 @@ const Events = () => {
   const [allEvents, setAllEvents] = useState([]);
   const [count, setCount] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [isSaveFilterOpen, setIsSaveFilterOpen] = useState(false);
+  const [isLoadFilterOpen, setIsLoadFilterOpen] = useState(false);
   const [filters, setFilters] = useState({
     name: searchParams.get('name') || '',
     published: searchParams.get('published') || '',
@@ -133,8 +137,46 @@ const Events = () => {
     }
   };
 
+  const handleSaveFilter = async (name) => {
+    try {
+      const filtersToSave = { ...filters, showMyEvents };
+      delete filtersToSave.page;
+      await savedFilterAPI.createSavedFilter(name, 'events', filtersToSave);
+      toast.success('Filter saved successfully');
+    } catch (error) {
+      console.error(error);
+      toast.error('Failed to save filter');
+    }
+  };
+
+  const handleLoadFilter = (savedFilters) => {
+    const { showMyEvents: savedShowMyEvents, ...otherFilters } = savedFilters;
+    
+    if (savedShowMyEvents !== undefined) {
+      setShowMyEvents(savedShowMyEvents);
+    }
+    
+    const newFilters = { ...otherFilters, page: 1 };
+    setFilters(newFilters);
+    setSearchParams(newFilters);
+    toast.success('Filters loaded');
+  };
+
   return (
     <div className="events-page">
+      <SaveFilterModal 
+        isOpen={isSaveFilterOpen} 
+        onClose={() => setIsSaveFilterOpen(false)} 
+        onSave={handleSaveFilter} 
+      />
+      
+      <SavedFiltersModal 
+        isOpen={isLoadFilterOpen} 
+        onClose={() => setIsLoadFilterOpen(false)} 
+        onSelect={handleLoadFilter} 
+        page="events" 
+      />
+
       <div className="events-page-header">
         <h1>Events</h1>
         <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
@@ -221,6 +263,14 @@ const Events = () => {
             <option value="25">25</option>
             <option value="50">50</option>
           </select>
+        </div>
+        <div className="events-filters-actions">
+          <button onClick={() => setIsSaveFilterOpen(true)} className="btn btn-outline-secondary" title="Save current filters">
+            Save
+          </button>
+          <button onClick={() => setIsLoadFilterOpen(true)} className="btn btn-outline-secondary" title="Load saved filters">
+            Load
+          </button>
         </div>
       </div>
 

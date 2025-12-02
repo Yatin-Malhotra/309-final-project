@@ -169,5 +169,12 @@ export const analyticsAPI = {
   getFinancialAnalytics: () => api.get('/analytics/financial'),
 };
 
+// Saved Filters endpoints
+export const savedFilterAPI = {
+  getSavedFilters: (page) => api.get('/saved-filters', { params: { page } }),
+  createSavedFilter: (name, page, filters) => api.post('/saved-filters', { name, page, filters }),
+  deleteSavedFilter: (id) => api.delete(`/saved-filters/${id}`),
+};
+
 export default api;
 

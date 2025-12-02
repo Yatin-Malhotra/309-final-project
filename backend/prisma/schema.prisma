@@ -53,6 +53,7 @@ model User {
   eventGuests            EventGuest[]
   
   userPromotions         UserPromotion[]
+  savedFilters           SavedFilter[]
 
   @@index([utorid])
   @@index([email])
@@ -181,4 +182,18 @@ model TransactionPromotion {
   @@unique([transactionId, promotionId])
   @@index([transactionId])
   @@index([promotionId])
+}
+
+model SavedFilter {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  name      String
+  page      String
+  filters   String
+  createdAt DateTime @default(now())
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([page])
 }
