@@ -1,6 +1,7 @@
 // Create transaction form (for cashiers and above)
 import { useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { toast } from 'react-toastify';
 import { promotionAPI, transactionAPI } from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
 import '../pages/CreateTransaction.css';
@@ -125,9 +126,12 @@ const CashierCreateTx = () => {
       
 
       await transactionAPI.createTransaction(data);
+      toast.success('Transaction created successfully!');
       navigate('/transactions');
     } catch (err) {
-      setError(err.response?.data?.error || 'Failed to create transaction.');
+      const errorMessage = err.response?.data?.error || 'Failed to create transaction.';
+      setError(errorMessage);
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
     }

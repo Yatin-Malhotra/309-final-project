@@ -1,6 +1,7 @@
 // Create/Edit promotion page (for managers)
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useParams, Link } from 'react-router-dom';
+import { toast } from 'react-toastify';
 import { promotionAPI } from '../services/api';
 import './CreatePromotion.css';
 
@@ -113,12 +114,16 @@ const CreatePromotion = () => {
 
       if (isEditMode) {
         await promotionAPI.updatePromotion(promotionId, data);
+        toast.success('Promotion updated successfully!');
       } else {
         await promotionAPI.createPromotion(data);
+        toast.success('Promotion created successfully!');
       }
       navigate('/promotions');
     } catch (err) {
-      setError(err.response?.data?.error || `Failed to ${isEditMode ? 'update' : 'create'} promotion.`);
+      const errorMessage = err.response?.data?.error || `Failed to ${isEditMode ? 'update' : 'create'} promotion.`;
+      setError(errorMessage);
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -276,9 +281,12 @@ const CreatePromotion = () => {
                   setDeleting(true);
                   try {
                     await promotionAPI.deletePromotion(promotionId);
+                    toast.success('Promotion deleted successfully!');
                     navigate('/promotions');
                   } catch (err) {
-                    setError(err.response?.data?.error || 'Failed to delete promotion.');
+                    const errorMessage = err.response?.data?.error || 'Failed to delete promotion.';
+                    setError(errorMessage);
+                    toast.error(errorMessage);
                     setDeleting(false);
                   }
                 }}

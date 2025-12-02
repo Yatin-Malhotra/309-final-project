@@ -1,5 +1,6 @@
 // Transactions management page
 import { useState, useEffect } from 'react';
+import { toast } from 'react-toastify';
 import { useAuth } from '../contexts/AuthContext';
 import { transactionAPI } from '../services/api';
 import { Link, useSearchParams } from 'react-router-dom';
@@ -173,9 +174,12 @@ const Transactions = () => {
 
     try {
       await transactionAPI.processRedemption(transactionId);
+      toast.success('Redemption processed successfully!');
       loadTransactions();
     } catch (err) {
-      alert(err.response?.data?.error || 'Failed to process redemption.');
+      const errorMessage = err.response?.data?.error || 'Failed to process redemption.';
+      alert(errorMessage);
+      toast.error(errorMessage);
     }
   };
 
@@ -185,9 +189,13 @@ const Transactions = () => {
 
     try {
       await transactionAPI.markSuspicious(transactionId, !currentSuspicious);
+      const actionMessage = currentSuspicious ? 'cleared' : 'marked';
+      toast.success(`Transaction ${actionMessage} as suspicious successfully!`);
       loadTransactions();
     } catch (err) {
-      alert(err.response?.data?.error || 'Failed to update suspicious status.');
+      const errorMessage = err.response?.data?.error || 'Failed to update suspicious status.';
+      alert(errorMessage);
+      toast.error(errorMessage);
     }
   };
 

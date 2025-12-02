@@ -1,5 +1,6 @@
 // Events management page
 import { useState, useEffect } from 'react';
+import { toast } from 'react-toastify';
 import { useAuth } from '../contexts/AuthContext';
 import { eventAPI } from '../services/api';
 import { Link, useSearchParams } from 'react-router-dom';
@@ -122,9 +123,12 @@ const Events = () => {
     setDeletingEventId(eventId);
     try {
       await eventAPI.deleteEvent(eventId);
+      toast.success('Event deleted successfully!');
       loadEvents(); // Reload the list
     } catch (err) {
-      alert(err.response?.data?.error || 'Failed to delete event.');
+      const errorMessage = err.response?.data?.error || 'Failed to delete event.';
+      alert(errorMessage);
+      toast.error(errorMessage);
     } finally {
       setDeletingEventId(null);
     }

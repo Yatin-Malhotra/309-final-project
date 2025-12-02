@@ -1,6 +1,7 @@
 // User detail page
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
+import { toast } from 'react-toastify';
 import { useAuth } from '../contexts/AuthContext';
 import { userAPI, getAvatarUrl } from '../services/api';
 import useTableSort from '../hooks/useTableSort';
@@ -107,8 +108,11 @@ const UserDetail = () => {
     try {
         const _ = await userAPI.updateUser(user.id, { email } )
         setUser({...user, email})
+        toast.success('Email updated successfully!');
       } catch (err) {
-        alert(err.response?.data?.error || 'Failed to modify email.');
+        const errorMessage = err.response?.data?.error || 'Failed to modify email.';
+        alert(errorMessage);
+        toast.error(errorMessage);
     } finally {
        setActionLoading(false)
     }
@@ -124,8 +128,11 @@ const UserDetail = () => {
     try {
       const _ = await userAPI.updateUser(user.id, { role : newRole })
       setUser({...user, role : newRole})
+      toast.success(`User role updated to ${newRole} successfully!`);
     } catch (err) {
-        alert(err.response?.data?.error || 'Failed to modify email.');
+        const errorMessage = err.response?.data?.error || 'Failed to modify role.';
+        alert(errorMessage);
+        toast.error(errorMessage);
     } finally {
        setActionLoading(false)
     }
@@ -153,8 +160,11 @@ const UserDetail = () => {
       const updatedSuspicious = response.data.suspicious ?? newSuspiciousValue;
       setSuspicious(updatedSuspicious);
       setUser({ ...user, suspicious: updatedSuspicious });
+      toast.success(`Suspicious flag ${newSuspiciousValue ? 'set' : 'cleared'} successfully!`);
     } catch (err) {
-      alert(err.response?.data?.error || 'Failed to update suspicious status.');
+      const errorMessage = err.response?.data?.error || 'Failed to update suspicious status.';
+      alert(errorMessage);
+      toast.error(errorMessage);
     } finally {
       setActionLoading(false);
     }
@@ -172,8 +182,11 @@ const UserDetail = () => {
       const response = await userAPI.updateUser(userId, { verified: true });
       setVerified(true);
       setUser({ ...user, verified: true });
+      toast.success('User verified successfully!');
     } catch (err) {
-      alert(err.response?.data?.error || 'Failed to verify user.');
+      const errorMessage = err.response?.data?.error || 'Failed to verify user.';
+      alert(errorMessage);
+      toast.error(errorMessage);
     } finally {
       setActionLoading(false);
     }

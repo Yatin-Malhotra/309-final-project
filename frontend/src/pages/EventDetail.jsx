@@ -1,6 +1,7 @@
 // Event detail page
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
+import { toast } from 'react-toastify';
 import { useAuth } from '../contexts/AuthContext';
 import { eventAPI, userAPI } from '../services/api';
 import './EventDetail.css';
@@ -176,9 +177,12 @@ const EventDetail = () => {
     setActionLoading(true);
     try {
       await eventAPI.registerForEvent(eventId);
+      toast.success('Successfully registered for event!');
       loadEvent();
     } catch (err) {
-      alert(err.response?.data?.error || 'Failed to register for event.');
+      const errorMessage = err.response?.data?.error || 'Failed to register for event.';
+      alert(errorMessage);
+      toast.error(errorMessage);
     } finally {
       setActionLoading(false);
     }
@@ -189,9 +193,12 @@ const EventDetail = () => {
     setActionLoading(true);
     try {
       await eventAPI.unregisterFromEvent(eventId);
+      toast.success('Successfully unregistered from event!');
       loadEvent();
     } catch (err) {
-      alert(err.response?.data?.error || 'Failed to unregister from event.');
+      const errorMessage = err.response?.data?.error || 'Failed to unregister from event.';
+      alert(errorMessage);
+      toast.error(errorMessage);
     } finally {
       setActionLoading(false);
     }
@@ -227,6 +234,7 @@ const EventDetail = () => {
     setAddingOrganizer(true);
     try {
       await eventAPI.addOrganizer(eventId, selectedUserId.utorid);
+      toast.success(`Organizer ${selectedUserId.name} added successfully!`);
       setSelectedUserId(null);
       setUserSearch('');
       setShowOrganizerDropdown(false);
@@ -237,7 +245,9 @@ const EventDetail = () => {
         loadUsers();
       }
     } catch (err) {
-      alert(err.response?.data?.error || 'Failed to add organizer.');
+      const errorMessage = err.response?.data?.error || 'Failed to add organizer.';
+      alert(errorMessage);
+      toast.error(errorMessage);
     } finally {
       setAddingOrganizer(false);
     }
@@ -272,6 +282,7 @@ const EventDetail = () => {
     setAddingGuest(true);
     try {
       await eventAPI.addGuest(eventId, utoridToAdd);
+      toast.success(`Guest added successfully!`);
       setSelectedGuestUserId(null);
       setGuestUserSearch('');
       setGuestUtorid('');
@@ -283,7 +294,9 @@ const EventDetail = () => {
         loadGuestUsers();
       }
     } catch (err) {
-      alert(err.response?.data?.error || 'Failed to add guest.');
+      const errorMessage = err.response?.data?.error || 'Failed to add guest.';
+      alert(errorMessage);
+      toast.error(errorMessage);
     } finally {
       setAddingGuest(false);
     }
@@ -301,9 +314,12 @@ const EventDetail = () => {
     setActionLoading(true);
     try {
       await eventAPI.removeGuest(eventId, userId);
+      toast.success('Guest removed successfully!');
       loadEvent();
     } catch (err) {
-      alert(err.response?.data?.error || 'Failed to remove guest.');
+      const errorMessage = err.response?.data?.error || 'Failed to remove guest.';
+      alert(errorMessage);
+      toast.error(errorMessage);
     } finally {
       setActionLoading(false);
     }
@@ -315,9 +331,12 @@ const EventDetail = () => {
     setActionLoading(true);
     try {
       await eventAPI.removeOrganizer(eventId, userId);
+      toast.success('Organizer removed successfully!');
       loadEvent();
     } catch (err) {
-      alert(err.response?.data?.error || 'Failed to remove organizer.');
+      const errorMessage = err.response?.data?.error || 'Failed to remove organizer.';
+      alert(errorMessage);
+      toast.error(errorMessage);
     } finally {
       setActionLoading(false);
     }
@@ -333,9 +352,12 @@ const EventDetail = () => {
     setActionLoading(true);
     try {
       await eventAPI.deleteEvent(eventId);
+      toast.success('Event deleted successfully!');
       navigate('/events');
     } catch (err) {
-      alert(err.response?.data?.error || 'Failed to delete event.');
+      const errorMessage = err.response?.data?.error || 'Failed to delete event.';
+      alert(errorMessage);
+      toast.error(errorMessage);
     } finally {
       setActionLoading(false);
     }
@@ -369,12 +391,15 @@ const EventDetail = () => {
     setAllocatingPoints(true);
     try {
       await eventAPI.awardPointsToGuest(eventId, guest.utorid, amount);
+      toast.success(`${amount} points awarded to ${guest.name} successfully!`);
       setPointsAmount('');
       setSelectedGuestForPoints(null);
       setShowPointsForm(false);
       loadEvent(); // Reload to update points remaining
     } catch (err) {
-      alert(err.response?.data?.error || 'Failed to award points.');
+      const errorMessage = err.response?.data?.error || 'Failed to award points.';
+      alert(errorMessage);
+      toast.error(errorMessage);
     } finally {
       setAllocatingPoints(false);
     }
@@ -393,11 +418,14 @@ const EventDetail = () => {
     setAllocatingPoints(true);
     try {
       await eventAPI.awardPointsToAllGuests(eventId, amount);
+      toast.success(`${amount} points awarded to all guests successfully!`);
       setPointsAmount('');
       setShowPointsForm(false);
       loadEvent(); // Reload to update points remaining
     } catch (err) {
-      alert(err.response?.data?.error || 'Failed to award points.');
+      const errorMessage = err.response?.data?.error || 'Failed to award points.';
+      alert(errorMessage);
+      toast.error(errorMessage);
     } finally {
       setAllocatingPoints(false);
     }

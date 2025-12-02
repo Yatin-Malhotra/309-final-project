@@ -1,5 +1,6 @@
 // Transaction detail sliding panel component
 import { useState, useEffect } from 'react';
+import { toast } from 'react-toastify';
 import { transactionAPI, promotionAPI } from '../services/api';
 import './TransactionDetailPanel.css';
 
@@ -82,6 +83,7 @@ const TransactionDetailPanel = ({ transaction, isOpen, onClose, onUpdate, hasRol
 
     try {
       await transactionAPI.updateTransactionAmount(transaction.id, newAmount);
+      toast.success('Transaction amount updated successfully!');
       setEditingAmount(false);
       // Reload transaction details
       await loadTransactionDetails();
@@ -90,7 +92,9 @@ const TransactionDetailPanel = ({ transaction, isOpen, onClose, onUpdate, hasRol
         onUpdate();
       }
     } catch (err) {
-      setError(err.response?.data?.error || 'Failed to update amount');
+      const errorMessage = err.response?.data?.error || 'Failed to update amount';
+      setError(errorMessage);
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -110,6 +114,7 @@ const TransactionDetailPanel = ({ transaction, isOpen, onClose, onUpdate, hasRol
 
     try {
       await transactionAPI.updateTransactionSpent(transaction.id, newSpent);
+      toast.success('Transaction spent amount updated successfully!');
       setEditingSpent(false);
       // Reload transaction details
       await loadTransactionDetails();
@@ -118,7 +123,9 @@ const TransactionDetailPanel = ({ transaction, isOpen, onClose, onUpdate, hasRol
         onUpdate();
       }
     } catch (err) {
-      setError(err.response?.data?.error || 'Failed to update spent amount');
+      const errorMessage = err.response?.data?.error || 'Failed to update spent amount';
+      setError(errorMessage);
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -142,11 +149,14 @@ const TransactionDetailPanel = ({ transaction, isOpen, onClose, onUpdate, hasRol
       }
       // Also reload full details to ensure everything is up to date
       await loadTransactionDetails();
+      toast.success('Redemption processed successfully!');
       if (onUpdate) {
         onUpdate();
       }
     } catch (err) {
-      setError(err.response?.data?.error || 'Failed to process redemption');
+      const errorMessage = err.response?.data?.error || 'Failed to process redemption';
+      setError(errorMessage);
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -170,11 +180,14 @@ const TransactionDetailPanel = ({ transaction, isOpen, onClose, onUpdate, hasRol
       }
       // Also reload full details to ensure everything is up to date
       await loadTransactionDetails();
+      toast.success('Transaction processed successfully!');
       if (onUpdate) {
         onUpdate();
       }
     } catch (err) {
-      setError(err.response?.data?.error || 'Failed to process transaction');
+      const errorMessage = err.response?.data?.error || 'Failed to process transaction';
+      setError(errorMessage);
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -200,11 +213,15 @@ const TransactionDetailPanel = ({ transaction, isOpen, onClose, onUpdate, hasRol
       }
       // Also reload full details to ensure everything is up to date
       await loadTransactionDetails();
+      const actionMessage = transactionDetails?.suspicious ? 'cleared' : 'marked';
+      toast.success(`Transaction ${actionMessage} as suspicious successfully!`);
       if (onUpdate) {
         onUpdate();
       }
     } catch (err) {
-      setError(err.response?.data?.error || 'Failed to update suspicious status');
+      const errorMessage = err.response?.data?.error || 'Failed to update suspicious status';
+      setError(errorMessage);
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
     }

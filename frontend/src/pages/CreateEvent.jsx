@@ -1,6 +1,7 @@
 // Create/Edit event page (for managers)
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate, useParams, Link } from 'react-router-dom';
+import { toast } from 'react-toastify';
 import { useAuth } from '../contexts/AuthContext';
 import { eventAPI, userAPI } from '../services/api';
 import './CreateEvent.css';
@@ -197,12 +198,16 @@ const CreateEvent = () => {
 
       if (isEditMode) {
         await eventAPI.updateEvent(eventId, data);
+        toast.success('Event updated successfully!');
       } else {
         await eventAPI.createEvent(data);
+        toast.success('Event created successfully!');
       }
       navigate('/events');
     } catch (err) {
-      setError(err.response?.data?.error || `Failed to ${isEditMode ? 'update' : 'create'} event.`);
+      const errorMessage = err.response?.data?.error || `Failed to ${isEditMode ? 'update' : 'create'} event.`;
+      setError(errorMessage);
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
     }

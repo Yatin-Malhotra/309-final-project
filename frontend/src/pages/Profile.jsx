@@ -1,5 +1,6 @@
 // User profile page
 import { useState, useEffect, useRef } from 'react';
+import { toast } from 'react-toastify';
 import { useAuth } from '../contexts/AuthContext';
 import { userAPI, getAvatarUrl } from '../services/api';
 import './Profile.css';
@@ -59,8 +60,11 @@ const Profile = () => {
       }
       updateLocalUser();
       setSuccess('Profile updated successfully!');
+      toast.success('Profile updated successfully!');
     } catch (err) {
-      setError(err.response?.data?.error || 'Failed to update profile.');
+      const errorMessage = err.response?.data?.error || 'Failed to update profile.';
+      setError(errorMessage);
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -90,9 +94,12 @@ const Profile = () => {
     try {
       await userAPI.changePassword(passwordData.old, passwordData.new);
       setSuccess('Password changed successfully!');
+      toast.success('Password changed successfully!');
       setPasswordData({ old: '', new: '', confirm: '' });
     } catch (err) {
-      setError(err.response?.data?.error || 'Failed to change password.');
+      const errorMessage = err.response?.data?.error || 'Failed to change password.';
+      setError(errorMessage);
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
     }
