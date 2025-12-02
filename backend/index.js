@@ -1272,7 +1272,8 @@ app.post('/transactions', requireRole('cashier'), validate(schemas.createTransac
                     amount,
                     relatedId: relatedIdNum,
                     remark: remark || '',
-                    createdBy: req.user.id
+                    createdBy: req.user.id,
+                    processed: true  // Adjustments are applied immediately, so they're processed
                 }
             });
             
@@ -1298,7 +1299,8 @@ app.post('/transactions', requireRole('cashier'), validate(schemas.createTransac
                 relatedId: transaction.relatedId,
                 remark: transaction.remark,
                 promotionIds: promotionIds || [],
-                createdBy: creatorUser.utorid
+                createdBy: creatorUser.utorid,
+                processed: transaction.processed
             });
         } else {
             return res.status(400).json({ error: 'Invalid transaction type' });
