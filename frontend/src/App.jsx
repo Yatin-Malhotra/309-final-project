@@ -168,7 +168,7 @@ function AppContent() {
               <Route
                 path="/users/:userId"
                 element={
-                  <ProtectedRoute requiredRole="cashier">
+                  <ProtectedRoute requiredRole="manager">
                     <UserDetail />
                   </ProtectedRoute>
                 }
