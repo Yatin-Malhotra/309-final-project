@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import { toast } from 'react-toastify';
 import { transactionAPI, promotionAPI } from '../services/api';
 import ConfirmationModal from './ConfirmationModal';
-import './TransactionDetailPanel.css';
+import '../styles/components/TransactionDetailPanel.css';
 
 const TransactionDetailPanel = ({ transaction, isOpen, onClose, onUpdate, hasRole }) => {
   const [loading, setLoading] = useState(false);

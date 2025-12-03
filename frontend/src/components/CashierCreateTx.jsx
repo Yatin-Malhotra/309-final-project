@@ -4,7 +4,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { promotionAPI, transactionAPI } from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
-import '../pages/CreateTransaction.css';
+import '../styles/pages/CreateTransaction.css';
 
 const CashierCreateTx = () => {
   const { hasRole } = useAuth();

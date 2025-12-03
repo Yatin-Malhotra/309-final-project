@@ -5,7 +5,7 @@ import { toast } from 'react-toastify';
 import { useAuth } from '../contexts/AuthContext';
 import { eventAPI, userAPI } from '../services/api';
 import ConfirmationModal from '../components/ConfirmationModal';
-import './EventDetail.css';
+import '../styles/pages/EventDetail.css';
 
 const EventDetail = () => {
   const { eventId } = useParams();

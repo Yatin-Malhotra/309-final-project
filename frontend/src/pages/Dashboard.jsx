@@ -10,7 +10,7 @@ import QRCodeModal from '../components/QRCodeModal';
 import QRScannerModal from '../components/QRScannerModal';
 import TransactionModal from '../components/TransactionModal';
 import SortableTable from '../components/SortableTable';
-import './Dashboard.css';
+import '../styles/pages/Dashboard.css';
 
 const Dashboard = () => {
   const { user, hasRole, currentRole, updateLocalUser } = useAuth();

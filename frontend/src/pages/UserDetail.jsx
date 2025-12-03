@@ -7,7 +7,7 @@ import { userAPI, getAvatarUrl } from '../services/api';
 import useTableSort from '../hooks/useTableSort';
 import SortableTableHeader from '../components/SortableTableHeader';
 import ConfirmationModal from '../components/ConfirmationModal';
-import './UserDetail.css';
+import '../styles/pages/UserDetail.css';
 
 const UserDetail = () => {
   const { userId } = useParams();

@@ -4,7 +4,7 @@ import { useNavigate, useParams, Link } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { useAuth } from '../contexts/AuthContext';
 import { eventAPI, userAPI } from '../services/api';
-import './CreateEvent.css';
+import '../styles/pages/CreateEvent.css';
 
 const CreateEvent = () => {
   const navigate = useNavigate();

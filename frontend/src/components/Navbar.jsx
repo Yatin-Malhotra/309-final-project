@@ -4,7 +4,7 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
 import { getAvatarUrl } from '../services/api';
-import './Navbar.css';
+import '../styles/components/Navbar.css';
 
 const Navbar = () => {
   const { user, logout, hasRole, allowedRoles, currentRole, setCurrentRole } = useAuth();

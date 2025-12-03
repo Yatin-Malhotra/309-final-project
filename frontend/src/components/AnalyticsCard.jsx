@@ -1,7 +1,7 @@
 // Reusable analytics card component for displaying metrics
 import { useMemo } from 'react';
 import useAnimatedNumber from '../hooks/useAnimatedNumber';
-import './AnalyticsCard.css';
+import '../styles/components/AnalyticsCard.css';
 
 const AnalyticsCard = ({ title, value, subtitle, description, children, className = '' }) => {
   // Check if value is numeric (number or string containing a number)

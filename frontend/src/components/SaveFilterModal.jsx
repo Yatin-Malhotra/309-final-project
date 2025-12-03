@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import './SavedFilters.css';
+import '../styles/components/SavedFilters.css';
 
 const SaveFilterModal = ({ isOpen, onClose, onSave }) => {
   const [name, setName] = useState('');

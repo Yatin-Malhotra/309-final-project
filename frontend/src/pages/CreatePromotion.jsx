@@ -4,7 +4,7 @@ import { useNavigate, useParams, Link } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { promotionAPI } from '../services/api';
 import ConfirmationModal from '../components/ConfirmationModal';
-import './CreatePromotion.css';
+import '../styles/pages/CreatePromotion.css';
 
 const CreatePromotion = () => {
   const navigate = useNavigate();

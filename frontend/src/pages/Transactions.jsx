@@ -12,7 +12,7 @@ import SavedFiltersModal from '../components/SavedFiltersModal';
 import { savedFilterAPI } from '../services/api';
 import { jsPDF } from 'jspdf';
 import { applyPlugin } from 'jspdf-autotable';
-import './Transactions.css';
+import '../styles/pages/Transactions.css';
 
 // Apply the autoTable plugin to jsPDF
 applyPlugin(jsPDF);

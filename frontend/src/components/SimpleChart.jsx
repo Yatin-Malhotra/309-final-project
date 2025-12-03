@@ -16,7 +16,7 @@ import {
   ResponsiveContainer
 } from 'recharts';
 import { useTheme } from '../contexts/ThemeContext';
-import './SimpleChart.css';
+import '../styles/components/SimpleChart.css';
 
 const SimpleChart = ({ type, data, dataKey, xKey = 'date', height = 300, className = '' }) => {
   const { isDark } = useTheme();

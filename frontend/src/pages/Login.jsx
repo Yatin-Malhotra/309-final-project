@@ -4,7 +4,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { useAuth } from '../contexts/AuthContext';
 import { authAPI, userAPI } from '../services/api';
-import './Login.css';
+import '../styles/pages/Login.css';
 
 const Login = () => {
   const [utorid, setUtorid] = useState('');

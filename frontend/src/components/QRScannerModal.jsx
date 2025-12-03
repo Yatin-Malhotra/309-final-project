@@ -1,7 +1,7 @@
 // QR Scanner Modal Component - Functional QR code scanner
 import { useEffect, useRef, useState } from 'react';
 import { Html5Qrcode } from 'html5-qrcode';
-import './QRScannerModal.css';
+import '../styles/components/QRScannerModal.css';
 
 const QRScannerModal = ({ isOpen, onClose, onScanSuccess }) => {
   const scannerRef = useRef(null);

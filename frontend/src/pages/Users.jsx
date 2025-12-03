@@ -10,7 +10,7 @@ import SaveFilterModal from '../components/SaveFilterModal';
 import SavedFiltersModal from '../components/SavedFiltersModal';
 import { jsPDF } from 'jspdf';
 import { applyPlugin } from 'jspdf-autotable';
-import './Users.css';
+import '../styles/pages/Users.css';
 
 // Apply the autoTable plugin to jsPDF
 applyPlugin(jsPDF);

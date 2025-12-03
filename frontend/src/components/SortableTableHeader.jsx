@@ -1,5 +1,5 @@
 // Sortable table header component
-import './SortableTableHeader.css';
+import '../styles/components/SortableTableHeader.css';
 
 const SortableTableHeader = ({ children, sortKey, currentSortKey, sortDirection, onSort }) => {
   const isActive = currentSortKey === sortKey;
