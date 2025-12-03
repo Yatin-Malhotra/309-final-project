@@ -345,20 +345,24 @@ const UserDetail = () => {
                 <tr>
                   <td><strong>Role</strong></td>
                   <td>
-                    <select
-                      value={user.role}
-                      onChange={(e) => handleRoleChange(user.id, e.target.value)}
-                      className={`user-detail-badge user-detail-role-select ${getRoleBadge(user.role)}`}
-                    >
-                      <option value="regular">Regular</option>
-                      <option value="cashier">Cashier</option>
-                      {hasRole('superuser') &&  (
-                        <>
-                        <option value="manager">Manager</option>
-                        <option value="superuser">Superuser</option>
-                        </>
-                      )}
-                    </select>
+                    {(hasRole('manager') && !hasRole('superuser') && (user.role === 'manager' || user.role === 'superuser')) ? (
+                      <span className={`user-detail-badge ${getRoleBadge(user.role)}`}>{user.role}</span>
+                    ) : (
+                      <select
+                        value={user.role}
+                        onChange={(e) => handleRoleChange(user.id, e.target.value)}
+                        className={`user-detail-badge user-detail-role-select ${getRoleBadge(user.role)}`}
+                      >
+                        <option value="regular">Regular</option>
+                        <option value="cashier">Cashier</option>
+                        {hasRole('superuser') &&  (
+                          <>
+                          <option value="manager">Manager</option>
+                          <option value="superuser">Superuser</option>
+                          </>
+                        )}
+                      </select>
+                    )}
                   </td>
                 </tr>
                 <tr>
