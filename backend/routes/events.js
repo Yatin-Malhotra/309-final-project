@@ -400,29 +400,53 @@ router.patch('/:eventId', async (req, res, next) => {
             throw error;
         }
         
+        // 6) Time/capacity (410 group)
+        const now = new Date();
+        const hasStarted = event.startTime <= now;
+        const hasEnded = event.endTime <= now;
+        
+        // If event has started, only allow endTime to be updated
+        if (hasStarted) {
+            const restrictedFields = ['name', 'description', 'location', 'startTime', 'capacity'];
+            const hasRestrictedFieldUpdate = restrictedFields.some(field => 
+                updates[field] !== undefined && updates[field] !== null
+            );
+            
+            if (hasRestrictedFieldUpdate) {
+                return res.status(400).json({ error: 'Cannot update after event started' });
+            }
+            
+            // Filter updates to only include allowed fields (endTime, points, published, organizerIds)
+            const allowedUpdates = {};
+            if (updates.endTime !== undefined && updates.endTime !== null) {
+                allowedUpdates.endTime = updates.endTime;
+            }
+            if (updates.points !== undefined && updates.points !== null) {
+                allowedUpdates.points = updates.points;
+            }
+            if (updates.published !== undefined && updates.published !== null) {
+                allowedUpdates.published = updates.published;
+            }
+            if (updates.organizerIds !== undefined && updates.organizerIds !== null) {
+                allowedUpdates.organizerIds = updates.organizerIds;
+            }
+            updates = allowedUpdates;
+        }
+        
         // Validate time updates
         if (updates.startTime || updates.endTime) {
             const newStart = updates.startTime ? new Date(updates.startTime) : event.startTime;
             const newEnd = updates.endTime ? new Date(updates.endTime) : event.endTime;
             
             if (newStart >= newEnd) return res.status(400).json({ error: 'Invalid times' });
-            if (newStart < new Date() || newEnd < new Date()) return res.status(400).json({ error: 'Times cannot be in past' });
-        }
-        
-        // 6) Time/capacity (410 group)
-        const now = new Date();
-        // Can't update certain fields after event starts
-        if (event.startTime <= now) {
-            const restrictedFields = ['name', 'description', 'location', 'startTime', 'capacity'];
-            for (const field of restrictedFields) {
-                if (updates[field] !== undefined) {
-                    return res.status(400).json({ error: 'Cannot update after event started' });
-                }
+            // If event has already started, allow startTime to be in the past
+            if (updates.startTime && !hasStarted && newStart < now) {
+                return res.status(400).json({ error: 'Times cannot be in past' });
             }
         }
         
-        // Can't update endTime after event ends
-        if (event.endTime <= now && updates.endTime !== undefined) {
+        // Can't update anything after event ends
+        if (hasEnded && Object.keys(updates).length > 0) {
             return res.status(400).json({ error: 'Cannot update after event ended' });
         }
         
