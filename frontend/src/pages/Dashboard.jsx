@@ -77,10 +77,16 @@ const Dashboard = () => {
               .filter(tx => earnedTypes.includes(tx.type) && new Date(tx.createdAt) >= monthAgo)
               .reduce((sum, tx) => sum + Math.abs(tx.amount), 0);
             const pointsSpentWeek = allTransactions
-              .filter(tx => tx.type === 'redemption' && new Date(tx.createdAt) >= weekAgo)
+              .filter(tx => {
+                const txDate = new Date(tx.createdAt);
+                return (tx.type === 'redemption' || (tx.type === 'transfer' && tx.amount < 0)) && txDate >= weekAgo;
+              })
               .reduce((sum, tx) => sum + Math.abs(tx.amount), 0);
             const pointsSpentMonth = allTransactions
-              .filter(tx => tx.type === 'redemption' && new Date(tx.createdAt) >= monthAgo)
+              .filter(tx => {
+                const txDate = new Date(tx.createdAt);
+                return (tx.type === 'redemption' || (tx.type === 'transfer' && tx.amount < 0)) && txDate >= monthAgo;
+              })
               .reduce((sum, tx) => sum + Math.abs(tx.amount), 0);
 
             // Points trend (last 2 weeks)
@@ -105,7 +111,7 @@ const Dashboard = () => {
               const spent = allTransactions
                 .filter(tx => {
                   const txDate = new Date(tx.createdAt);
-                  return tx.type === 'redemption' && txDate >= date && txDate < nextDate;
+                  return (tx.type === 'redemption' || (tx.type === 'transfer' && tx.amount < 0)) && txDate >= date && txDate < nextDate;
                 })
                 .reduce((sum, tx) => sum + Math.abs(tx.amount), 0);
               
