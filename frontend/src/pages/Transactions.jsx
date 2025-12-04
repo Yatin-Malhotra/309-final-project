@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import { toast } from 'react-toastify';
 import { useAuth } from '../contexts/AuthContext';
 import { transactionAPI } from '../services/api';
-import { Link, useSearchParams } from 'react-router-dom';
+import { Link, useSearchParams, useLocation } from 'react-router-dom';
 import useTableSort from '../hooks/useTableSort';
 import SortableTableHeader from '../components/SortableTableHeader';
 import TransactionDetailPanel from '../components/TransactionDetailPanel';
@@ -21,6 +21,7 @@ const Transactions = () => {
   const { user, hasRole } = useAuth();
   const isCashierOnly = hasRole('cashier') && !hasRole('manager');
   const [searchParams, setSearchParams] = useSearchParams();
+  const location = useLocation();
   const [transactions, setTransactions] = useState([]);
   const [allTransactions, setAllTransactions] = useState([]);
   const [filteredTransactions, setFilteredTransactions] = useState([]);
@@ -82,6 +83,41 @@ const Transactions = () => {
   };
 
   const { sortedData, sortConfig: currentSort, handleSort } = useTableSort(transactions, sortConfig, { manualSort: true });
+
+  // Handle pre-filled filters from navigation state (e.g., from QR scan)
+  useEffect(() => {
+    if (location.state) {
+      const { utorid, type, status } = location.state;
+      
+      if (utorid) {
+        if (hasRole('manager')) {
+          // For managers: set UTORid search, type, and status filters
+          setManagerFilters({
+            idUtoridSearch: utorid,
+            status: status === 'pending' ? 'false' : ''
+          });
+          if (type) {
+            setFilters(prev => {
+              const newFilters = { ...prev, type, page: 1 };
+              setSearchParams(newFilters);
+              return newFilters;
+            });
+          }
+        } else if (isCashierOnly) {
+          // For cashiers: set name/UTORid search and status filter
+          // Cashiers already only see redemption transactions
+          setClientFilters({
+            idNameSearch: utorid,
+            status: status === 'pending' ? 'false' : ''
+          });
+        }
+        
+        // Clear location state to prevent re-applying on re-renders
+        window.history.replaceState({}, document.title);
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [location.state]);
 
   // Check if client-side filtering is active
   const hasClientSideFilters = () => {

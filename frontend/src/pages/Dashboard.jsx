@@ -8,6 +8,7 @@ import AnimatedNumber from '../components/AnimatedNumber';
 import SimpleChart from '../components/SimpleChart';
 import QRCodeModal from '../components/QRCodeModal';
 import QRScannerModal from '../components/QRScannerModal';
+import QRScanOptionsModal from '../components/QRScanOptionsModal';
 import TransactionModal from '../components/TransactionModal';
 import SortableTable from '../components/SortableTable';
 import '../styles/pages/Dashboard.css';
@@ -31,6 +32,8 @@ const Dashboard = () => {
   const [loading, setLoading] = useState(true);
   const [showQRCode, setShowQRCode] = useState(false);
   const [showQRScanner, setShowQRScanner] = useState(false);
+  const [showQRScanOptions, setShowQRScanOptions] = useState(false);
+  const [scannedUtorid, setScannedUtorid] = useState('');
   const [showTransactionModal, setShowTransactionModal] = useState(false);
   const [transactionModalType, setTransactionModalType] = useState('redemption');
   const [collapsedSections, setCollapsedSections] = useState({
@@ -338,9 +341,26 @@ const Dashboard = () => {
     // Close the scanner modal
     setShowQRScanner(false);
     
+    // Store the scanned UTORid and show options modal
+    setScannedUtorid(scannedUtorid);
+    setShowQRScanOptions(true);
+  };
+
+  const handleCreateTransaction = () => {
     // Navigate to create transaction page with UTORid in state
     navigate('/transactions/create', { 
       state: { utorid: scannedUtorid } 
+    });
+  };
+
+  const handleCheckRedemption = () => {
+    // Navigate to transactions page with filters pre-filled
+    navigate('/transactions', { 
+      state: { 
+        utorid: scannedUtorid,
+        type: 'redemption',
+        status: 'pending'
+      } 
     });
   };
 
@@ -681,6 +701,13 @@ const Dashboard = () => {
           onClose={() => setShowQRScanner(false)}
           onScanSuccess={handleQRScanSuccess}
         />
+        <QRScanOptionsModal
+          isOpen={showQRScanOptions}
+          onClose={() => setShowQRScanOptions(false)}
+          utorid={scannedUtorid}
+          onCreateTransaction={handleCreateTransaction}
+          onCheckRedemption={handleCheckRedemption}
+        />
 
         {/* Transaction Processing Metrics */}
         {analytics?.transactions && (
@@ -925,6 +952,13 @@ const Dashboard = () => {
           isOpen={showQRScanner} 
           onClose={() => setShowQRScanner(false)}
           onScanSuccess={handleQRScanSuccess}
+        />
+        <QRScanOptionsModal
+          isOpen={showQRScanOptions}
+          onClose={() => setShowQRScanOptions(false)}
+          utorid={scannedUtorid}
+          onCreateTransaction={handleCreateTransaction}
+          onCheckRedemption={handleCheckRedemption}
         />
 
         {/* Financial Insights */}
