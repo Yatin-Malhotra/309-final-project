@@ -88,7 +88,16 @@ const Users = () => {
     verified: { sortFn: (a, b) => (a.verified ? 1 : 0) - (b.verified ? 1 : 0) },
   };
 
-  const { sortedData, sortConfig: currentSort, handleSort } = useTableSort(users, sortConfig);
+  const { sortedData, sortConfig: currentSort, handleSort } = useTableSort(users, sortConfig, { manualSort: true });
+
+  useEffect(() => {
+    if (currentSort.key) {
+      setFilters(prev => {
+        if (prev.sortBy === currentSort.key && prev.order === currentSort.direction) return prev;
+        return { ...prev, sortBy: currentSort.key, order: currentSort.direction };
+      });
+    }
+  }, [currentSort]);
 
   const handleSaveFilter = async (name) => {
     try {

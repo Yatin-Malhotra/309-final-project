@@ -46,6 +46,43 @@ const Transactions = () => {
   const [isSaveFilterOpen, setIsSaveFilterOpen] = useState(false);
   const [isLoadFilterOpen, setIsLoadFilterOpen] = useState(false);
 
+  // Table sorting configuration
+  const sortConfig = {
+    id: { sortFn: (a, b) => a.id - b.id },
+    user: { 
+      accessor: (tx) => (tx.userName || tx.utorid || tx.user?.utorid || '').toLowerCase() 
+    },
+    type: { 
+      accessor: (tx) => tx.type 
+    },
+    amount: { 
+      sortFn: (a, b) => {
+        const aVal = isCashierOnly ? (a.redeemed || Math.abs(a.amount)) : a.amount;
+        const bVal = isCashierOnly ? (b.redeemed || Math.abs(b.amount)) : b.amount;
+        return aVal - bVal;
+      }
+    },
+    date: { 
+      accessor: (tx) => tx.createdAt ? new Date(tx.createdAt).getTime() : 0 
+    },
+    status: { 
+      sortFn: (a, b) => {
+        // Processed = 1, Pending = 0
+        return (a.processed ? 1 : 0) - (b.processed ? 1 : 0);
+      }
+    },
+    suspicious: {
+      sortFn: (a, b) => {
+        // Suspicious = 1, Not suspicious = 0, Undefined = -1
+        const aVal = a.suspicious === true ? 1 : a.suspicious === false ? 0 : -1;
+        const bVal = b.suspicious === true ? 1 : b.suspicious === false ? 0 : -1;
+        return aVal - bVal;
+      }
+    },
+  };
+
+  const { sortedData, sortConfig: currentSort, handleSort } = useTableSort(transactions, sortConfig, { manualSort: true });
+
   // Check if client-side filtering is active
   const hasClientSideFilters = () => {
     if (isCashierOnly) {
@@ -118,6 +155,47 @@ const Transactions = () => {
       }
     }
 
+    // Apply sorting if client-side filters are active
+    if (hasClientSideFilters() && currentSort.key) {
+      filtered.sort((a, b) => {
+        const sortKey = currentSort.key;
+        const direction = currentSort.direction;
+        
+        // Custom sort function from config
+        if (sortConfig[sortKey]?.sortFn) {
+          const result = sortConfig[sortKey].sortFn(a, b);
+          return direction === 'asc' ? result : -result;
+        }
+        
+        let aVal = a[sortKey];
+        let bVal = b[sortKey];
+        
+        // Accessor
+        if (sortConfig[sortKey]?.accessor) {
+          aVal = sortConfig[sortKey].accessor(a);
+          bVal = sortConfig[sortKey].accessor(b);
+        }
+        
+        if (aVal == null && bVal == null) return 0;
+        if (aVal == null) return 1;
+        if (bVal == null) return -1;
+
+        // Strings
+        if (typeof aVal === 'string' && typeof bVal === 'string') {
+          const aStr = aVal.toLowerCase();
+          const bStr = bVal.toLowerCase();
+          if (aStr < bStr) return direction === 'asc' ? -1 : 1;
+          if (aStr > bStr) return direction === 'asc' ? 1 : -1;
+          return 0;
+        }
+        
+        // Numbers/Others
+        if (aVal < bVal) return direction === 'asc' ? -1 : 1;
+        if (aVal > bVal) return direction === 'asc' ? 1 : -1;
+        return 0;
+      });
+    }
+
     setFilteredTransactions(filtered);
 
     // Apply client-side pagination if filters are active
@@ -129,7 +207,7 @@ const Transactions = () => {
       // Use server-side paginated results
       setTransactions(filtered);
     }
-  }, [clientFilters, managerFilters, allTransactions, isCashierOnly, hasRole, filters.page, filters.limit]);
+  }, [clientFilters, managerFilters, allTransactions, isCashierOnly, hasRole, filters.page, filters.limit, currentSort]);
 
   const loadTransactions = async () => {
     setLoading(true);
@@ -195,42 +273,18 @@ const Transactions = () => {
     return colors[type] || 'transactions-badge-secondary';
   };
 
-  // Table sorting configuration
-  const sortConfig = {
-    id: { sortFn: (a, b) => a.id - b.id },
-    user: { 
-      accessor: (tx) => (tx.userName || tx.utorid || tx.user?.utorid || '').toLowerCase() 
-    },
-    type: { 
-      accessor: (tx) => tx.type 
-    },
-    amount: { 
-      sortFn: (a, b) => {
-        const aVal = isCashierOnly ? (a.redeemed || Math.abs(a.amount)) : a.amount;
-        const bVal = isCashierOnly ? (b.redeemed || Math.abs(b.amount)) : b.amount;
-        return aVal - bVal;
-      }
-    },
-    date: { 
-      accessor: (tx) => tx.createdAt ? new Date(tx.createdAt).getTime() : 0 
-    },
-    status: { 
-      sortFn: (a, b) => {
-        // Processed = 1, Pending = 0
-        return (a.processed ? 1 : 0) - (b.processed ? 1 : 0);
-      }
-    },
-    suspicious: {
-      sortFn: (a, b) => {
-        // Suspicious = 1, Not suspicious = 0, Undefined = -1
-        const aVal = a.suspicious === true ? 1 : a.suspicious === false ? 0 : -1;
-        const bVal = b.suspicious === true ? 1 : b.suspicious === false ? 0 : -1;
-        return aVal - bVal;
-      }
-    },
-  };
+  // Server-side sorting sync
+  useEffect(() => {
+    // If client-side filters are active, we sort locally, so don't update server filters
+    if (hasClientSideFilters()) return;
 
-  const { sortedData, sortConfig: currentSort, handleSort } = useTableSort(transactions, sortConfig);
+    if (currentSort.key) {
+      setFilters(prev => {
+        if (prev.sortBy === currentSort.key && prev.order === currentSort.direction) return prev;
+        return { ...prev, sortBy: currentSort.key, order: currentSort.direction };
+      });
+    }
+  }, [currentSort, clientFilters.idNameSearch, clientFilters.status, managerFilters.idUtoridSearch, managerFilters.status]);
 
   const handleSaveFilter = async (name) => {
     try {

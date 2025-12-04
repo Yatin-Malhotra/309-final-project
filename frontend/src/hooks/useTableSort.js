@@ -1,7 +1,7 @@
 // Custom hook for table sorting
 import { useState, useMemo } from 'react';
 
-const useTableSort = (data, config = {}) => {
+const useTableSort = (data, config = {}, options = { manualSort: false }) => {
   const [sortConfig, setSortConfig] = useState({
     key: null,
     direction: 'asc', // 'asc' or 'desc'
@@ -25,6 +25,10 @@ const useTableSort = (data, config = {}) => {
   };
 
   const sortedData = useMemo(() => {
+    if (options.manualSort) {
+      return data;
+    }
+
     if (!sortConfig.key || !data || data.length === 0) {
       return data;
     }
@@ -74,7 +78,7 @@ const useTableSort = (data, config = {}) => {
     });
 
     return sorted;
-  }, [data, sortConfig, config]);
+  }, [data, sortConfig, config, options.manualSort]);
 
   return {
     sortedData,
