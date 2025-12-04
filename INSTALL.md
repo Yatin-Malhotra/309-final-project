@@ -136,27 +136,61 @@ PORT=<auto-set-by-railway>
 - **Service not starting**: Check Railway logs in the dashboard
 - **Environment variables not working**: Ensure variables are set in Railway service settings, not just in code
 
+
 ## Local Development
 
-For local development:
+### 1. Clone the Repository
 
-1. **Backend**:
-   ```bash
-   cd backend
-   npm install
-   npx prisma generate
-   npx prisma db push
-   node prisma/seed.js
-   # Set variables in .env file
-   node index.js 5000
-   ```
+```bash
+git clone https://github.com/Yatin-Malhotra/309-final-project.git
+cd 309-final-project
+```
 
-2. **Frontend**:
-   ```bash
-   cd frontend
-   npm install
-   npm run dev
-   ```
+### 2. Start Backend
+
+#### Commands
+
+```bash
+cd backend
+npm install
+npx prisma generate
+npx prisma db push
+node prisma/seed.js
+node index.js 5000
+```
+
+#### Backend Environment Variables
+
+1. Create a .env file in the backend folder and add the following variables
+
+| Variable | Value |
+|----------|-------|
+| `JWT_SECRET` | `146ff9d90105efa2c2e50cb00d929d10` (or any other 32-bit random number) |
+| `DATABASE_URL` | `file:./dev.db` |
+
+By default, instead of mailing in development we simply console.log the mails that would have been mailed but if you need mail functionality in development mode, add the following variables with their values from the emailJS service.
+
+- `EMAILJS_SERVICE_ID`: <EMAILJS_SERVICE_ID>
+- `EMAILJS_PRIVATE_KEY`: <EMAILJS_PRIVATE_KEY>
+- `EMAILJS_PUBLIC_KEY`: <EMAILJS_PUBLIC_KEY>
+- `EMAILJS_TEMPLATE_ID`: <EMAILJS_TEMPLATE_ID>
+- `EMAILJS_WELCOME_TEMPLATE_ID`: <EMAILJS_WELCOME_TEMPLATE_ID>
+
+### 3. Start Frontend
+
+#### Commands
+
+Open a new terminal:
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+#### Frontend Environment Variables
+
+None needed, defaults are configured
 
 ## Additional Notes
 

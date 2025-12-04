@@ -148,7 +148,7 @@ The next five variables come directly from the emailJS service which we used for
 
 ---
 
-## Demo Accounts
+## Demo Accounts (Not all accounts shown for readability purposes)
 
 The seeded database includes the following demo accounts (all use password: `password`):
 
@@ -163,7 +163,7 @@ The seeded database includes the following demo accounts (all use password: `pas
 | Regular | user004 | diana.prince@mail.utoronto.ca | 50 |
 | Regular | user005 | eve.wilson@mail.utoronto.ca | 600 |
 
-### Sample Events
+### Sample Events (Not all events shown for readability purposes)
 
 | Event Name | Location | Capacity | Published |
 |------------|----------|----------|-----------|
@@ -173,7 +173,7 @@ The seeded database includes the following demo accounts (all use password: `pas
 | CSSU Career Fair | Myhal Centre, Room 150 | 150 | Yes |
 | Database Design Seminar | Sanford Fleming Building, Room 2101 | 35 | No |
 
-### Sample Promotions
+### Sample Promotions (Not all promotions shown for readability purposes)
 
 | Name | Type | Min Spending | Bonus Points/Rate |
 |------|------|--------------|-------------------|
