@@ -10,10 +10,11 @@ import ConfirmationModal from '../components/ConfirmationModal';
 import '../styles/pages/Events.css';
 
 const Events = () => {
-  const { user, hasRole } = useAuth();
+  const { user, hasRole, currentRole } = useAuth();
   const [searchParams, setSearchParams] = useSearchParams();
   const [events, setEvents] = useState([]);
   const [allEvents, setAllEvents] = useState([]);
+  const [filteredEvents, setFilteredEvents] = useState([]);
   const [count, setCount] = useState(0);
   const [loading, setLoading] = useState(true);
   const [isSaveFilterOpen, setIsSaveFilterOpen] = useState(false);
@@ -38,18 +39,49 @@ const Events = () => {
   const [showMyEvents, setShowMyEvents] = useState(false);
   const [deletingEventId, setDeletingEventId] = useState(null);
 
+  // Check if client-side filtering is active
+  const hasClientSideFilters = () => {
+    return showMyEvents;
+  };
+
   useEffect(() => {
     loadEvents();
-  }, [filters, showMyEvents]);
+  }, [filters, user]);
 
-  // Apply client-side filtering and pagination when showMyEvents filter is active
+  // Reset to page 1 and reload when client-side filters change
   useEffect(() => {
-    if (showMyEvents && allEvents.length > 0) {
-      const filtered = allEvents.filter(e => e.isOrganizer === true);
-      setCount(filtered.length);
+    const hasFilters = hasClientSideFilters();
+    
+    // Reset to page 1 if filters are active and we're not already on page 1
+    if (hasFilters && filters.page !== 1) {
+      const newFilters = { ...filters, page: 1 };
+      setFilters(newFilters);
+      setSearchParams(newFilters);
+      // Don't reload here - the filters change will trigger the first useEffect
+    } else {
+      // Reload immediately if page is already 1 or filters were cleared
+      loadEvents();
+    }
+  }, [showMyEvents]);
+
+  // Client-side filtering
+  useEffect(() => {
+    let filtered = [...allEvents];
+
+    if (showMyEvents) {
+      filtered = filtered.filter(e => e.isOrganizer === true);
+    }
+
+    setFilteredEvents(filtered);
+
+    // Apply client-side pagination if filters are active
+    if (hasClientSideFilters()) {
       const startIndex = (filters.page - 1) * filters.limit;
       const endIndex = startIndex + filters.limit;
       setEvents(filtered.slice(startIndex, endIndex));
+    } else {
+      // Use server-side paginated results
+      setEvents(filtered);
     }
   }, [showMyEvents, allEvents, filters.page, filters.limit]);
 
@@ -58,28 +90,27 @@ const Events = () => {
     setError('');
     try {
       const params = { ...filters };
-      Object.keys(params).forEach((key) => {
-        if (!params[key]) delete params[key];
-      });
-
-      // If filtering by "My Events", we need to fetch more results for client-side filtering
-      const fetchParams = { ...params };
-      if (showMyEvents) {
-        // Remove page parameter and increase limit to get more results for client-side filtering
-        delete fetchParams.page;
-        fetchParams.limit = 100; // Maximum allowed by backend
-      }
-
-      const response = await eventAPI.getEvents(fetchParams);
-      const fetchedEvents = response.data.results || [];
-      setAllEvents(fetchedEvents);
       
-      // Store all fetched events - filtering will be applied in useEffect if needed
-      if (!showMyEvents) {
-        setEvents(fetchedEvents);
-        setCount(response.data.count || 0);
+      // If client-side filters are active, fetch maximum results for client-side filtering
+      if (hasClientSideFilters()) {
+        // Remove page parameter and set limit to maximum (100) to get more results for client-side filtering
+        delete params.page;
+        params.limit = 100; // Maximum allowed by backend
+      } else {
+        // Keep server-side pagination when no client-side filters
+        Object.keys(params).forEach((key) => {
+          if (!params[key]) delete params[key];
+        });
       }
-      // If showMyEvents is active, the useEffect will handle filtering and pagination
+
+      const response = await eventAPI.getEvents(params);
+      let fetchedEvents = response.data.results || [];
+      
+      // Backend already filters by published=true for regular/cashier users
+      // No need for client-side filtering here
+      
+      setAllEvents(fetchedEvents);
+      setCount(response.data.count || 0);
     } catch (err) {
       setError(err.response?.data?.error || 'Failed to load events.');
     } finally {
@@ -199,10 +230,6 @@ const Events = () => {
               type="button"
               onClick={() => {
                 setShowMyEvents(!showMyEvents);
-                // Reset to page 1 when toggling filter
-                const newFilters = { ...filters, page: 1 };
-                setFilters(newFilters);
-                setSearchParams(newFilters);
               }}
               className={showMyEvents ? "btn btn-secondary" : "btn btn-outline-secondary"}
               title={showMyEvents ? "Clear filter and show all events" : "Show only events I organize"}
@@ -228,7 +255,7 @@ const Events = () => {
             placeholder="Search by name..."
           />
         </div>
-        {hasRole('manager') && (
+        {(hasRole('manager') && (currentRole === 'manager' || currentRole === 'superuser')) && (
           <div className="form-group">
             <label>Published</label>
             <select
@@ -241,7 +268,7 @@ const Events = () => {
             </select>
           </div>
         )}
-        {!hasRole('manager') && (
+        {(currentRole === 'regular' || currentRole === 'cashier') && (
           <div className="form-group">
             <label>Registered</label>
             <select
@@ -254,7 +281,7 @@ const Events = () => {
             </select>
           </div>
         )}
-        {hasRole('manager') && (
+        {(hasRole('manager') && (currentRole === 'manager' || currentRole === 'superuser')) && (
           <div className="form-group">
             <label>Event Full Status</label>
             <select
@@ -306,7 +333,7 @@ const Events = () => {
                     </p>
                     <p className="events-card-location">Location: {event.location}</p>
                     <div className="events-card-badges">
-                      {hasRole('manager') && (
+                      {(hasRole('manager') && (currentRole === 'manager' || currentRole === 'superuser')) && (
                         <>
                           <span className="events-badge events-badge-secondary">
                             {event.numGuests} / {event.capacity || '∞'} guests
@@ -331,7 +358,7 @@ const Events = () => {
                           )}
                         </>
                       )}
-                      {!hasRole('manager') && (
+                      {(currentRole === 'regular' || currentRole === 'cashier') && (
                         <>
                           <span className="events-badge events-badge-secondary">
                             {event.numGuests} / {event.capacity || '∞'} guests
@@ -363,7 +390,7 @@ const Events = () => {
                 </div>
               );
 
-              if (hasRole('manager') || hasRole('superuser')) {
+              if ((hasRole('manager') || hasRole('superuser')) && (currentRole === 'manager' || currentRole === 'superuser')) {
                 return (
                   <Link
                     key={event.id}
@@ -414,45 +441,31 @@ const Events = () => {
           </div>
 
           <div className="events-pagination">
-            <button
-              onClick={() => {
-                if (showMyEvents) {
-                  // Client-side pagination
-                  const newPage = filters.page - 1;
-                  const startIndex = (newPage - 1) * filters.limit;
-                  const endIndex = startIndex + filters.limit;
-                  const filtered = allEvents.filter(e => e.isOrganizer === true);
-                  setEvents(filtered.slice(startIndex, endIndex));
-                  handleFilterChange('page', newPage);
-                } else {
-                  handleFilterChange('page', filters.page - 1);
-                }
-              }}
-              disabled={filters.page <= 1}
-            >
-              Previous
-            </button>
-            <span>
-              Page {filters.page} of {Math.ceil(count / filters.limit)}
-            </span>
-            <button
-              onClick={() => {
-                if (showMyEvents) {
-                  // Client-side pagination
-                  const newPage = filters.page + 1;
-                  const startIndex = (newPage - 1) * filters.limit;
-                  const endIndex = startIndex + filters.limit;
-                  const filtered = allEvents.filter(e => e.isOrganizer === true);
-                  setEvents(filtered.slice(startIndex, endIndex));
-                  handleFilterChange('page', newPage);
-                } else {
-                  handleFilterChange('page', filters.page + 1);
-                }
-              }}
-              disabled={filters.page >= Math.ceil(count / filters.limit)}
-            >
-              Next
-            </button>
+            {(() => {
+              const isClientFiltering = hasClientSideFilters();
+              const totalCount = isClientFiltering ? filteredEvents.length : count;
+              const totalPages = Math.ceil(totalCount / filters.limit);
+              
+              return (
+                <>
+                  <button
+                    onClick={() => handleFilterChange('page', filters.page - 1)}
+                    disabled={filters.page <= 1}
+                  >
+                    Previous
+                  </button>
+                  <span>
+                    Page {filters.page} of {totalPages || 1}
+                  </span>
+                  <button
+                    onClick={() => handleFilterChange('page', filters.page + 1)}
+                    disabled={filters.page >= totalPages}
+                  >
+                    Next
+                  </button>
+                </>
+              );
+            })()}
           </div>
         </>
       )}

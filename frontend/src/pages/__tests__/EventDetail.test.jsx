@@ -83,7 +83,6 @@ describe('EventDetail Page', () => {
   it('should handle registration', async () => {
     eventAPI.getEvent.mockResolvedValue({ data: mockEvent });
     eventAPI.registerForEvent.mockResolvedValue({});
-    window.confirm = vi.fn(() => true);
 
     renderEventDetail();
 
@@ -91,8 +90,16 @@ describe('EventDetail Page', () => {
       expect(screen.getByText('Register')).toBeInTheDocument();
     });
 
-    // Use getByText instead of getByRole if role lookup is flaky due to button rendering
+    // Click Register button - this opens confirmation modal
     fireEvent.click(screen.getByText('Register'));
+
+    // Wait for confirmation modal and click Confirm
+    await waitFor(() => {
+      expect(screen.getByText('Register for Event')).toBeInTheDocument();
+    });
+
+    const confirmButton = screen.getByText('Confirm');
+    fireEvent.click(confirmButton);
 
     await waitFor(() => {
       expect(eventAPI.registerForEvent).toHaveBeenCalledWith('1');
@@ -132,7 +139,6 @@ describe('EventDetail Page', () => {
     eventAPI.getEvent.mockResolvedValue({ data: mockEvent });
     userAPI.getUsers.mockResolvedValue({ data: { results: [{ id: 3, name: 'New Org', utorid: 'neworg' }] } });
     eventAPI.addOrganizer.mockResolvedValue({});
-    window.confirm = vi.fn(() => true);
 
     renderEventDetail();
 
@@ -146,22 +152,41 @@ describe('EventDetail Page', () => {
 
     await waitFor(() => {
         const input = screen.getByPlaceholderText(/search users/i);
-        fireEvent.focus(input);
-        fireEvent.change(input, { target: { value: 'New' } });
+        expect(input).toBeInTheDocument();
     });
+
+    const input = screen.getByPlaceholderText(/search users/i);
+    fireEvent.focus(input);
+    fireEvent.change(input, { target: { value: 'New' } });
 
     await waitFor(() => {
         expect(screen.getByText(/New Org/)).toBeInTheDocument();
-    });
+    }, { timeout: 3000 });
 
     fireEvent.click(screen.getByText(/New Org/));
     
-    // Get all buttons again to find the one in the form
+    // Get the form submit button (the one that's not disabled and is in the form)
+    await waitFor(() => {
+      const buttons = screen.getAllByText('Add Organizer');
+      // The last button should be the form submit button
+      const formButton = buttons[buttons.length - 1];
+      expect(formButton).toBeInTheDocument();
+      expect(formButton).not.toBeDisabled();
+    });
+
     const buttons = screen.getAllByText('Add Organizer');
     fireEvent.click(buttons[buttons.length - 1]);
 
+    // Wait for confirmation modal - find it by the message text which is unique
+    await waitFor(() => {
+      expect(screen.getByText(/Add.*New Org.*neworg.*as an organizer/i)).toBeInTheDocument();
+    });
+
+    const confirmButton = screen.getByText('Confirm');
+    fireEvent.click(confirmButton);
+
     await waitFor(() => {
         expect(eventAPI.addOrganizer).toHaveBeenCalledWith('1', 'neworg');
-    });
+    }, { timeout: 3000 });
   });
 });

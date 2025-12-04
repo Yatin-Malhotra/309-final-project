@@ -10,9 +10,10 @@ import ConfirmationModal from '../components/ConfirmationModal';
 import '../styles/pages/Promotions.css';
 
 const Promotions = () => {
-  const { hasRole } = useAuth();
+  const { hasRole, currentRole, user } = useAuth();
   const [searchParams, setSearchParams] = useSearchParams();
   const [promotions, setPromotions] = useState([]);
+  const [count, setCount] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [deletingPromotionId, setDeletingPromotionId] = useState(null);
@@ -29,6 +30,8 @@ const Promotions = () => {
     // For managers to filter active/expired
     started: searchParams.get('started') || '', 
     ended: searchParams.get('ended') || '',
+    page: parseInt(searchParams.get('page')) || 1,
+    limit: parseInt(searchParams.get('limit')) || 10,
   });
 
   useEffect(() => {
@@ -44,8 +47,15 @@ const Promotions = () => {
         if (!params[key]) delete params[key];
       });
       
+      if ((currentRole === 'regular' || currentRole === 'cashier') && user?.utorid) {
+        params.utorid = user.utorid;
+      }
+      
       const response = await promotionAPI.getPromotions(params);
-      setPromotions(response.data.results || []);
+      let fetchedPromotions = response.data.results || [];
+      
+      setPromotions(fetchedPromotions);
+      setCount(response.data.count || 0);
     } catch (err) {
       setError(err.response?.data?.error || 'Failed to load promotions.');
     } finally {
@@ -55,6 +65,10 @@ const Promotions = () => {
 
   const handleFilterChange = (key, value) => {
     const newFilters = { ...filters, [key]: value };
+    // Only reset to page 1 if changing a non-page filter
+    if (key !== 'page') {
+      newFilters.page = 1;
+    }
     // If mutually exclusive filters are set (started/ended), handle them?
     // Backend says: "if (started && ended) return res.status(400)"
     // So we should prevent setting both.
@@ -81,8 +95,9 @@ const Promotions = () => {
   };
 
   const handleLoadFilter = (savedFilters) => {
-    setFilters(savedFilters);
-    setSearchParams(savedFilters);
+    const newFilters = { ...savedFilters, page: 1 };
+    setFilters(newFilters);
+    setSearchParams(newFilters);
     toast.success('Filters loaded');
   };
 
@@ -179,7 +194,7 @@ const Promotions = () => {
             <option value="onetime">One-time</option>
           </select>
         </div>
-        {(hasRole('manager') || hasRole('superuser')) && (
+        {((hasRole('manager') || hasRole('superuser')) && (currentRole === 'manager' || currentRole === 'superuser')) && (
           <>
             <div className="form-group">
               <label>Status</label>
@@ -195,7 +210,7 @@ const Promotions = () => {
                      handleFilterChange('ended', 'true');
                    } else {
                      // Clear both
-                     const newFilters = { ...filters, started: '', ended: '' };
+                     const newFilters = { ...filters, started: '', ended: '', page: 1 };
                      setFilters(newFilters);
                      setSearchParams(newFilters);
                    }
@@ -209,6 +224,18 @@ const Promotions = () => {
             </div>
           </>
         )}
+        <div className="form-group">
+          <label>Limit</label>
+          <select
+            value={filters.limit}
+            onChange={(e) => handleFilterChange('limit', parseInt(e.target.value))}
+          >
+            <option value="10">10</option>
+            <option value="25">25</option>
+            <option value="50">50</option>
+            <option value="100">100</option>
+          </select>
+        </div>
         <div className="promotions-filters-actions">
           <button onClick={() => setIsSaveFilterOpen(true)} className="btn btn-outline-secondary" title="Save current filters">
             Save
@@ -225,8 +252,9 @@ const Promotions = () => {
       ) : promotions.length === 0 ? (
         <div className="promotions-empty-state">No promotions found</div>
       ) : (
-        <div className="promotions-grid">
-          {promotions.map((promo) => {
+        <>
+          <div className="promotions-grid">
+            {promotions.map((promo) => {
             const CardContent = () => (
               <div className="promotions-card-content">
                 <div className="promotions-card-main">
@@ -276,7 +304,7 @@ const Promotions = () => {
               </div>
             );
 
-            if (hasRole('manager') || hasRole('superuser')) {
+            if ((hasRole('manager') || hasRole('superuser')) && (currentRole === 'manager' || currentRole === 'superuser')) {
               return (
                 <div key={promo.id} className="promotions-card" style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
                   <Link
@@ -318,7 +346,26 @@ const Promotions = () => {
               </div>
             );
           })}
-        </div>
+          </div>
+
+          <div className="promotions-pagination">
+            <button
+              onClick={() => handleFilterChange('page', filters.page - 1)}
+              disabled={filters.page <= 1}
+            >
+              Previous
+            </button>
+            <span>
+              Page {filters.page} of {Math.ceil(count / filters.limit) || 1}
+            </span>
+            <button
+              onClick={() => handleFilterChange('page', filters.page + 1)}
+              disabled={filters.page >= Math.ceil(count / filters.limit)}
+            >
+              Next
+            </button>
+          </div>
+        </>
       )}
       
       <ConfirmationModal

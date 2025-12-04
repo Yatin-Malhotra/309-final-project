@@ -212,10 +212,12 @@ router.get('/', requireRole('manager'), validateQuery(z.object({
     limit: z.preprocess(
         (val) => (val === undefined || val === null || val === '') ? '10' : val,
         z.string().regex(/^\d+$/)
-    )
+    ),
+    sortBy: z.enum(['id', 'amount', 'type', 'createdAt', 'processed', 'suspicious', 'user']).optional(),
+    order: z.enum(['asc', 'desc']).optional()
 })), async (req, res, next) => {
     try {
-        const { name, createdBy, suspicious, promotionId, type, relatedId, amount, operator, page = '1', limit = '10' } = req.validatedQuery;
+        const { name, createdBy, suspicious, promotionId, type, relatedId, amount, operator, page = '1', limit = '10', sortBy, order } = req.validatedQuery;
         const pageNum = parseInt(page), limitNum = parseInt(limit);
         
         // FIX: Add validation
@@ -249,6 +251,17 @@ router.get('/', requireRole('manager'), validateQuery(z.object({
         if (amount && operator) {
             where.amount = operator === 'gte' ? { gte: parseInt(amount) } : { lte: parseInt(amount) };
         }
+
+        const orderBy = {};
+        if (sortBy) {
+            if (sortBy === 'user') {
+                orderBy.user = { utorid: order || 'asc' };
+            } else {
+                orderBy[sortBy] = order || 'asc';
+            }
+        } else {
+            orderBy.createdAt = 'desc';
+        }
         
         const count = await prisma.transaction.count({ where });
         const transactions = await prisma.transaction.findMany({
@@ -258,7 +271,7 @@ router.get('/', requireRole('manager'), validateQuery(z.object({
                 creator: { select: { utorid: true } },
                 transactionPromotions: { select: { promotionId: true } }
             },
-            orderBy: { createdAt: 'desc' }
+            orderBy
         });
         
         const results = transactions.map(tx => {
@@ -294,10 +307,12 @@ router.get('/redemptions', requireRole('cashier'), validateQuery(z.object({
         (val) => (val === undefined || val === null || val === '') ? '10' : val,
         z.string().regex(/^\d+$/)
     ),
-    processed: z.string().optional()
+    processed: z.string().optional(),
+    sortBy: z.enum(['id', 'amount', 'type', 'createdAt', 'processed', 'user']).optional(),
+    order: z.enum(['asc', 'desc']).optional()
 })), async (req, res, next) => {
     try {
-        const { page = '1', limit = '10', processed } = req.validatedQuery;
+        const { page = '1', limit = '10', processed, sortBy, order } = req.validatedQuery;
         const pageNum = parseInt(page), limitNum = parseInt(limit);
         
         if (pageNum < 1) {
@@ -313,6 +328,17 @@ router.get('/redemptions', requireRole('cashier'), validateQuery(z.object({
         if (processed !== undefined) {
             where.processed = processed === 'true';
         }
+
+        const orderBy = {};
+        if (sortBy) {
+            if (sortBy === 'user') {
+                 orderBy.user = { utorid: order || 'asc' };
+            } else {
+                orderBy[sortBy] = order || 'asc';
+            }
+        } else {
+            orderBy.createdAt = 'desc';
+        }
         
         const count = await prisma.transaction.count({ where });
         const transactions = await prisma.transaction.findMany({
@@ -322,7 +348,7 @@ router.get('/redemptions', requireRole('cashier'), validateQuery(z.object({
                 creator: { select: { utorid: true } },
                 processor: { select: { utorid: true } }
             },
-            orderBy: { createdAt: 'desc' }
+            orderBy
         });
         
         const results = transactions.map(tx => {
