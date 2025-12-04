@@ -372,6 +372,137 @@
   font-style: italic;
 }
 
+/* Guest item styles */
+.event-detail-guest-item {
+  overflow: visible;
+}
+
+.event-detail-guest-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.event-detail-guest-name {
+  flex: 1;
+  min-width: 0;
+  word-break: break-word;
+}
+
+.event-detail-guest-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+  flex-shrink: 0;
+}
+
+.event-detail-points-form {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.event-detail-points-input {
+  width: 80px;
+  padding: 6px 8px;
+  border: 1.5px solid rgba(147, 177, 181, 0.3);
+  border-radius: 6px;
+  font-size: 14px;
+  color: var(--text-primary);
+  background-color: var(--bg-secondary);
+  transition: all 0.2s ease;
+  font-family: inherit;
+  font-weight: 500;
+}
+
+.event-detail-points-input:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(79, 124, 130, 0.1);
+}
+
+.event-detail-points-input:hover:not(:focus) {
+  border-color: var(--primary);
+}
+
+.event-detail-points-btn,
+.event-detail-award-btn {
+  padding: 6px 12px;
+  font-size: 13px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.event-detail-remove-btn {
+  padding: 6px 12px;
+  font-size: 13px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+/* Award to All section */
+.event-detail-award-all-section {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(147, 177, 181, 0.2);
+}
+
+.event-detail-award-all-title {
+  margin-bottom: 12px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.event-detail-award-all-form {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.event-detail-award-all-input {
+  flex: 1;
+  min-width: 150px;
+  padding: 8px 12px;
+  border: 1.5px solid rgba(147, 177, 181, 0.3);
+  border-radius: 6px;
+  font-size: 14px;
+  color: var(--text-primary);
+  background-color: var(--bg-secondary);
+  transition: all 0.2s ease;
+  font-family: inherit;
+  font-weight: 500;
+}
+
+.event-detail-award-all-input:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(79, 124, 130, 0.1);
+}
+
+.event-detail-award-all-input:hover:not(:focus) {
+  border-color: var(--primary);
+}
+
+.event-detail-award-all-btn {
+  padding: 8px 16px;
+  font-size: 14px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.event-detail-award-all-remaining {
+  margin-top: 8px;
+  font-size: 13px;
+  color: #666;
+}
+
 /* Responsive adjustments */
 @media (max-width: 768px) {
   .event-detail-page {
@@ -400,6 +531,88 @@
 
   .event-detail-sections-grid {
     grid-template-columns: 1fr;
+  }
+
+  .event-detail-guest-content {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .event-detail-guest-name {
+    width: 100%;
+  }
+
+  .event-detail-guest-actions {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .event-detail-points-form {
+    width: 100%;
+    flex-wrap: wrap;
+  }
+
+  .event-detail-points-input {
+    flex: 1;
+    min-width: 80px;
+    max-width: 120px;
+  }
+
+  .event-detail-points-btn,
+  .event-detail-award-btn,
+  .event-detail-remove-btn {
+    flex: 1;
+    min-width: auto;
+  }
+}
+
+@media (max-width: 480px) {
+  .event-detail-page {
+    padding: 12px;
+    padding-top: 20px;
+  }
+
+  .event-detail-section {
+    padding: 20px 16px;
+  }
+
+  .event-detail-title,
+  .event-detail-section-header {
+    margin: -20px -16px 16px -16px;
+    padding: 12px 16px;
+    font-size: 18px;
+  }
+
+  .event-detail-points-form {
+    flex-direction: column;
+    width: 100%;
+    gap: 8px;
+  }
+
+  .event-detail-points-input {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .event-detail-points-btn,
+  .event-detail-award-btn,
+  .event-detail-remove-btn {
+    width: 100%;
+  }
+
+  .event-detail-award-all-form {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .event-detail-award-all-input {
+    width: 100%;
+    min-width: 100%;
+  }
+
+  .event-detail-award-all-btn {
+    width: 100%;
   }
 }
 
