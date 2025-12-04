@@ -10,7 +10,7 @@ import ConfirmationModal from '../components/ConfirmationModal';
 import '../styles/pages/Events.css';
 
 const Events = () => {
-  const { user, hasRole } = useAuth();
+  const { user, hasRole, currentRole } = useAuth();
   const [searchParams, setSearchParams] = useSearchParams();
   const [events, setEvents] = useState([]);
   const [allEvents, setAllEvents] = useState([]);
@@ -71,13 +71,20 @@ const Events = () => {
       }
 
       const response = await eventAPI.getEvents(fetchParams);
-      const fetchedEvents = response.data.results || [];
+      let fetchedEvents = response.data.results || [];
+      
+      // Filter by published status when viewing as regular/cashier role
+      // This ensures managers/superusers see only published events when switching to regular/cashier view
+      if (currentRole === 'regular' || currentRole === 'cashier') {
+        fetchedEvents = fetchedEvents.filter(event => event.published === true);
+      }
+      
       setAllEvents(fetchedEvents);
       
       // Store all fetched events - filtering will be applied in useEffect if needed
       if (!showMyEvents) {
         setEvents(fetchedEvents);
-        setCount(response.data.count || 0);
+        setCount(fetchedEvents.length);
       }
       // If showMyEvents is active, the useEffect will handle filtering and pagination
     } catch (err) {
@@ -228,7 +235,7 @@ const Events = () => {
             placeholder="Search by name..."
           />
         </div>
-        {hasRole('manager') && (
+        {(hasRole('manager') && (currentRole === 'manager' || currentRole === 'superuser')) && (
           <div className="form-group">
             <label>Published</label>
             <select
@@ -241,7 +248,7 @@ const Events = () => {
             </select>
           </div>
         )}
-        {!hasRole('manager') && (
+        {(currentRole === 'regular' || currentRole === 'cashier') && (
           <div className="form-group">
             <label>Registered</label>
             <select
@@ -254,7 +261,7 @@ const Events = () => {
             </select>
           </div>
         )}
-        {hasRole('manager') && (
+        {(hasRole('manager') && (currentRole === 'manager' || currentRole === 'superuser')) && (
           <div className="form-group">
             <label>Event Full Status</label>
             <select
@@ -306,7 +313,7 @@ const Events = () => {
                     </p>
                     <p className="events-card-location">Location: {event.location}</p>
                     <div className="events-card-badges">
-                      {hasRole('manager') && (
+                      {(hasRole('manager') && (currentRole === 'manager' || currentRole === 'superuser')) && (
                         <>
                           <span className="events-badge events-badge-secondary">
                             {event.numGuests} / {event.capacity || '∞'} guests
@@ -331,7 +338,7 @@ const Events = () => {
                           )}
                         </>
                       )}
-                      {!hasRole('manager') && (
+                      {(currentRole === 'regular' || currentRole === 'cashier') && (
                         <>
                           <span className="events-badge events-badge-secondary">
                             {event.numGuests} / {event.capacity || '∞'} guests
@@ -363,7 +370,7 @@ const Events = () => {
                 </div>
               );
 
-              if (hasRole('manager') || hasRole('superuser')) {
+              if ((hasRole('manager') || hasRole('superuser')) && (currentRole === 'manager' || currentRole === 'superuser')) {
                 return (
                   <Link
                     key={event.id}

@@ -10,7 +10,7 @@ import ConfirmationModal from '../components/ConfirmationModal';
 import '../styles/pages/Promotions.css';
 
 const Promotions = () => {
-  const { hasRole } = useAuth();
+  const { hasRole, currentRole } = useAuth();
   const [searchParams, setSearchParams] = useSearchParams();
   const [promotions, setPromotions] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -45,7 +45,25 @@ const Promotions = () => {
       });
       
       const response = await promotionAPI.getPromotions(params);
-      setPromotions(response.data.results || []);
+      let fetchedPromotions = response.data.results || [];
+      
+      // Filter by active status when viewing as regular/cashier role
+      // This ensures managers/superusers see only active promotions when switching to regular/cashier view
+      if (currentRole === 'regular' || currentRole === 'cashier') {
+        const now = new Date();
+        fetchedPromotions = fetchedPromotions.filter(promo => {
+          // If startTime is not provided (for non-managers), backend already filtered to active
+          // But we need to double-check in case we're viewing as a switched role
+          if (!promo.startTime) {
+            return new Date(promo.endTime) >= now;
+          }
+          const start = new Date(promo.startTime);
+          const end = new Date(promo.endTime);
+          return start <= now && end >= now;
+        });
+      }
+      
+      setPromotions(fetchedPromotions);
     } catch (err) {
       setError(err.response?.data?.error || 'Failed to load promotions.');
     } finally {
@@ -179,7 +197,7 @@ const Promotions = () => {
             <option value="onetime">One-time</option>
           </select>
         </div>
-        {(hasRole('manager') || hasRole('superuser')) && (
+        {((hasRole('manager') || hasRole('superuser')) && (currentRole === 'manager' || currentRole === 'superuser')) && (
           <>
             <div className="form-group">
               <label>Status</label>
@@ -276,7 +294,7 @@ const Promotions = () => {
               </div>
             );
 
-            if (hasRole('manager') || hasRole('superuser')) {
+            if ((hasRole('manager') || hasRole('superuser')) && (currentRole === 'manager' || currentRole === 'superuser')) {
               return (
                 <div key={promo.id} className="promotions-card" style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
                   <Link
