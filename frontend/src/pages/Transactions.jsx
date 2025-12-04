@@ -130,25 +130,38 @@ const Transactions = () => {
     return false;
   };
 
+  // Check if we need to fetch all data for client-side operations (filtering or sorting)
+  const needsClientSideData = () => {
+    // If client-side filters are active, we need all data
+    if (hasClientSideFilters()) return true;
+    // If sorting is active (any column), we need all data to sort across all pages
+    if (currentSort.key) return true;
+    return false;
+  };
+
   useEffect(() => {
     loadTransactions();
   }, [filters, user]);
 
-  // Reset to page 1 and reload when client-side filters change
+  // Reset to page 1 and reload when client-side filters or sorting changes
   useEffect(() => {
-    const hasFilters = hasClientSideFilters();
+    const needsClientData = needsClientSideData();
     
-    // Reset to page 1 if filters are active and we're not already on page 1
-    if (hasFilters && filters.page !== 1) {
+    // Reset to page 1 if client-side operations are active and we're not already on page 1
+    if (needsClientData && filters.page !== 1) {
       const newFilters = { ...filters, page: 1 };
       setFilters(newFilters);
       setSearchParams(newFilters);
       // Don't reload here - the filters change will trigger the first useEffect
-    } else {
-      // Reload immediately if page is already 1 or filters were cleared
+    } else if (needsClientData) {
+      // If we need client-side data (sorting active) and we're on page 1, reload to fetch all data
+      loadTransactions();
+    } else if (!needsClientData) {
+      // Reload immediately if client-side operations were cleared
       loadTransactions();
     }
-  }, [clientFilters.idNameSearch, clientFilters.status, managerFilters.idUtoridSearch, managerFilters.status]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [clientFilters.idNameSearch, clientFilters.status, managerFilters.idUtoridSearch, managerFilters.status, currentSort.key, currentSort.direction]);
 
   // Client-side filtering
   useEffect(() => {
@@ -192,8 +205,8 @@ const Transactions = () => {
       }
     }
 
-    // Apply sorting if client-side filters are active
-    if (hasClientSideFilters() && currentSort.key) {
+    // Apply sorting whenever a sort key is selected (works for all columns including status and suspicious)
+    if (currentSort.key) {
       filtered.sort((a, b) => {
         const sortKey = currentSort.key;
         const direction = currentSort.direction;
@@ -235,8 +248,8 @@ const Transactions = () => {
 
     setFilteredTransactions(filtered);
 
-    // Apply client-side pagination if filters are active
-    if (hasClientSideFilters()) {
+    // Apply client-side pagination if filters or sorting are active
+    if (needsClientSideData()) {
       const startIndex = (filters.page - 1) * filters.limit;
       const endIndex = startIndex + filters.limit;
       setTransactions(filtered.slice(startIndex, endIndex));
@@ -252,13 +265,13 @@ const Transactions = () => {
     try {
       const params = { ...filters };
       
-      // If client-side filters are active, fetch maximum results for client-side filtering
-      if (hasClientSideFilters()) {
-        // Remove page parameter and set limit to maximum (100) to get more results for client-side filtering
+      // If client-side operations (filtering or sorting) are active, fetch maximum results
+      if (needsClientSideData()) {
+        // Remove page parameter and set limit to maximum (100) to get more results for client-side operations
         delete params.page;
         params.limit = 100; // Maximum allowed by backend
       } else {
-        // Keep server-side pagination when no client-side filters
+        // Keep server-side pagination when no client-side operations
         Object.keys(params).forEach((key) => {
           if (!params[key]) delete params[key];
         });
@@ -312,8 +325,14 @@ const Transactions = () => {
 
   // Server-side sorting sync
   useEffect(() => {
-    // If client-side filters are active, we sort locally, so don't update server filters
-    if (hasClientSideFilters()) return;
+    // If client-side operations are active, we sort locally, so don't update server filters
+    if (needsClientSideData()) return;
+
+    // Always do client-side sorting for status and suspicious columns
+    // (they may not be supported server-side, and we have custom sort functions for them)
+    if (currentSort.key === 'status' || currentSort.key === 'suspicious') {
+      return; // Skip server-side sync, use client-side sorting
+    }
 
     if (currentSort.key) {
       setFilters(prev => {
@@ -869,8 +888,8 @@ const Transactions = () => {
 
           <div className="transactions-pagination">
             {(() => {
-              const isClientFiltering = hasClientSideFilters();
-              const totalCount = isClientFiltering ? filteredTransactions.length : count;
+              const isClientOperation = needsClientSideData();
+              const totalCount = isClientOperation ? filteredTransactions.length : count;
               const totalPages = Math.ceil(totalCount / filters.limit);
               
               return (
