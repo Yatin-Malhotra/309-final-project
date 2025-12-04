@@ -55,7 +55,7 @@ Add the following environment variables in Railway:
 - `PORT`: Railway sets this automatically, but you can reference it in your code
 - `FRONTEND_URL`: The url for your frontend website
 
-The next five variables come directly from the EmailJS API which we used for sending mails,
+The next five variables come directly from the emailJS Service which we used for sending mails,
 - `EMAILJS_SERVICE_ID`: <EMAILJS_SERVICE_ID>
 - `EMAILJS_PRIVATE_KEY`: <EMAILJS_PRIVATE_KEY>
 - `EMAILJS_PUBLIC_KEY`: <EMAILJS_PUBLIC_KEY>
