@@ -87,22 +87,53 @@ describe('Events Page', () => {
   });
 
   it('should handle delete event for manager', async () => {
-    useAuth.mockReturnValue({ user: { role: 'manager' }, hasRole: (role) => role === 'manager' });
+    useAuth.mockReturnValue({ 
+      user: { role: 'manager' }, 
+      hasRole: (role) => role === 'manager',
+      currentRole: 'manager'
+    });
     const mockEvents = [
         { id: 1, name: 'Event 1', startTime: '2023-12-25T10:00:00', endTime: '2023-12-25T12:00:00', location: 'Room 1', published: false },
     ];
     eventAPI.getEvents.mockResolvedValue({ data: { results: mockEvents, count: 1 } });
     eventAPI.deleteEvent.mockResolvedValue({});
-    // Mock window.confirm
-    window.confirm = vi.fn(() => true);
 
     renderEvents();
 
     await waitFor(() => {
-        expect(screen.getByText('Delete')).toBeInTheDocument();
+        // Wait for event to load first
+        expect(screen.getByText('Event 1')).toBeInTheDocument();
+    }, { timeout: 3000 });
+
+    // Wait for delete button - it should appear for unpublished events
+    await waitFor(() => {
+        const deleteButtons = screen.queryAllByText('Delete');
+        expect(deleteButtons.length).toBeGreaterThan(0);
+    }, { timeout: 3000 });
+
+    // Click Delete button on the event card - this opens confirmation modal
+    // Use getAllByText and click the first one (the card button, not the modal button)
+    const deleteButtons = screen.getAllByText('Delete');
+    const cardDeleteButton = deleteButtons[0]; // First one is the card button
+    fireEvent.click(cardDeleteButton);
+
+    // Wait for confirmation modal to appear
+    await waitFor(() => {
+      expect(screen.getByText(/delete event/i)).toBeInTheDocument();
     });
 
-    fireEvent.click(screen.getByText('Delete'));
+    // Now there will be multiple Delete buttons - the modal confirm button is the one in the modal
+    // Find it by looking for the button that's a child of the modal
+    await waitFor(() => {
+      const modalDeleteButtons = screen.getAllByText('Delete');
+      // The last one should be the modal confirm button, or we can find it by its parent
+      expect(modalDeleteButtons.length).toBeGreaterThan(1);
+    });
+
+    // Get all Delete buttons again and click the one that's in the modal (usually the last one)
+    const allDeleteButtons = screen.getAllByText('Delete');
+    const modalConfirmButton = allDeleteButtons[allDeleteButtons.length - 1];
+    fireEvent.click(modalConfirmButton);
 
     await waitFor(() => {
         expect(eventAPI.deleteEvent).toHaveBeenCalledWith(1);

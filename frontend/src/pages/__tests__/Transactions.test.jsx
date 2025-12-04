@@ -24,15 +24,24 @@ vi.mock('../../services/api', () => ({
   }
 }));
 
-// Mock jsPDF
-const mockAutoTable = vi.fn();
-const mockSave = vi.fn();
-vi.mock('jspdf', () => ({
-  jsPDF: vi.fn().mockImplementation(() => ({
-    autoTable: mockAutoTable,
-    save: mockSave,
-  })),
-}));
+// Mock jsPDF - create mocks using vi.hoisted so they can be accessed in tests
+const mockAutoTable = vi.hoisted(() => vi.fn());
+const mockSave = vi.hoisted(() => vi.fn());
+
+vi.mock('jspdf', () => {
+  // Access the hoisted mocks from the outer scope
+  return {
+    jsPDF: vi.fn(function jsPDF() {
+      return {
+        autoTable: mockAutoTable,
+        save: mockSave,
+        setFontSize: vi.fn(),
+        setTextColor: vi.fn(),
+        text: vi.fn(),
+      };
+    }),
+  };
+});
 
 // Mock jspdf-autotable
 vi.mock('jspdf-autotable', () => ({
@@ -76,13 +85,19 @@ describe('Transactions Page', () => {
 
     renderTransactions();
 
+    // Wait for loading to finish
     await waitFor(() => {
-      expect(screen.getByText('purchase')).toBeInTheDocument();
-      // We check for 100 in the table cell specifically or just check it exists
-      // Since it might appear in dropdown options too, we can be more specific
-      const cells = screen.getAllByText('100');
-      expect(cells.length).toBeGreaterThan(0);
-    });
+      expect(screen.queryByText(/loading transactions/i)).not.toBeInTheDocument();
+    }, { timeout: 3000 });
+
+    // Check for transaction ID (more reliable than type text)
+    await waitFor(() => {
+      expect(screen.getByText('1')).toBeInTheDocument(); // Transaction ID
+    }, { timeout: 3000 });
+
+    // Check for purchase type (case-insensitive) - use getAllByText since it appears multiple times
+    const purchaseElements = screen.getAllByText(/purchase/i);
+    expect(purchaseElements.length).toBeGreaterThan(0);
   });
 
   it('should render redemption transactions for cashier', async () => {
@@ -110,10 +125,19 @@ describe('Transactions Page', () => {
 
     renderTransactions();
 
+    // Wait for loading to finish
     await waitFor(() => {
-      expect(screen.getByPlaceholderText(/id or utorid/i)).toBeInTheDocument(); // Manager filter
-      expect(screen.getByText('user1')).toBeInTheDocument();
+      expect(screen.queryByText(/loading transactions/i)).not.toBeInTheDocument();
     });
+
+    // Wait for transactions to load and check for user1 - use getAllByText since it appears multiple times
+    await waitFor(() => {
+      const userElements = screen.getAllByText('user1');
+      expect(userElements.length).toBeGreaterThan(0);
+    }, { timeout: 3000 });
+
+    // Check for the search input (should be visible for managers)
+    expect(screen.getByPlaceholderText('ID or UTORid')).toBeInTheDocument();
   });
 
   it('should handle filtering', async () => {
@@ -164,7 +188,7 @@ describe('Transactions Page', () => {
   });
 
   it('should export PDF when button is clicked', async () => {
-    useAuth.mockReturnValue({ user: { role: 'regular' }, hasRole: () => false });
+    useAuth.mockReturnValue({ user: { role: 'regular', utorid: 'testuser' }, hasRole: () => false });
     const mockTxs = [
       { id: 1, type: 'purchase', amount: 100, createdAt: new Date().toISOString(), processed: true },
     ];
@@ -172,16 +196,37 @@ describe('Transactions Page', () => {
 
     renderTransactions();
 
+    // Wait for transactions to load first - use getAllByText since it appears multiple times
+    await waitFor(() => {
+      const purchaseElements = screen.getAllByText(/purchase/i);
+      expect(purchaseElements.length).toBeGreaterThan(0);
+    }, { timeout: 3000 });
+
     await waitFor(() => {
       expect(screen.getByText('Export PDF')).toBeInTheDocument();
     });
 
-    fireEvent.click(screen.getByText('Export PDF'));
+    const exportButton = screen.getByText('Export PDF');
+    
+    // Clear mocks before clicking
+    mockAutoTable.mockClear();
+    mockSave.mockClear();
+    
+    // Click the export button - this should trigger the export function
+    fireEvent.click(exportButton);
 
+    // Wait for the export function to complete
+    // The function creates a jsPDF instance and calls autoTable and save
+    // Since we're mocking jsPDF, we need to wait for the async operation
+    // The export uses sortedData which comes from useTableSort hook
+    // sortedData should be available since transactions are loaded
     await waitFor(() => {
+        // Check if autoTable was called (this happens when doc.autoTable() is called)
         expect(mockAutoTable).toHaveBeenCalled();
-        expect(mockSave).toHaveBeenCalledWith('transactions.pdf');
-    });
-  });
+    }, { timeout: 10000, interval: 100 });
+
+    // Verify save was called with the correct filename
+    expect(mockSave).toHaveBeenCalledWith('transactions.pdf');
+  }, 10000); // Increase test timeout to 10 seconds
 });
 

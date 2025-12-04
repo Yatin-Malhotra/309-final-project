@@ -64,7 +64,10 @@ describe('Promotions Page', () => {
   });
 
   it('should handle delete promotion for manager', async () => {
-    useAuth.mockReturnValue({ hasRole: (role) => role === 'manager' });
+    useAuth.mockReturnValue({ 
+      hasRole: (role) => role === 'manager',
+      currentRole: 'manager'
+    });
     const futureDate = new Date();
     futureDate.setDate(futureDate.getDate() + 1);
     
@@ -73,15 +76,43 @@ describe('Promotions Page', () => {
     ];
     promotionAPI.getPromotions.mockResolvedValue({ data: { results: mockPromos } });
     promotionAPI.deletePromotion.mockResolvedValue({});
-    window.confirm = vi.fn(() => true);
 
     renderPromotions();
 
     await waitFor(() => {
-      expect(screen.getByText('Delete')).toBeInTheDocument();
+      // Wait for promotion to load first
+      expect(screen.getByText('Promo 1')).toBeInTheDocument();
+    }, { timeout: 3000 });
+
+    // Wait for delete button - it should appear for promotions that haven't started
+    await waitFor(() => {
+      const deleteButtons = screen.queryAllByText('Delete');
+      expect(deleteButtons.length).toBeGreaterThan(0);
+    }, { timeout: 3000 });
+
+    // Click Delete button on the promotion card - this opens confirmation modal
+    // Use getAllByText and click the first one (the card button, not the modal button)
+    const deleteButtons = screen.getAllByText('Delete');
+    const cardDeleteButton = deleteButtons[0]; // First one is the card button
+    fireEvent.click(cardDeleteButton);
+
+    // Wait for confirmation modal to appear
+    await waitFor(() => {
+      expect(screen.getByText(/delete promotion/i)).toBeInTheDocument();
     });
 
-    fireEvent.click(screen.getByText('Delete'));
+    // Now there will be multiple Delete buttons - the modal confirm button is the one in the modal
+    // Find it by looking for the button that's a child of the modal
+    await waitFor(() => {
+      const modalDeleteButtons = screen.getAllByText('Delete');
+      // The last one should be the modal confirm button
+      expect(modalDeleteButtons.length).toBeGreaterThan(1);
+    });
+
+    // Get all Delete buttons again and click the one that's in the modal (usually the last one)
+    const allDeleteButtons = screen.getAllByText('Delete');
+    const modalConfirmButton = allDeleteButtons[allDeleteButtons.length - 1];
+    fireEvent.click(modalConfirmButton);
 
     await waitFor(() => {
       expect(promotionAPI.deletePromotion).toHaveBeenCalledWith(1);

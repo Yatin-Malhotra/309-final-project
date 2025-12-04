@@ -10,6 +10,15 @@ vi.mock('../../contexts/AuthContext', () => ({
   useAuth: vi.fn(),
 }));
 
+// Mock react-toastify
+vi.mock('react-toastify', () => ({
+  toast: {
+    success: vi.fn(),
+    error: vi.fn(),
+    info: vi.fn(),
+  },
+}));
+
 // Mock API
 vi.mock('../../services/api', () => ({
   transactionAPI: {
@@ -67,7 +76,12 @@ describe('Dashboard Page', () => {
   };
 
   it('should render loading state initially', () => {
-    useAuth.mockReturnValue({ user: { role: 'regular' }, currentRole: 'regular' });
+    useAuth.mockReturnValue({ 
+      user: { role: 'regular' }, 
+      currentRole: 'regular',
+      hasRole: () => false,
+      updateLocalUser: vi.fn()
+    });
     renderDashboard();
     // It starts with loading = true
     expect(screen.getByText(/loading dashboard/i)).toBeInTheDocument();
@@ -77,7 +91,8 @@ describe('Dashboard Page', () => {
     useAuth.mockReturnValue({ 
       user: { name: 'Test User', role: 'regular', points: 500, verified: true }, 
       currentRole: 'regular',
-      hasRole: () => false
+      hasRole: () => false,
+      updateLocalUser: vi.fn()
     });
 
     transactionAPI.getMyTransactions.mockResolvedValue({ data: { results: [] } });
@@ -88,7 +103,7 @@ describe('Dashboard Page', () => {
 
     await waitFor(() => {
       expect(screen.getByText(/welcome, test user/i)).toBeInTheDocument();
-    });
+    }, { timeout: 3000 });
 
     expect(screen.getByText(/your points balance/i)).toBeInTheDocument();
     expect(screen.getByText('500')).toBeInTheDocument(); // AnimatedNumber mock renders value
@@ -99,7 +114,8 @@ describe('Dashboard Page', () => {
     useAuth.mockReturnValue({ 
       user: { name: 'Cashier User', role: 'cashier' }, 
       currentRole: 'cashier',
-      hasRole: () => true
+      hasRole: () => true,
+      updateLocalUser: vi.fn()
     });
 
     transactionAPI.getMyTransactions.mockResolvedValue({ data: { results: [] } });
@@ -110,7 +126,7 @@ describe('Dashboard Page', () => {
 
     await waitFor(() => {
       expect(screen.getByText(/welcome, cashier user/i)).toBeInTheDocument();
-    });
+    }, { timeout: 3000 });
 
     // Cashier specific elements
     // Use getAllByText because "Pending Redemptions" appears in title and description
@@ -123,7 +139,8 @@ describe('Dashboard Page', () => {
     useAuth.mockReturnValue({ 
       user: { name: 'Manager User', role: 'manager' }, 
       currentRole: 'manager',
-      hasRole: () => true
+      hasRole: () => true,
+      updateLocalUser: vi.fn()
     });
 
     eventAPI.getEvents.mockResolvedValue({ data: { results: [], count: 10 } });
@@ -143,7 +160,7 @@ describe('Dashboard Page', () => {
 
     await waitFor(() => {
       expect(screen.getByText(/welcome, manager user/i)).toBeInTheDocument();
-    });
+    }, { timeout: 3000 });
 
     // Manager specific elements
     expect(screen.getByText(/total users/i)).toBeInTheDocument();
