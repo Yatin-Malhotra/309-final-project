@@ -748,8 +748,8 @@ app.get('/users', requireRole('manager'), validateQuery(z.object({
         if (pageNum < 1) {
             return res.status(400).json({ error: 'Page must be at least 1' });
         }
-        if (limitNum < 1 || limitNum > 100) {
-            return res.status(400).json({ error: 'Limit must be between 1 and 100' });
+        if (limitNum < 1 || limitNum > 10000) {
+            return res.status(400).json({ error: 'Limit must be between 1 and 10000' });
         }
         const skip = (pageNum - 1) * limitNum;
         
@@ -1365,8 +1365,8 @@ app.get('/transactions', requireRole('manager'), validateQuery(z.object({
         if (pageNum < 1) {
             return res.status(400).json({ error: 'Page must be at least 1' });
         }
-        if (limitNum < 1 || limitNum > 100) {
-            return res.status(400).json({ error: 'Limit must be between 1 and 100' });
+        if (limitNum < 1 || limitNum > 10000) {
+            return res.status(400).json({ error: 'Limit must be between 1 and 10000' });
         }
         
         const skip = (pageNum - 1) * limitNum;
@@ -1446,8 +1446,8 @@ app.get('/transactions/redemptions', requireRole('cashier'), validateQuery(z.obj
         if (pageNum < 1) {
             return res.status(400).json({ error: 'Page must be at least 1' });
         }
-        if (limitNum < 1 || limitNum > 100) {
-            return res.status(400).json({ error: 'Limit must be between 1 and 100' });
+        if (limitNum < 1 || limitNum > 10000) {
+            return res.status(400).json({ error: 'Limit must be between 1 and 10000' });
         }
         
         const skip = (pageNum - 1) * limitNum;
@@ -1834,8 +1834,8 @@ app.get('/users/me/transactions', requireRole('regular'), validateQuery(z.object
         if (pageNum < 1) {
             return res.status(400).json({ error: 'Page must be at least 1' });
         }
-        if (limitNum < 1 || limitNum > 100) {
-            return res.status(400).json({ error: 'Limit must be between 1 and 100' });
+        if (limitNum < 1 || limitNum > 10000) {
+            return res.status(400).json({ error: 'Limit must be between 1 and 10000' });
         }
         
         const skip = (pageNum - 1) * limitNum;
@@ -1913,8 +1913,8 @@ app.get('/users/:userId/transactions', requireRole('manager'), validateQuery(z.o
         if (pageNum < 1) {
             return res.status(400).json({ error: 'Page must be at least 1' });
         }
-        if (limitNum < 1 || limitNum > 100) {
-            return res.status(400).json({ error: 'Limit must be between 1 and 100' });
+        if (limitNum < 1 || limitNum > 10000) {
+            return res.status(400).json({ error: 'Limit must be between 1 and 10000' });
         }
         
         const skip = (pageNum - 1) * limitNum;
@@ -3164,8 +3164,8 @@ app.get('/promotions', optionalAuth, validateQuery(z.object({
         if (pageNum < 1) {
             return res.status(400).json({ error: 'Page must be at least 1' });
         }
-        if (limitNum < 1 || limitNum > 100) {
-            return res.status(400).json({ error: 'Limit must be between 1 and 100' });
+        if (limitNum < 1 || limitNum > 10000) {
+            return res.status(400).json({ error: 'Limit must be between 1 and 10000' });
         }
         
         const skip = (pageNum - 1) * limitNum;
