@@ -572,6 +572,7 @@ router.get('/me/transactions', requireRole('regular'), validateQuery(z.object({
     promotionId: z.string().optional(),
     amount: z.string().optional(),
     operator: z.string().optional(),
+    processed: z.string().optional(),
     page: z.preprocess(
         (val) => (val === undefined || val === null || val === '') ? '1' : val,
         z.string().regex(/^\d+$/)
@@ -584,7 +585,7 @@ router.get('/me/transactions', requireRole('regular'), validateQuery(z.object({
     order: z.enum(['asc', 'desc']).optional()
 })), async (req, res, next) => {
     try {
-        const { type, relatedId, promotionId, amount, operator, page = '1', limit = '10', sortBy, order } = req.validatedQuery;
+        const { type, relatedId, promotionId, amount, operator, processed, page = '1', limit = '10', sortBy, order } = req.validatedQuery;
         const pageNum = parseInt(page), limitNum = parseInt(limit);
         
         // FIX: Add validation
@@ -606,6 +607,9 @@ router.get('/me/transactions', requireRole('regular'), validateQuery(z.object({
         }
         if (amount && operator) {
             where.amount = operator === 'gte' ? { gte: parseInt(amount) } : { lte: parseInt(amount) };
+        }
+        if (processed !== undefined && processed !== '') {
+            where.processed = processed === 'true';
         }
         
         const orderBy = {};

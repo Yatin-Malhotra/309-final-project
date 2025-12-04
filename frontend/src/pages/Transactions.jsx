@@ -588,7 +588,7 @@ const Transactions = () => {
                 <option value="transfer">Transfer</option>
               </select>
             </div>
-            {hasRole('manager') && (
+            {hasRole('manager') ? (
               <div className="form-group">
                 <label>Status</label>
                 <select
@@ -596,6 +596,19 @@ const Transactions = () => {
                   onChange={(e) =>
                     setManagerFilters({ ...managerFilters, status: e.target.value })
                   }
+                >
+                  <option value="">All</option>
+                  <option value="false">Pending</option>
+                  <option value="true">Processed</option>
+                </select>
+              </div>
+            ) : (
+              <div className="form-group">
+                <label htmlFor="transaction-status">Status</label>
+                <select
+                  id="transaction-status"
+                  value={filters.processed}
+                  onChange={(e) => handleFilterChange('processed', e.target.value)}
                 >
                   <option value="">All</option>
                   <option value="false">Pending</option>
