@@ -1,5 +1,5 @@
 // User detail page
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { useAuth } from '../contexts/AuthContext';
@@ -36,6 +36,11 @@ const UserDetail = () => {
 
   const [editingEmail, setEditingEmail] = useState(false);
   const [email, setEmail] = useState();
+
+  const mgrCheck = useMemo(() => {
+    console.log(hasRole('manager') && !hasRole('superuser') && user && (user.role === 'manager' || user.role === 'superuser'))
+    return hasRole('manager') && !hasRole('superuser') && user && (user.role === 'manager' || user.role === 'superuser');
+  }, [user, hasRole]);
 
   // Define sort config for transactions table
   const transactionSortConfig = {
@@ -330,7 +335,9 @@ const UserDetail = () => {
                       ) : (
                         <>
                           {user.email}
-                          <button onClick={() => setEditingEmail(true)} className="btn btn-secondary user-detail-edit-btn">Edit</button>
+                          {!mgrCheck && (
+                            <button onClick={() => setEditingEmail(true)} className="btn btn-secondary user-detail-edit-btn">Edit</button>
+                          )}
                         </>
                       )}
                     </td>
@@ -345,20 +352,24 @@ const UserDetail = () => {
                 <tr>
                   <td><strong>Role</strong></td>
                   <td>
-                    <select
-                      value={user.role}
-                      onChange={(e) => handleRoleChange(user.id, e.target.value)}
-                      className={`user-detail-badge user-detail-role-select ${getRoleBadge(user.role)}`}
-                    >
-                      <option value="regular">Regular</option>
-                      <option value="cashier">Cashier</option>
-                      {hasRole('superuser') &&  (
-                        <>
-                        <option value="manager">Manager</option>
-                        <option value="superuser">Superuser</option>
-                        </>
-                      )}
-                    </select>
+                    {(hasRole('manager') && !hasRole('superuser') && user && (user.role === 'manager' || user.role === 'superuser')) ? (
+                      <span className={`user-detail-badge ${getRoleBadge(user.role)}`}>{user.role}</span>
+                    ) : (
+                      <select
+                        value={user.role}
+                        onChange={(e) => handleRoleChange(user.id, e.target.value)}
+                        className={`user-detail-badge user-detail-role-select ${getRoleBadge(user.role)}`}
+                      >
+                        <option value="regular">Regular</option>
+                        <option value="cashier">Cashier</option>
+                        {hasRole('superuser') &&  (
+                          <>
+                          <option value="manager">Manager</option>
+                          <option value="superuser">Superuser</option>
+                          </>
+                        )}
+                      </select>
+                    )}
                   </td>
                 </tr>
                 <tr>
@@ -368,7 +379,7 @@ const UserDetail = () => {
                 <tr>
                   <td><strong>Verified</strong></td>
                   <td>
-                    {hasRole('manager') ? (
+                    {!mgrCheck ? (
                       <label className={`switch ${verified ? 'disabled' : ''}`}>
                         <input
                           type="checkbox"
@@ -390,7 +401,7 @@ const UserDetail = () => {
                 <tr>
                   <td><strong>Suspicious</strong></td>
                   <td>
-                    {hasRole('manager') ? (
+                    {!mgrCheck ? (
                       <label className="switch">
                         <input
                           type="checkbox"
