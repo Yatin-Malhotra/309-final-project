@@ -12,11 +12,12 @@ const Navbar = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [dropdownOpen, setDropdownOpen] = useState(false);
-
   const [roleMenuOpen, setRoleMenuOpen] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const dropdownRef = useRef(null);
   const roleMenuRef = useRef(null);
+  const mobileMenuRef = useRef(null);
 
   const switchRole = (newRole) => {
     setCurrentRole(newRole)
@@ -27,21 +28,27 @@ const Navbar = () => {
     const handleClickOutside = (event) => {
       const clickedInsideDropdown = dropdownRef.current?.contains(event.target);
       const clickedInsideRoleMenu = roleMenuRef.current?.querySelector('.navbar-role-menu')?.contains(event.target);
+      const clickedInsideMobileMenu = mobileMenuRef.current?.contains(event.target);
+      const clickedHamburger = event.target.closest('.navbar-hamburger');
       
       if (!clickedInsideDropdown && !clickedInsideRoleMenu) {
         setDropdownOpen(false);
         setRoleMenuOpen(false);
       }
+      
+      if (!clickedInsideMobileMenu && !clickedHamburger) {
+        setMobileMenuOpen(false);
+      }
     };
 
-    if (dropdownOpen || roleMenuOpen) {
+    if (dropdownOpen || roleMenuOpen || mobileMenuOpen) {
       document.addEventListener('mousedown', handleClickOutside);
     }
 
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
-  }, [dropdownOpen, roleMenuOpen]);
+  }, [dropdownOpen, roleMenuOpen, mobileMenuOpen]);
 
   // Position the role menu dynamically with responsive handling
   const positionRoleMenu = () => {
@@ -103,6 +110,7 @@ const Navbar = () => {
   }, [roleMenuOpen]);
 
   const handleLogout = () => {
+    closeMobileMenu();
     logout();
     navigate('/login');
   };
@@ -122,20 +130,46 @@ const Navbar = () => {
     return role.charAt(0).toUpperCase() + role.slice(1);
   };
 
-  return (
-    <nav className="navbar">
-      <div className="container navbar-content">
-        <Link to="/" className="navbar-brand">
-          CSSU Rewards
-        </Link>
+  const closeMobileMenu = () => {
+    setMobileMenuOpen(false);
+    setDropdownOpen(false);
+    setRoleMenuOpen(false);
+  };
 
-        {user ? (
-          <div className="navbar-links">
-            <Link to="/dashboard" className={location.pathname === '/dashboard' || location.pathname === '/' ? 'active' : ''}>Dashboard</Link>
-            <Link to="/transactions" className={location.pathname.startsWith('/transactions') ? 'active' : ''}>Transactions</Link>
-            {hasRole('manager') && <Link to="/users" className={location.pathname.startsWith('/users') ? 'active' : ''}>Users</Link>}
-            <Link to="/events" className={location.pathname.startsWith('/events') ? 'active' : ''}>Events</Link>
-            <Link to="/promotions" className={location.pathname.startsWith('/promotions') ? 'active' : ''}>Promotions</Link>
+  return (
+    <>
+      {mobileMenuOpen && (
+        <div 
+          className="navbar-mobile-overlay" 
+          onClick={closeMobileMenu}
+        />
+      )}
+      <nav className="navbar">
+        <div className="container navbar-content">
+          <div className="navbar-header">
+            <Link to="/" className="navbar-brand" onClick={closeMobileMenu}>
+              CSSU Rewards
+            </Link>
+            {user && (
+              <button
+                className={`navbar-hamburger ${mobileMenuOpen ? 'active' : ''}`}
+                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                aria-label="Toggle menu"
+              >
+                <span></span>
+                <span></span>
+                <span></span>
+              </button>
+            )}
+          </div>
+
+          {user ? (
+            <div className={`navbar-links ${mobileMenuOpen ? 'mobile-open' : ''}`} ref={mobileMenuRef}>
+            <Link to="/dashboard" className={location.pathname === '/dashboard' || location.pathname === '/' ? 'active' : ''} onClick={closeMobileMenu}>Dashboard</Link>
+            <Link to="/transactions" className={location.pathname.startsWith('/transactions') ? 'active' : ''} onClick={closeMobileMenu}>Transactions</Link>
+            {hasRole('manager') && <Link to="/users" className={location.pathname.startsWith('/users') ? 'active' : ''} onClick={closeMobileMenu}>Users</Link>}
+            <Link to="/events" className={location.pathname.startsWith('/events') ? 'active' : ''} onClick={closeMobileMenu}>Events</Link>
+            <Link to="/promotions" className={location.pathname.startsWith('/promotions') ? 'active' : ''} onClick={closeMobileMenu}>Promotions</Link>
 
             <div className="navbar-user" ref={dropdownRef}>
               <div
@@ -164,6 +198,7 @@ const Navbar = () => {
                     onClick={() => {
                       setDropdownOpen(false);
                       setRoleMenuOpen(false);
+                      closeMobileMenu();
                     }}
                   >
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -212,6 +247,7 @@ const Navbar = () => {
                               switchRole(r);
                               setRoleMenuOpen(false);
                               setDropdownOpen(false);
+                              closeMobileMenu();
                             }}
                           >
                             <span className="role-name">{capitalizeRole(r)}</span>
@@ -273,11 +309,12 @@ const Navbar = () => {
           </div>
         ) : (
           <div className="navbar-links">
-            <Link to="/login">Login</Link>
+            <Link to="/login" onClick={closeMobileMenu}>Login</Link>
           </div>
         )}
       </div>
     </nav>
+    </>
   );
 };
 

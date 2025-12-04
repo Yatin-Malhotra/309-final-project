@@ -25,6 +25,14 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+  position: relative;
+}
+
+.navbar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
 }
 
 .navbar-brand {
@@ -44,6 +52,59 @@
   display: flex;
   gap: 24px;
   align-items: center;
+}
+
+/* Hamburger Menu */
+.navbar-hamburger {
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 32px;
+  height: 32px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  z-index: 1001;
+  position: relative;
+}
+
+.navbar-hamburger span {
+  position: absolute;
+  width: 20px;
+  height: 2px;
+  background-color: white;
+  border-radius: 2px;
+  transition: all 0.3s ease;
+  transform-origin: center;
+}
+
+.navbar-hamburger span:nth-child(1) {
+  top: 10px;
+}
+
+.navbar-hamburger span:nth-child(2) {
+  top: 15px;
+}
+
+.navbar-hamburger span:nth-child(3) {
+  top: 20px;
+}
+
+.navbar-hamburger.active span:nth-child(1) {
+  top: 15px;
+  transform: rotate(45deg);
+}
+
+.navbar-hamburger.active span:nth-child(2) {
+  opacity: 0;
+  transform: scale(0);
+}
+
+.navbar-hamburger.active span:nth-child(3) {
+  top: 15px;
+  transform: rotate(-45deg);
 }
 
 .navbar-links a {
@@ -160,18 +221,146 @@
   gap: 10px;
 }
 
+/* Mobile Menu Overlay */
+.navbar-mobile-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(11, 46, 51, 0.4);
+  backdrop-filter: blur(2px);
+  z-index: 999;
+  opacity: 0;
+  animation: fadeIn 0.3s ease-out forwards;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
 /* Responsive */
 @media (max-width: 768px) {
+  .navbar {
+    padding: 12px 0;
+    position: relative;
+    z-index: 1000;
+  }
+
   .navbar-content {
     flex-direction: column;
-    gap: 15px;
+    gap: 0;
+    align-items: stretch;
+  }
+
+  .navbar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+  }
+
+  .navbar-hamburger {
+    display: flex;
   }
 
   .navbar-links {
+    display: none;
+    position: fixed;
+    top: 64px;
+    left: 12px;
+    right: 12px;
     flex-direction: column;
-    gap: 10px;
+    gap: 0;
+    background: var(--bg-secondary);
+    border-radius: 12px;
+    padding: 8px 0;
+    box-shadow: 0 8px 24px var(--shadow-hover), 0 4px 8px var(--shadow);
+    border: 1px solid var(--border-light);
+    max-height: calc(100vh - 100px);
+    overflow-y: auto;
+    z-index: 1001;
+    opacity: 0;
+    transform: translateY(-20px);
+    transition: all 0.3s ease;
   }
 
+  .navbar-links.mobile-open {
+    display: flex;
+    opacity: 1;
+    transform: translateY(0);
+    animation: slideDownOverlay 0.3s ease-out;
+  }
+
+  @keyframes slideDownOverlay {
+    from {
+      opacity: 0;
+      transform: translateY(-20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .navbar-links a {
+    padding: 10px 16px;
+    width: 100%;
+    border-bottom: 1px solid var(--border-light);
+    color: var(--text-primary) !important;
+    font-size: 15px;
+  }
+
+  .navbar-links a:last-child {
+    border-bottom: none;
+  }
+
+  .navbar-links a:hover {
+    background-color: var(--bg-hover);
+    border-bottom-color: var(--border-light);
+  }
+
+  .navbar-links a.active {
+    background-color: var(--primary);
+    color: white !important;
+    border-bottom-color: var(--primary);
+  }
+
+  .navbar-user {
+    width: 100%;
+    padding: 10px 16px;
+    border-top: 1px solid var(--border-light);
+    margin-top: 4px;
+  }
+
+  .user-info-clickable {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .user-info-clickable span {
+    color: var(--text-primary) !important;
+  }
+
+  .navbar-dropdown {
+    position: static;
+    top: auto;
+    right: auto;
+    width: 100%;
+    margin-top: 8px;
+    box-shadow: none;
+    border: none;
+    border-top: 1px solid var(--border-light);
+    border-radius: 0;
+    background: transparent;
+    max-height: none;
+    overflow: visible;
+  }
 
   .form-row {
     grid-template-columns: 1fr;
@@ -183,6 +372,27 @@
 
   .filters .form-group {
     width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .navbar-brand {
+    font-size: 18px;
+  }
+
+  .navbar-hamburger {
+    width: 24px;
+    height: 20px;
+  }
+
+  .navbar-links {
+    margin-top: 12px;
+    padding: 8px 0;
+  }
+
+  .navbar-links a {
+    padding: 10px 16px;
+    font-size: 14px;
   }
 }
 

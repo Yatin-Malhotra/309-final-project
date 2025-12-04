@@ -440,7 +440,7 @@ const Transactions = () => {
     <div className="transactions-page">
       <div className="transactions-page-header">
         <h1>{isCashierOnly ? 'Redemption Transactions' : 'Transactions'}</h1>
-        <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+        <div className="transactions-header-actions">
           {hasRole('manager') && (
             <button
               type="button"
@@ -578,7 +578,8 @@ const Transactions = () => {
         <div className="transactions-empty-state">No transactions found</div>
       ) : (
         <>
-          <div className="transactions-section">
+          {/* Desktop Table View */}
+          <div className="transactions-section transactions-table-container">
             <table className="transactions-table">
               <thead>
                 <tr>
@@ -695,6 +696,71 @@ const Transactions = () => {
                 ))}
               </tbody>
             </table>
+          </div>
+
+          {/* Mobile Card View */}
+          <div className="transactions-cards-container">
+            {sortedData.map((tx) => (
+              <div
+                key={tx.id}
+                onClick={() => {
+                  setSelectedTransaction(tx);
+                  setIsPanelOpen(true);
+                }}
+                className="transactions-card"
+              >
+                <div className="transactions-card-header">
+                  <div className="transactions-card-id">#{tx.id}</div>
+                  <div className="transactions-card-status">
+                    {tx.processed ? (
+                      <span className="transactions-badge transactions-badge-success">Processed</span>
+                    ) : (
+                      <span className="transactions-badge transactions-badge-warning">Pending</span>
+                    )}
+                  </div>
+                </div>
+                <div className="transactions-card-body">
+                  {(hasRole('manager') || isCashierOnly) && (
+                    <div className="transactions-card-row">
+                      <span className="transactions-card-label">User:</span>
+                      <span className="transactions-card-value">{tx.userName || tx.utorid || tx.user?.utorid}</span>
+                    </div>
+                  )}
+                  {!isCashierOnly && (
+                    <div className="transactions-card-row">
+                      <span className="transactions-card-label">Type:</span>
+                      <span className={`transactions-badge ${getTransactionTypeBadge(tx.type)}`}>
+                        {tx.type}
+                      </span>
+                    </div>
+                  )}
+                  <div className="transactions-card-row">
+                    <span className="transactions-card-label">Amount:</span>
+                    <span className="transactions-card-value transactions-card-amount">
+                      {isCashierOnly ? (tx.redeemed || Math.abs(tx.amount)) : tx.amount}
+                    </span>
+                  </div>
+                  <div className="transactions-card-row">
+                    <span className="transactions-card-label">Date:</span>
+                    <span className="transactions-card-value">{tx.createdAt ? formatDate(tx.createdAt) : 'N/A'}</span>
+                  </div>
+                  {(hasRole('manager') || hasRole('superuser')) && (
+                    <div className="transactions-card-row">
+                      <span className="transactions-card-label">Suspicious:</span>
+                      {tx.suspicious !== undefined ? (
+                        tx.suspicious ? (
+                          <span className="transactions-badge transactions-badge-danger">Yes</span>
+                        ) : (
+                          <span className="transactions-badge transactions-badge-success">No</span>
+                        )
+                      ) : (
+                        <span className="transactions-badge transactions-badge-secondary">N/A</span>
+                      )}
+                    </div>
+                  )}
+                </div>
+              </div>
+            ))}
           </div>
 
           <div className="transactions-pagination">

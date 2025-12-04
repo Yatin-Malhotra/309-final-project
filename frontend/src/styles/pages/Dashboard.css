@@ -571,6 +571,12 @@
 
 /* Responsive adjustments */
 @media (max-width: 768px) {
+  .dashboard-page {
+    padding: 16px;
+    padding-top: 20px;
+    padding-bottom: 24px;
+  }
+
   .dashboard-header-with-action {
     flex-direction: column;
     align-items: flex-start;
@@ -578,6 +584,12 @@
 
   .dashboard-header-with-action h1 {
     margin-bottom: 0;
+  }
+
+  .dashboard-header-with-badge {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
   }
 
   .dashboard-create-btn {
@@ -595,7 +607,14 @@
   }
 
   .dashboard-section {
-    padding: 24px 20px;
+    padding: 20px 16px;
+    margin-bottom: 24px;
+  }
+
+  .dashboard-section-header {
+    margin: -20px -16px 20px -16px;
+    padding: 16px;
+    font-size: 18px;
   }
 
   .dashboard-card-value {
@@ -607,13 +626,160 @@
     margin-bottom: 24px;
   }
 
+  /* Table wrapper for horizontal scrolling */
+  .dashboard-table-wrapper {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+
+  /* Handle tables inside AnalyticsCard */
+  .analytics-card-wide {
+    overflow: hidden;
+  }
+
+  .analytics-card-wide .dashboard-table-wrapper {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    max-width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .analytics-card-content .dashboard-table-wrapper {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    max-width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Ensure AnalyticsCard itself doesn't overflow */
+  .dashboard-quick-access-card.analytics-card-wide {
+    overflow: hidden;
+    position: relative;
+  }
+
+  /* Ensure table inside AnalyticsCard doesn't overflow */
+  .analytics-card-wide .analytics-card-content {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: auto;
+    margin-left: 0;
+    margin-right: 0;
+    padding-left: 0;
+    padding-right: 0;
+  }
+
+  .analytics-card-wide .dashboard-table-wrapper {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    max-width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Ensure table doesn't overflow container */
+  .dashboard-section .dashboard-table-wrapper {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    max-width: 100%;
+  }
+
+  /* Ensure tables inside divs with margin-top are also contained */
+  div[style*="margin-top"] .dashboard-table-wrapper {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    max-width: 100%;
+  }
+
   .dashboard-table {
-    font-size: 14px;
+    font-size: 13px;
+    min-width: 500px;
+    width: max-content;
   }
 
   .dashboard-table th,
   .dashboard-table td {
-    padding: 12px 8px;
+    padding: 10px 8px;
+    white-space: nowrap;
+  }
+
+  .dashboard-table th {
+    font-size: 12px;
+    padding: 10px 8px;
+  }
+
+  .dashboard-badge {
+    font-size: 11px;
+    padding: 4px 8px;
+  }
+
+  .dashboard-section-actions {
+    flex-direction: column;
+  }
+
+  .dashboard-section-actions .btn {
+    width: 100%;
+  }
+
+  /* Responsive table headings */
+  .dashboard-section h3 {
+    font-size: 16px;
+    margin-bottom: 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .dashboard-page {
+    padding: 12px;
+    padding-top: 16px;
+    padding-bottom: 20px;
+  }
+
+  .dashboard-section {
+    padding: 16px 12px;
+  }
+
+  .dashboard-section-header {
+    margin: -16px -12px 16px -12px;
+    padding: 12px;
+    font-size: 16px;
+  }
+
+  .dashboard-table {
+    font-size: 12px;
+    min-width: 450px;
+    width: max-content;
+  }
+
+  .dashboard-table th,
+  .dashboard-table td {
+    padding: 8px 6px;
+  }
+
+  .dashboard-table th {
+    font-size: 11px;
+  }
+
+  .dashboard-badge {
+    font-size: 10px;
+    padding: 3px 6px;
+  }
+
+  /* Responsive table headings */
+  .dashboard-section h3 {
+    font-size: 14px;
+    margin-bottom: 10px;
   }
 }
 

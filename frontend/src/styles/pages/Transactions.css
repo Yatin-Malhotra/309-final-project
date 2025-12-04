@@ -17,6 +17,14 @@
   justify-content: space-between;
   align-items: center;
   margin-bottom: 32px;
+  gap: 16px;
+}
+
+.transactions-header-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
 }
 
 .transactions-page-header h1 {
@@ -136,6 +144,11 @@
   border: 1px solid var(--border-color);
   margin-bottom: 24px;
   transition: all 0.3s ease;
+}
+
+.transactions-table-container {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 .transactions-section:hover {
@@ -375,38 +388,297 @@
   box-shadow: 0 2px 4px rgba(79, 124, 130, 0.3);
 }
 
+/* Mobile Card View */
+.transactions-cards-container {
+  display: none;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.transactions-card {
+  background: var(--bg-card);
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(11, 46, 51, 0.08), 0 1px 2px rgba(11, 46, 51, 0.04);
+  border: 1px solid var(--border-color);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.transactions-card:hover {
+  background: var(--bg-card-hover);
+  box-shadow: 0 4px 12px rgba(11, 46, 51, 0.12), 0 2px 4px rgba(11, 46, 51, 0.08);
+  border-color: rgba(79, 124, 130, 0.35);
+  transform: translateY(-2px);
+}
+
+.transactions-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgba(147, 177, 181, 0.15);
+}
+
+.transactions-card-id {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.transactions-card-body {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.transactions-card-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+
+.transactions-card-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  min-width: 80px;
+}
+
+.transactions-card-value {
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--text-primary);
+  text-align: right;
+  flex: 1;
+}
+
+.transactions-card-amount {
+  font-weight: 700;
+  font-size: 16px;
+}
+
 /* Responsive adjustments */
 @media (max-width: 768px) {
+  .transactions-page {
+    padding: 16px;
+    padding-top: 20px;
+    padding-bottom: 24px;
+  }
+
   .transactions-page-header {
     flex-direction: column;
     align-items: flex-start;
     gap: 16px;
+    margin-bottom: 24px;
   }
 
-  .transactions-filters {
-    flex-direction: column;
-  }
-
-  .transactions-filters .form-group {
+  .transactions-page-header > div {
     width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
   }
 
-  .transactions-section {
-    padding: 20px;
-    overflow-x: auto;
-  }
-
-  .transactions-table {
-    font-size: 14px;
-  }
-
-  .transactions-table th,
-  .transactions-table td {
-    padding: 12px 8px;
+  .transactions-page-header > div > * {
+    width: 100%;
   }
 
   .transactions-page-header h1 {
     font-size: 24px;
+  }
+
+  .transactions-filters {
+    flex-direction: column;
+    padding: 20px;
+    gap: 16px;
+  }
+
+  .transactions-filters .form-group {
+    width: 100%;
+    min-width: 100%;
+  }
+
+  .transactions-filters-actions {
+    flex-wrap: wrap;
+    width: 100%;
+  }
+
+  .transactions-filters-actions button {
+    flex: 1;
+    min-width: calc(50% - 6px);
+  }
+
+  /* Hide table on mobile, show cards */
+  .transactions-table-container {
+    display: none;
+  }
+
+  .transactions-cards-container {
+    display: flex;
+  }
+
+  .transactions-section {
+    padding: 0;
+    background: transparent;
+    box-shadow: none;
+    border: none;
+    margin-bottom: 0;
+  }
+
+  .transactions-section:hover {
+    background: transparent;
+    box-shadow: none;
+    border: none;
+  }
+
+  .transactions-pagination {
+    flex-direction: column;
+    gap: 12px;
+    padding: 16px;
+  }
+
+  .transactions-pagination button {
+    width: 100%;
+    padding: 12px 20px;
+  }
+
+  .transactions-pagination span {
+    text-align: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .transactions-page {
+    padding: 12px;
+    padding-top: 16px;
+    padding-bottom: 20px;
+  }
+
+  .transactions-page-header h1 {
+    font-size: 20px;
+  }
+
+  .transactions-filters {
+    padding: 16px;
+    gap: 14px;
+  }
+
+  .transactions-filters .form-group label {
+    font-size: 13px;
+  }
+
+  .transactions-filters .form-group select,
+  .transactions-filters .form-group input {
+    padding: 8px 12px;
+    font-size: 14px;
+  }
+
+  .transactions-filters-actions {
+    flex-direction: column;
+  }
+
+  .transactions-filters-actions button {
+    width: 100%;
+    min-width: 100%;
+  }
+
+  .transactions-card {
+    padding: 16px;
+  }
+
+  .transactions-card-header {
+    margin-bottom: 12px;
+    padding-bottom: 10px;
+  }
+
+  .transactions-card-id {
+    font-size: 16px;
+  }
+
+  .transactions-card-body {
+    gap: 10px;
+  }
+
+  .transactions-card-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+  }
+
+  .transactions-card-label {
+    font-size: 12px;
+    min-width: auto;
+  }
+
+  .transactions-card-value {
+    text-align: left;
+    font-size: 14px;
+  }
+
+  .transactions-card-amount {
+    font-size: 15px;
+  }
+
+  .transactions-pagination {
+    padding: 12px;
+  }
+
+  .transactions-pagination button {
+    padding: 10px 16px;
+    font-size: 13px;
+  }
+
+  .transactions-pagination span {
+    font-size: 13px;
+  }
+}
+
+/* Tablet adjustments */
+@media (min-width: 481px) and (max-width: 768px) {
+  .transactions-page {
+    padding: 20px;
+  }
+
+  .transactions-filters-actions button {
+    min-width: calc(50% - 6px);
+  }
+}
+
+/* Small desktop / Large tablet */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .transactions-page {
+    padding: 20px;
+  }
+
+  .transactions-section {
+    padding: 24px;
+  }
+
+  .transactions-table th,
+  .transactions-table td {
+    padding: 12px 10px;
+    font-size: 14px;
+  }
+
+  .transactions-table-container {
+    overflow-x: auto;
+  }
+}
+
+/* Ensure table scrolls horizontally on smaller desktop screens */
+@media (min-width: 769px) {
+  .transactions-table-container {
+    overflow-x: auto;
+  }
+
+  .transactions-table {
+    min-width: 800px;
   }
 }
 
