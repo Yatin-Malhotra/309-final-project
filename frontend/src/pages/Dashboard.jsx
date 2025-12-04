@@ -353,15 +353,41 @@ const Dashboard = () => {
     });
   };
 
-  const handleCheckRedemption = () => {
-    // Navigate to transactions page with filters pre-filled
-    navigate('/transactions', { 
-      state: { 
-        utorid: scannedUtorid,
-        type: 'redemption',
-        status: 'pending'
-      } 
-    });
+  const handleCheckRedemption = async () => {
+    // For cashiers, fetch the user's name since they filter by name, not UTORid
+    if (hasRole('cashier') && !hasRole('manager')) {
+      try {
+        const response = await userAPI.getUser(scannedUtorid);
+        const userName = response.data.name;
+        
+        // Navigate to transactions page with name filter for cashiers
+        navigate('/transactions', { 
+          state: { 
+            name: userName,
+            status: 'pending'
+          } 
+        });
+      } catch (error) {
+        console.error('Failed to fetch user:', error);
+        // Fallback: navigate with UTORid anyway
+        navigate('/transactions', { 
+          state: { 
+            utorid: scannedUtorid,
+            type: 'redemption',
+            status: 'pending'
+          } 
+        });
+      }
+    } else {
+      // For managers: navigate with UTORid filter
+      navigate('/transactions', { 
+        state: { 
+          utorid: scannedUtorid,
+          type: 'redemption',
+          status: 'pending'
+        } 
+      });
+    }
   };
 
   if (loading) {

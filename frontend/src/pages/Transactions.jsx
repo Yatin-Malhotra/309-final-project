@@ -87,13 +87,13 @@ const Transactions = () => {
   // Handle pre-filled filters from navigation state (e.g., from QR scan)
   useEffect(() => {
     if (location.state) {
-      const { utorid, type, status } = location.state;
+      const { utorid, name, type, status } = location.state;
       
-      if (utorid) {
+      if (utorid || name) {
         if (hasRole('manager')) {
           // For managers: set UTORid search, type, and status filters
           setManagerFilters({
-            idUtoridSearch: utorid,
+            idUtoridSearch: utorid || '',
             status: status === 'pending' ? 'false' : ''
           });
           if (type) {
@@ -104,10 +104,11 @@ const Transactions = () => {
             });
           }
         } else if (isCashierOnly) {
-          // For cashiers: set name/UTORid search and status filter
+          // For cashiers: set name search and status filter
           // Cashiers already only see redemption transactions
+          // Use name if provided (from QR scan), otherwise fallback to utorid
           setClientFilters({
-            idNameSearch: utorid,
+            idNameSearch: name || utorid || '',
             status: status === 'pending' ? 'false' : ''
           });
         }
