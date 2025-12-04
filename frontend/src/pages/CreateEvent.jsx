@@ -4,7 +4,7 @@ import { useNavigate, useParams, Link } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { useAuth } from '../contexts/AuthContext';
 import { eventAPI, userAPI } from '../services/api';
-import './CreateEvent.css';
+import '../styles/pages/CreateEvent.css';
 
 const CreateEvent = () => {
   const navigate = useNavigate();
@@ -36,6 +36,8 @@ const CreateEvent = () => {
   const organizerInputRef = useRef(null);
   const organizerDropdownRef = useRef(null);
   const [originalPublished, setOriginalPublished] = useState(false); // Track original published state
+  const [originalStartTime, setOriginalStartTime] = useState(null);
+  const [originalEndTime, setOriginalEndTime] = useState(null);
 
   const loadEvent = useCallback(async () => {
     if (!eventId || !user) return;
@@ -78,6 +80,9 @@ const CreateEvent = () => {
         points: event.pointsAllocated ? String(event.pointsAllocated) : '',
         published: publishedState,
       });
+      // Store original start and end times to check if event has started/expired
+      setOriginalStartTime(event.startTime ? new Date(event.startTime) : null);
+      setOriginalEndTime(event.endTime ? new Date(event.endTime) : null);
       
       // Load existing organizers
       if (event.organizers) {
@@ -104,6 +109,10 @@ const CreateEvent = () => {
       loadEvent();
     }
   }, [isEditMode, loadEvent]);
+
+  // Check if event has already started or expired
+  const hasStarted = isEditMode && originalStartTime && new Date() >= originalStartTime;
+  const hasExpired = isEditMode && originalEndTime && new Date() >= originalEndTime;
 
   const loadUsers = useCallback(async () => {
     if (!hasRole('manager') && !hasRole('superuser')) return;
@@ -170,29 +179,56 @@ const CreateEvent = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+
+    // Don't allow submission if event has expired
+    if (hasExpired) {
+      toast.error('Cannot update expired event.');
+      return;
+    }
+
     setLoading(true);
 
     try {
-      const data = {
-        name: formData.name,
-        description: formData.description,
-        location: formData.location,
-        startTime: new Date(formData.startTime).toISOString(),
-        endTime: new Date(formData.endTime).toISOString(),
-      };
+      let data;
+      
+      // If event has started (but not expired), only send endTime and other allowed fields
+      if (isEditMode && hasStarted && !hasExpired) {
+        data = {
+          endTime: new Date(formData.endTime).toISOString(),
+        };
+        
+        // Only include points and published for managers/superusers
+        if (hasRole('manager') || hasRole('superuser')) {
+          data.points = parseInt(formData.points);
+          data.published = formData.published;
+          // Only send organizerIds if they've changed
+          const organizerIdsChanged = JSON.stringify([...organizerIds].sort()) !== JSON.stringify([...originalOrganizerIds].sort());
+          if (organizerIdsChanged) {
+            data.organizerIds = organizerIds;
+          }
+        }
+      } else {
+        data = {
+          name: formData.name,
+          description: formData.description,
+          location: formData.location,
+          startTime: new Date(formData.startTime).toISOString(),
+          endTime: new Date(formData.endTime).toISOString(),
+        };
 
-      if (formData.capacity) {
-        data.capacity = parseInt(formData.capacity);
-      }
+        if (formData.capacity) {
+          data.capacity = parseInt(formData.capacity);
+        }
 
-      // Only include points and published for managers/superusers
-      if (hasRole('manager') || hasRole('superuser')) {
-        data.points = parseInt(formData.points);
-        data.published = formData.published;
-        // Only send organizerIds if they've changed (to avoid unnecessary delete/recreate)
-        const organizerIdsChanged = JSON.stringify([...organizerIds].sort()) !== JSON.stringify([...originalOrganizerIds].sort());
-        if (organizerIdsChanged) {
-          data.organizerIds = organizerIds;
+        // Only include points and published for managers/superusers
+        if (hasRole('manager') || hasRole('superuser')) {
+          data.points = parseInt(formData.points);
+          data.published = formData.published;
+          // Only send organizerIds if they've changed (to avoid unnecessary delete/recreate)
+          const organizerIdsChanged = JSON.stringify([...organizerIds].sort()) !== JSON.stringify([...originalOrganizerIds].sort());
+          if (organizerIdsChanged) {
+            data.organizerIds = organizerIds;
+          }
         }
       }
 
@@ -245,6 +281,8 @@ const CreateEvent = () => {
                 setFormData({ ...formData, name: e.target.value })
               }
               required
+              disabled={hasStarted || hasExpired}
+              className={(hasStarted || hasExpired) ? 'field-disabled' : ''}
             />
           </div>
           <div className="form-group">
@@ -257,6 +295,8 @@ const CreateEvent = () => {
               }
               rows="4"
               required
+              disabled={hasStarted || hasExpired}
+              className={(hasStarted || hasExpired) ? 'field-disabled' : ''}
             />
           </div>
           <div className="form-group">
@@ -269,6 +309,8 @@ const CreateEvent = () => {
                 setFormData({ ...formData, location: e.target.value })
               }
               required
+              disabled={hasStarted || hasExpired}
+              className={(hasStarted || hasExpired) ? 'field-disabled' : ''}
             />
           </div>
           <div className="form-row">
@@ -282,20 +324,24 @@ const CreateEvent = () => {
                   setFormData({ ...formData, startTime: e.target.value })
                 }
                 required
+                disabled={hasStarted || hasExpired}
+                className={(hasStarted || hasExpired) ? 'field-disabled' : ''}
               />
             </div>
-            <div className="form-group">
-              <label htmlFor="endTime">End Time *</label>
-              <input
-                type="datetime-local"
-                id="endTime"
-                value={formData.endTime}
-                onChange={(e) =>
-                  setFormData({ ...formData, endTime: e.target.value })
-                }
-                required
-              />
-            </div>
+            {!hasExpired && (
+              <div className="form-group">
+                <label htmlFor="endTime">End Time *</label>
+                <input
+                  type="datetime-local"
+                  id="endTime"
+                  value={formData.endTime}
+                  onChange={(e) =>
+                    setFormData({ ...formData, endTime: e.target.value })
+                  }
+                  required
+                />
+              </div>
+            )}
           </div>
           <div className="form-row">
             <div className="form-group">
@@ -308,6 +354,8 @@ const CreateEvent = () => {
                 onChange={(e) =>
                   setFormData({ ...formData, capacity: e.target.value })
                 }
+                disabled={hasStarted || hasExpired}
+                className={(hasStarted || hasExpired) ? 'field-disabled' : ''}
               />
             </div>
             {(hasRole('manager') || hasRole('superuser')) && (
@@ -322,10 +370,22 @@ const CreateEvent = () => {
                     setFormData({ ...formData, points: e.target.value })
                   }
                   required={!isEditMode}
+                  disabled={hasExpired}
+                  className={hasExpired ? 'field-disabled' : ''}
                 />
               </div>
             )}
           </div>
+          {hasExpired && (
+            <div className="event-started-warning">
+              Event already ended, no edits allowed.
+            </div>
+          )}
+          {hasStarted && !hasExpired && (
+            <div className="event-started-warning">
+              Event already started, limited edits allowed.
+            </div>
+          )}
           
           {(hasRole('manager') || hasRole('superuser')) && (
             <div className="form-group">
@@ -345,7 +405,7 @@ const CreateEvent = () => {
                       setShowOrganizerDropdown(true);
                     }
                   }}
-                  disabled={loadingUsers}
+                  disabled={loadingUsers || hasExpired}
                   className="event-detail-searchable-input"
                   style={{ width: '100%', padding: '8px' }}
                 />
@@ -392,8 +452,9 @@ const CreateEvent = () => {
                           alignItems: 'center',
                           padding: '8px',
                           marginBottom: '4px',
-                          backgroundColor: '#f5f5f5',
+                          backgroundColor: 'var(--bg-tertiary)',
                           borderRadius: '4px',
+                          color: 'var(--text-primary)',
                         }}
                       >
                         <span>
@@ -411,6 +472,7 @@ const CreateEvent = () => {
                           }}
                           className="btn btn-secondary"
                           style={{ padding: '4px 8px', fontSize: '12px' }}
+                          disabled={hasExpired}
                         >
                           Remove
                         </button>
@@ -434,7 +496,7 @@ const CreateEvent = () => {
                     onChange={(e) =>
                       setFormData({ ...formData, published: e.target.checked })
                     }
-                    disabled={isEditMode && originalPublished}
+                    disabled={(isEditMode && originalPublished) || hasExpired}
                   />
                   <span className="slider round"></span>
                 </label>
@@ -458,9 +520,11 @@ const CreateEvent = () => {
             >
               Cancel
             </button>
-            <button type="submit" className="btn btn-primary" disabled={loading}>
-              {loading ? (isEditMode ? 'Updating...' : 'Creating...') : (isEditMode ? 'Update Event' : 'Create Event')}
-            </button>
+            {!hasExpired && (
+              <button type="submit" className="btn btn-primary" disabled={loading}>
+                {loading ? (isEditMode ? 'Updating...' : 'Creating...') : (isEditMode ? 'Update Event' : 'Create Event')}
+              </button>
+            )}
           </div>
         </form>
       </div>

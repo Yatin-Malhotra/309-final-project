@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { userAPI } from '../services/api';
-import './CreateUser.css';
+import '../styles/pages/CreateUser.css';
 
 const CreateUser = () => {
   const navigate = useNavigate();

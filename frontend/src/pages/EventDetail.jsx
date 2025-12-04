@@ -5,7 +5,7 @@ import { toast } from 'react-toastify';
 import { useAuth } from '../contexts/AuthContext';
 import { eventAPI, userAPI } from '../services/api';
 import ConfirmationModal from '../components/ConfirmationModal';
-import './EventDetail.css';
+import '../styles/pages/EventDetail.css';
 
 const EventDetail = () => {
   const { eventId } = useParams();
@@ -730,33 +730,26 @@ const EventDetail = () => {
               {event.guests && event.guests.length > 0 ? (
                 <ul className="event-detail-list">
                   {event.guests.map((guest) => (
-                    <li key={guest.id} className="event-detail-list-item">
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', gap: '12px' }}>
-                        <span>{guest.name} ({guest.utorid})</span>
-                        <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                    <li key={guest.id} className="event-detail-list-item event-detail-guest-item">
+                      <div className="event-detail-guest-content">
+                        <span className="event-detail-guest-name">{guest.name} ({guest.utorid})</span>
+                        <div className="event-detail-guest-actions">
                           {canAllocatePoints() && (
                             <>
                               {selectedGuestForPoints?.id === guest.id && showPointsForm ? (
-                                <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                                <div className="event-detail-points-form">
                                   <input
                                     type="number"
                                     min="1"
                                     placeholder="Points"
                                     value={pointsAmount}
                                     onChange={(e) => setPointsAmount(e.target.value)}
-                                    style={{
-                                      width: '80px',
-                                      padding: '6px 8px',
-                                      border: '1.5px solid rgba(147, 177, 181, 0.3)',
-                                      borderRadius: '6px',
-                                      fontSize: '14px'
-                                    }}
+                                    className="event-detail-points-input"
                                     disabled={allocatingPoints}
                                   />
                                   <button
                                     onClick={() => handleAwardPoints(guest)}
-                                    className="btn btn-primary"
-                                    style={{ padding: '6px 12px', fontSize: '13px' }}
+                                    className="btn btn-primary event-detail-points-btn"
                                     disabled={allocatingPoints || !pointsAmount || parseInt(pointsAmount) <= 0}
                                   >
                                     {allocatingPoints ? '...' : 'Award'}
@@ -767,8 +760,7 @@ const EventDetail = () => {
                                       setShowPointsForm(false);
                                       setPointsAmount('');
                                     }}
-                                    className="btn btn-secondary"
-                                    style={{ padding: '6px 12px', fontSize: '13px' }}
+                                    className="btn btn-secondary event-detail-points-btn"
                                     disabled={allocatingPoints}
                                   >
                                     Cancel
@@ -781,8 +773,7 @@ const EventDetail = () => {
                                     setShowPointsForm(true);
                                     setPointsAmount('');
                                   }}
-                                  className="btn btn-primary"
-                                  style={{ padding: '6px 12px', fontSize: '13px' }}
+                                  className="btn btn-primary event-detail-award-btn"
                                   disabled={allocatingPoints || (showPointsForm && selectedGuestForPoints?.id !== guest.id)}
                                 >
                                   Award Points
@@ -794,7 +785,6 @@ const EventDetail = () => {
                             <button
                               onClick={() => handleRemoveGuest(guest.id)}
                               className="btn btn-danger event-detail-remove-btn"
-                              style={{ padding: '6px 12px', fontSize: '13px' }}
                               disabled={actionLoading || showPointsForm}
                             >
                               Remove
@@ -811,37 +801,30 @@ const EventDetail = () => {
                 </div>
               )}
               {canAllocatePoints() && event.guests && event.guests.length > 0 && !showPointsForm && (
-                <div className="event-detail-add-organizer-section" style={{ marginTop: '16px', paddingTop: '16px', borderTop: '1px solid rgba(147, 177, 181, 0.2)' }}>
-                  <div style={{ marginBottom: '12px', fontSize: '14px', fontWeight: '600', color: 'var(--text-primary)' }}>
+                <div className="event-detail-add-organizer-section event-detail-award-all-section">
+                  <div className="event-detail-award-all-title">
                     Award Points to All Guests
                   </div>
-                  <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                  <div className="event-detail-award-all-form">
                     <input
                       type="number"
                       min="1"
                       placeholder="Points per guest"
                       value={pointsAmount}
                       onChange={(e) => setPointsAmount(e.target.value)}
-                      style={{
-                        flex: 1,
-                        padding: '8px 12px',
-                        border: '1.5px solid rgba(147, 177, 181, 0.3)',
-                        borderRadius: '6px',
-                        fontSize: '14px'
-                      }}
+                      className="event-detail-award-all-input"
                       disabled={allocatingPoints}
                     />
                     <button
                       onClick={handleAwardPointsToAll}
-                      className="btn btn-primary"
-                      style={{ padding: '8px 16px', fontSize: '14px' }}
+                      className="btn btn-primary event-detail-award-all-btn"
                       disabled={allocatingPoints || !pointsAmount || parseInt(pointsAmount) <= 0}
                     >
                       {allocatingPoints ? 'Awarding...' : `Award to All (${event.guests.length})`}
                     </button>
                   </div>
                   {event.pointsRemain !== undefined && (
-                    <div style={{ marginTop: '8px', fontSize: '13px', color: '#666' }}>
+                    <div className="event-detail-award-all-remaining">
                       Points remaining: {event.pointsRemain}
                     </div>
                   )}

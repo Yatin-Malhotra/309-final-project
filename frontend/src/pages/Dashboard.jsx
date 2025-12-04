@@ -10,7 +10,7 @@ import QRCodeModal from '../components/QRCodeModal';
 import QRScannerModal from '../components/QRScannerModal';
 import TransactionModal from '../components/TransactionModal';
 import SortableTable from '../components/SortableTable';
-import './Dashboard.css';
+import '../styles/pages/Dashboard.css';
 
 const Dashboard = () => {
   const { user, hasRole, currentRole, updateLocalUser } = useAuth();
@@ -77,10 +77,16 @@ const Dashboard = () => {
               .filter(tx => earnedTypes.includes(tx.type) && new Date(tx.createdAt) >= monthAgo)
               .reduce((sum, tx) => sum + Math.abs(tx.amount), 0);
             const pointsSpentWeek = allTransactions
-              .filter(tx => tx.type === 'redemption' && new Date(tx.createdAt) >= weekAgo)
+              .filter(tx => {
+                const txDate = new Date(tx.createdAt);
+                return (tx.type === 'redemption' || (tx.type === 'transfer' && tx.amount < 0)) && txDate >= weekAgo;
+              })
               .reduce((sum, tx) => sum + Math.abs(tx.amount), 0);
             const pointsSpentMonth = allTransactions
-              .filter(tx => tx.type === 'redemption' && new Date(tx.createdAt) >= monthAgo)
+              .filter(tx => {
+                const txDate = new Date(tx.createdAt);
+                return (tx.type === 'redemption' || (tx.type === 'transfer' && tx.amount < 0)) && txDate >= monthAgo;
+              })
               .reduce((sum, tx) => sum + Math.abs(tx.amount), 0);
 
             // Points trend (last 2 weeks)
@@ -105,7 +111,7 @@ const Dashboard = () => {
               const spent = allTransactions
                 .filter(tx => {
                   const txDate = new Date(tx.createdAt);
-                  return tx.type === 'redemption' && txDate >= date && txDate < nextDate;
+                  return (tx.type === 'redemption' || (tx.type === 'transfer' && tx.amount < 0)) && txDate >= date && txDate < nextDate;
                 })
                 .reduce((sum, tx) => sum + Math.abs(tx.amount), 0);
               
@@ -138,7 +144,9 @@ const Dashboard = () => {
             const upcomingEventsRegistered = allEvents.filter(
               event => new Date(event.startTime) > now && event.isRegistered === true
             );
-            const activePromotions = await promotionAPI.getPromotions();
+            const activePromotions = await promotionAPI.getPromotions({ 
+              utorid: user.utorid 
+            });
             const activePromos = activePromotions.data.results || [];
             // Count events attended this month based on event transactions
             const eventsAttendedMonth = allTransactions.filter(tx => {
@@ -491,7 +499,8 @@ const Dashboard = () => {
             <div className="dashboard-empty-state">No recent transactions</div>
           ) : (
             <>
-              <SortableTable
+              <div className="dashboard-table-wrapper">
+                <SortableTable
                 data={stats.recentTransactions}
                 columns={[
                   { key: 'type', label: 'Type' },
@@ -531,8 +540,9 @@ const Dashboard = () => {
                       )}
                     </td>
                   </tr>
-                )}
-              />
+                  )}
+                />
+              </div>
               <div className="dashboard-section-actions">
                 <Link to="/transactions" className="btn btn-secondary">
                   View All Transactions
@@ -737,27 +747,29 @@ const Dashboard = () => {
                   title="Most Active Users"
                   className="analytics-card-wide"
                 >
-                  <SortableTable
-                    data={analytics.topUsers.slice(0, 5)}
-                    columns={[
-                      { key: 'user', label: 'User' },
-                      { key: 'utorid', label: 'UTORid' },
-                      { key: 'transactions', label: 'Transactions' },
-                    ]}
-                    config={{
-                      user: { accessor: (item) => (item.name || '').toLowerCase() },
-                      utorid: { accessor: (item) => (item.utorid || '').toLowerCase() },
-                      transactions: { sortFn: (a, b) => a.transactionCount - b.transactionCount },
-                    }}
-                    className="dashboard-table"
-                    renderRow={(userItem) => (
-                      <tr key={userItem.userId}>
-                        <td>{userItem.name}</td>
-                        <td>{userItem.utorid}</td>
-                        <td>{userItem.transactionCount}</td>
-                      </tr>
-                    )}
-                  />
+                  <div className="dashboard-table-wrapper">
+                    <SortableTable
+                      data={analytics.topUsers.slice(0, 5)}
+                      columns={[
+                        { key: 'user', label: 'User' },
+                        { key: 'utorid', label: 'UTORid' },
+                        { key: 'transactions', label: 'Transactions' },
+                      ]}
+                      config={{
+                        user: { accessor: (item) => (item.name || '').toLowerCase() },
+                        utorid: { accessor: (item) => (item.utorid || '').toLowerCase() },
+                        transactions: { sortFn: (a, b) => a.transactionCount - b.transactionCount },
+                      }}
+                      className="dashboard-table"
+                      renderRow={(userItem) => (
+                        <tr key={userItem.userId}>
+                          <td>{userItem.name}</td>
+                          <td>{userItem.utorid}</td>
+                          <td>{userItem.transactionCount}</td>
+                        </tr>
+                      )}
+                    />
+                  </div>
                 </AnalyticsCard>
               </div>
             )}
@@ -788,34 +800,36 @@ const Dashboard = () => {
           <div className="dashboard-section">
             <div className="dashboard-section-header">Transaction Types Breakdown</div>
             <div style={{ marginTop: '24px' }}>
-              <SortableTable
-                data={Object.entries(analytics.typeBreakdown)
-                  .filter(([type]) => type === 'purchase' || type === 'redemption')
-                  .map(([type, count]) => ({ type, count }))}
-                columns={[
-                  { key: 'type', label: 'Transaction Type' },
-                  { key: 'count', label: 'Count' },
-                ]}
-                config={{
-                  type: { accessor: (item) => item.type.toLowerCase() },
-                  count: { sortFn: (a, b) => a.count - b.count },
-                }}
-                className="dashboard-table"
-                renderRow={({ type, count }) => (
-                  <tr key={type}>
-                    <td>
-                      <span className={`dashboard-badge ${
-                        type === 'purchase' ? 'dashboard-badge-blue' :
-                        type === 'redemption' ? 'dashboard-badge-danger' :
-                        'dashboard-badge-secondary'
-                      }`}>
-                        {type.charAt(0).toUpperCase() + type.slice(1)}
-                      </span>
-                    </td>
-                    <td>{count}</td>
-                  </tr>
-                )}
-              />
+              <div className="dashboard-table-wrapper">
+                <SortableTable
+                  data={Object.entries(analytics.typeBreakdown)
+                    .filter(([type]) => type === 'purchase' || type === 'redemption')
+                    .map(([type, count]) => ({ type, count }))}
+                  columns={[
+                    { key: 'type', label: 'Transaction Type' },
+                    { key: 'count', label: 'Count' },
+                  ]}
+                  config={{
+                    type: { accessor: (item) => item.type.toLowerCase() },
+                    count: { sortFn: (a, b) => a.count - b.count },
+                  }}
+                  className="dashboard-table"
+                  renderRow={({ type, count }) => (
+                    <tr key={type}>
+                      <td>
+                        <span className={`dashboard-badge ${
+                          type === 'purchase' ? 'dashboard-badge-blue' :
+                          type === 'redemption' ? 'dashboard-badge-danger' :
+                          'dashboard-badge-secondary'
+                        }`}>
+                          {type.charAt(0).toUpperCase() + type.slice(1)}
+                        </span>
+                      </td>
+                      <td>{count}</td>
+                    </tr>
+                  )}
+                />
+              </div>
             </div>
           </div>
         )}
@@ -1104,65 +1118,69 @@ const Dashboard = () => {
             {analytics.users.topUsersByPoints && analytics.users.topUsersByPoints.length > 0 && (
               <div style={{ marginTop: '24px' }}>
                 <h3 style={{ marginBottom: '16px', fontSize: '18px', fontWeight: 600 }}>Top 5 Users by Points</h3>
-                <SortableTable
-                  data={analytics.users.topUsersByPoints.slice(0, 5)}
-                  columns={[
-                    { key: 'name', label: 'Name' },
-                    { key: 'utorid', label: 'UTORid' },
-                    { key: 'points', label: 'Points' },
-                    { key: 'status', label: 'Status' },
-                  ]}
-                  config={{
-                    name: { accessor: (u) => (u.name || '').toLowerCase() },
-                    utorid: { accessor: (u) => (u.utorid || '').toLowerCase() },
-                    points: { sortFn: (a, b) => a.points - b.points },
-                    status: { sortFn: (a, b) => (a.verified ? 1 : 0) - (b.verified ? 1 : 0) },
-                  }}
-                  className="dashboard-table"
-                  renderRow={(u) => (
-                    <tr key={u.id}>
-                      <td>{u.name}</td>
-                      <td>{u.utorid}</td>
-                      <td>{u.points}</td>
-                      <td>
-                        {u.verified ? (
-                          <span className="dashboard-badge dashboard-badge-success">Verified</span>
-                        ) : (
-                          <span className="dashboard-badge dashboard-badge-warning">Unverified</span>
-                        )}
-                      </td>
-                    </tr>
-                  )}
-                />
+                <div className="dashboard-table-wrapper">
+                  <SortableTable
+                    data={analytics.users.topUsersByPoints.slice(0, 5)}
+                    columns={[
+                      { key: 'name', label: 'Name' },
+                      { key: 'utorid', label: 'UTORid' },
+                      { key: 'points', label: 'Points' },
+                      { key: 'status', label: 'Status' },
+                    ]}
+                    config={{
+                      name: { accessor: (u) => (u.name || '').toLowerCase() },
+                      utorid: { accessor: (u) => (u.utorid || '').toLowerCase() },
+                      points: { sortFn: (a, b) => a.points - b.points },
+                      status: { sortFn: (a, b) => (a.verified ? 1 : 0) - (b.verified ? 1 : 0) },
+                    }}
+                    className="dashboard-table"
+                    renderRow={(u) => (
+                      <tr key={u.id}>
+                        <td>{u.name}</td>
+                        <td>{u.utorid}</td>
+                        <td>{u.points}</td>
+                        <td>
+                          {u.verified ? (
+                            <span className="dashboard-badge dashboard-badge-success">Verified</span>
+                          ) : (
+                            <span className="dashboard-badge dashboard-badge-warning">Unverified</span>
+                          )}
+                        </td>
+                      </tr>
+                    )}
+                  />
+                </div>
               </div>
             )}
             {analytics.users.topUsersByTransactionCount && analytics.users.topUsersByTransactionCount.length > 0 && (
               <div style={{ marginTop: '24px' }}>
                 <h3 style={{ marginBottom: '16px', fontSize: '18px', fontWeight: 600 }}>Top 5 Users by Transaction Count</h3>
-                <SortableTable
-                  data={analytics.users.topUsersByTransactionCount.slice(0, 5)}
-                  columns={[
-                    { key: 'name', label: 'Name' },
-                    { key: 'utorid', label: 'UTORid' },
-                    { key: 'transactions', label: 'Transactions' },
-                    { key: 'points', label: 'Points' },
-                  ]}
-                  config={{
-                    name: { accessor: (u) => (u.name || '').toLowerCase() },
-                    utorid: { accessor: (u) => (u.utorid || '').toLowerCase() },
-                    transactions: { sortFn: (a, b) => a.transactionCount - b.transactionCount },
-                    points: { sortFn: (a, b) => a.points - b.points },
-                  }}
-                  className="dashboard-table"
-                  renderRow={(u) => (
-                    <tr key={u.userId}>
-                      <td>{u.name}</td>
-                      <td>{u.utorid}</td>
-                      <td>{u.transactionCount}</td>
-                      <td>{u.points}</td>
-                    </tr>
-                  )}
-                />
+                <div className="dashboard-table-wrapper">
+                  <SortableTable
+                    data={analytics.users.topUsersByTransactionCount.slice(0, 5)}
+                    columns={[
+                      { key: 'name', label: 'Name' },
+                      { key: 'utorid', label: 'UTORid' },
+                      { key: 'transactions', label: 'Transactions' },
+                      { key: 'points', label: 'Points' },
+                    ]}
+                    config={{
+                      name: { accessor: (u) => (u.name || '').toLowerCase() },
+                      utorid: { accessor: (u) => (u.utorid || '').toLowerCase() },
+                      transactions: { sortFn: (a, b) => a.transactionCount - b.transactionCount },
+                      points: { sortFn: (a, b) => a.points - b.points },
+                    }}
+                    className="dashboard-table"
+                    renderRow={(u) => (
+                      <tr key={u.userId}>
+                        <td>{u.name}</td>
+                        <td>{u.utorid}</td>
+                        <td>{u.transactionCount}</td>
+                        <td>{u.points}</td>
+                      </tr>
+                    )}
+                  />
+                </div>
               </div>
             )}
               </>
@@ -1283,31 +1301,33 @@ const Dashboard = () => {
             {analytics.events.popularEvents && analytics.events.popularEvents.length > 0 && (
               <div style={{ marginTop: '24px' }}>
                 <h3 style={{ marginBottom: '16px', fontSize: '18px', fontWeight: 600 }}>Most Popular Events</h3>
-                <SortableTable
-                  data={analytics.events.popularEvents}
-                  columns={[
-                    { key: 'name', label: 'Event Name' },
-                    { key: 'guests', label: 'Guests' },
-                    { key: 'capacity', label: 'Capacity' },
-                  ]}
-                  config={{
-                    name: { accessor: (event) => (event.name || '').toLowerCase() },
-                    guests: { sortFn: (a, b) => a.guestCount - b.guestCount },
-                    capacity: { sortFn: (a, b) => {
-                      const aCap = a.capacity || Infinity;
-                      const bCap = b.capacity || Infinity;
-                      return aCap - bCap;
-                    }},
-                  }}
-                  className="dashboard-table"
-                  renderRow={(event) => (
-                    <tr key={event.eventId}>
-                      <td>{event.name}</td>
-                      <td>{event.guestCount}</td>
-                      <td>{event.capacity || 'Unlimited'}</td>
-                    </tr>
-                  )}
-                />
+                <div className="dashboard-table-wrapper">
+                  <SortableTable
+                    data={analytics.events.popularEvents}
+                    columns={[
+                      { key: 'name', label: 'Event Name' },
+                      { key: 'guests', label: 'Guests' },
+                      { key: 'capacity', label: 'Capacity' },
+                    ]}
+                    config={{
+                      name: { accessor: (event) => (event.name || '').toLowerCase() },
+                      guests: { sortFn: (a, b) => a.guestCount - b.guestCount },
+                      capacity: { sortFn: (a, b) => {
+                        const aCap = a.capacity || Infinity;
+                        const bCap = b.capacity || Infinity;
+                        return aCap - bCap;
+                      }},
+                    }}
+                    className="dashboard-table"
+                    renderRow={(event) => (
+                      <tr key={event.eventId}>
+                        <td>{event.name}</td>
+                        <td>{event.guestCount}</td>
+                        <td>{event.capacity || 'Unlimited'}</td>
+                      </tr>
+                    )}
+                  />
+                </div>
               </div>
             )}
               </>
@@ -1349,33 +1369,35 @@ const Dashboard = () => {
             {analytics.promotions.effectivePromotions && analytics.promotions.effectivePromotions.length > 0 && (
               <div style={{ marginTop: '24px' }}>
                 <h3 style={{ marginBottom: '16px', fontSize: '18px', fontWeight: 600 }}>Most Effective Promotions</h3>
-                <SortableTable
-                  data={analytics.promotions.effectivePromotions}
-                  columns={[
-                    { key: 'name', label: 'Promotion Name' },
-                    { key: 'type', label: 'Type' },
-                    { key: 'usageCount', label: 'Usage Count' },
-                  ]}
-                  config={{
-                    name: { accessor: (promo) => (promo.name || '').toLowerCase() },
-                    type: { accessor: (promo) => promo.type },
-                    usageCount: { sortFn: (a, b) => a.usageCount - b.usageCount },
-                  }}
-                  className="dashboard-table"
-                  renderRow={(promo) => (
-                    <tr key={promo.promotionId}>
-                      <td>{promo.name}</td>
-                      <td>
-                        <span className={`dashboard-badge ${
-                          promo.type === 'automatic' ? 'dashboard-badge-primary' : 'dashboard-badge-secondary'
-                        }`}>
-                          {promo.type}
-                        </span>
-                      </td>
-                      <td>{promo.usageCount}</td>
-                    </tr>
-                  )}
-                />
+                <div className="dashboard-table-wrapper">
+                  <SortableTable
+                    data={analytics.promotions.effectivePromotions}
+                    columns={[
+                      { key: 'name', label: 'Promotion Name' },
+                      { key: 'type', label: 'Type' },
+                      { key: 'usageCount', label: 'Usage Count' },
+                    ]}
+                    config={{
+                      name: { accessor: (promo) => (promo.name || '').toLowerCase() },
+                      type: { accessor: (promo) => promo.type },
+                      usageCount: { sortFn: (a, b) => a.usageCount - b.usageCount },
+                    }}
+                    className="dashboard-table"
+                    renderRow={(promo) => (
+                      <tr key={promo.promotionId}>
+                        <td>{promo.name}</td>
+                        <td>
+                          <span className={`dashboard-badge ${
+                            promo.type === 'automatic' ? 'dashboard-badge-primary' : 'dashboard-badge-secondary'
+                          }`}>
+                            {promo.type}
+                          </span>
+                        </td>
+                        <td>{promo.usageCount}</td>
+                      </tr>
+                    )}
+                  />
+                </div>
               </div>
             )}
               </>

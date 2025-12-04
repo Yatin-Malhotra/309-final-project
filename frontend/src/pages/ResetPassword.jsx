@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { useNavigate, useParams, Link } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { authAPI } from '../services/api';
-import './ResetPassword.css';
+import '../styles/pages/ResetPassword.css';
 
 const ResetPassword = () => {
   const { resetToken } = useParams();

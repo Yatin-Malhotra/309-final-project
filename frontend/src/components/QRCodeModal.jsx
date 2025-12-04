@@ -1,7 +1,7 @@
 // QR Code Modal Component - Generates unique QR code per user
 import { useAuth } from '../contexts/AuthContext';
 import { QRCodeSVG } from 'qrcode.react';
-import './QRCodeModal.css';
+import '../styles/components/QRCodeModal.css';
 
 const QRCodeModal = ({ isOpen, onClose }) => {
   const { user } = useAuth();

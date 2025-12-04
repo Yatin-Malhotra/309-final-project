@@ -3,7 +3,7 @@ import { useState, useEffect, useRef } from 'react';
 import { toast } from 'react-toastify';
 import { useAuth } from '../contexts/AuthContext';
 import { userAPI, getAvatarUrl } from '../services/api';
-import './Profile.css';
+import '../styles/pages/Profile.css';
 
 const Profile = () => {
   const { user, updateLocalUser } = useAuth();

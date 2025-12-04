@@ -1,5 +1,4 @@
-const { PrismaClient } = require('@prisma/client');
-const prisma = new PrismaClient();
+const { prisma } = require('../middleware');
 
 // GET /saved-filters
 const getSavedFilters = async (req, res, next) => {

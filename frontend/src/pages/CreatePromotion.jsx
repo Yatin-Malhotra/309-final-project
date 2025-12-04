@@ -4,7 +4,7 @@ import { useNavigate, useParams, Link } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { promotionAPI } from '../services/api';
 import ConfirmationModal from '../components/ConfirmationModal';
-import './CreatePromotion.css';
+import '../styles/pages/CreatePromotion.css';
 
 const CreatePromotion = () => {
   const navigate = useNavigate();
@@ -26,6 +26,8 @@ const CreatePromotion = () => {
   const [loadingPromotion, setLoadingPromotion] = useState(isEditMode);
   const [deleting, setDeleting] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [originalStartTime, setOriginalStartTime] = useState(null);
+  const [originalEndTime, setOriginalEndTime] = useState(null);
 
   const loadPromotion = useCallback(async () => {
     if (!promotionId) return;
@@ -48,16 +50,20 @@ const CreatePromotion = () => {
         return `${year}-${month}-${day}T${hours}:${minutes}`;
       };
 
+      const formattedStartTime = formatDateTimeLocal(promo.startTime);
       setFormData({
         name: promo.name || '',
         description: promo.description || '',
         type: promo.type || 'automatic',
-        startTime: formatDateTimeLocal(promo.startTime),
+        startTime: formattedStartTime,
         endTime: formatDateTimeLocal(promo.endTime),
         minSpending: promo.minSpending ? String(promo.minSpending) : '',
         rate: promo.rate ? String(promo.rate) : '',
         points: promo.points !== undefined && promo.points !== null ? String(promo.points) : '',
       });
+      // Store original start and end times to check if promotion has started/expired
+      setOriginalStartTime(promo.startTime ? new Date(promo.startTime) : null);
+      setOriginalEndTime(promo.endTime ? new Date(promo.endTime) : null);
     } catch (err) {
       setError(err.response?.data?.error || 'Failed to load promotion.');
     } finally {
@@ -71,12 +77,21 @@ const CreatePromotion = () => {
     }
   }, [isEditMode, loadPromotion]);
 
+  // Check if promotion has already started or expired
+  const hasStarted = isEditMode && originalStartTime && new Date() >= originalStartTime;
+  const hasExpired = isEditMode && originalEndTime && new Date() >= originalEndTime;
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
 
-    // Validation: At least one reward mechanism must be provided
-    if (!formData.minSpending && !formData.rate && !formData.points) {
+    // Don't allow submission if promotion has expired
+    if (hasExpired) {
+      toast.error('Cannot update expired promotion.');
+      return;
+    }
+
+    if (!hasStarted && !formData.minSpending && !formData.rate && !formData.points) {
       toast.error('Please provide at least one reward mechanism (minSpending, rate, or points).');
       return;
     }
@@ -84,28 +99,37 @@ const CreatePromotion = () => {
     setLoading(true);
 
     try {
-      const data = {
-        name: formData.name,
-        description: formData.description,
-        type: formData.type,
-        startTime: new Date(formData.startTime).toISOString(),
-        endTime: new Date(formData.endTime).toISOString(),
-      };
+      let data;
+      
+      // If promotion has started (but not expired), only send endTime
+      if (isEditMode && hasStarted && !hasExpired) {
+        data = {
+          endTime: new Date(formData.endTime).toISOString(),
+        };
+      } else {
+        data = {
+          name: formData.name,
+          description: formData.description,
+          type: formData.type,
+          startTime: new Date(formData.startTime).toISOString(),
+          endTime: new Date(formData.endTime).toISOString(),
+        };
 
-      if (formData.minSpending) {
-        data.minSpending = parseFloat(formData.minSpending);
-      } else {
-        data.minSpending = null;
-      }
-      if (formData.rate) {
-        data.rate = parseFloat(formData.rate);
-      } else {
-        data.rate = null;
-      }
-      if (formData.points) {
-        data.points = parseInt(formData.points);
-      } else {
-        data.points = null;
+        if (formData.minSpending) {
+          data.minSpending = parseFloat(formData.minSpending);
+        } else {
+          data.minSpending = null;
+        }
+        if (formData.rate) {
+          data.rate = parseFloat(formData.rate);
+        } else {
+          data.rate = null;
+        }
+        if (formData.points) {
+          data.points = parseInt(formData.points);
+        } else {
+          data.points = null;
+        }
       }
 
       if (isEditMode) {
@@ -171,6 +195,8 @@ const CreatePromotion = () => {
                 setFormData({ ...formData, name: e.target.value })
               }
               required
+              disabled={hasStarted || hasExpired}
+              className={(hasStarted || hasExpired) ? 'field-disabled' : ''}
             />
           </div>
           <div className="form-group">
@@ -183,6 +209,8 @@ const CreatePromotion = () => {
               }
               rows="4"
               required
+              disabled={hasStarted || hasExpired}
+              className={(hasStarted || hasExpired) ? 'field-disabled' : ''}
             />
           </div>
           <div className="form-group">
@@ -194,6 +222,8 @@ const CreatePromotion = () => {
                 setFormData({ ...formData, type: e.target.value })
               }
               required
+              disabled={hasStarted || hasExpired}
+              className={(hasStarted || hasExpired) ? 'field-disabled' : ''}
             >
               <option value="automatic">Automatic</option>
               <option value="onetime">One-time</option>
@@ -213,20 +243,24 @@ const CreatePromotion = () => {
                   setFormData({ ...formData, startTime: e.target.value })
                 }
                 required
+                disabled={hasStarted || hasExpired}
+                className={(hasStarted || hasExpired) ? 'field-disabled' : ''}
               />
             </div>
-            <div className="form-group">
-              <label htmlFor="endTime">End Time *</label>
-              <input
-                type="datetime-local"
-                id="endTime"
-                value={formData.endTime}
-                onChange={(e) =>
-                  setFormData({ ...formData, endTime: e.target.value })
-                }
-                required
-              />
-            </div>
+            {!hasExpired && (
+              <div className="form-group">
+                <label htmlFor="endTime">End Time *</label>
+                <input
+                  type="datetime-local"
+                  id="endTime"
+                  value={formData.endTime}
+                  onChange={(e) =>
+                    setFormData({ ...formData, endTime: e.target.value })
+                  }
+                  required
+                />
+              </div>
+            )}
           </div>
           <div className="form-row">
             <div className="form-group">
@@ -241,6 +275,8 @@ const CreatePromotion = () => {
                   setFormData({ ...formData, minSpending: e.target.value })
                 }
                 placeholder="e.g., 50.00"
+                disabled={hasStarted || hasExpired}
+                className={(hasStarted || hasExpired) ? 'field-disabled' : ''}
               />
               
             </div>
@@ -256,6 +292,8 @@ const CreatePromotion = () => {
                   setFormData({ ...formData, rate: e.target.value })
                 }
                 placeholder="e.g., 1.5"
+                disabled={hasStarted || hasExpired}
+                className={(hasStarted || hasExpired) ? 'field-disabled' : ''}
               />
               
             </div>
@@ -272,13 +310,25 @@ const CreatePromotion = () => {
                 setFormData({ ...formData, points: e.target.value })
               }
               placeholder="e.g., 100"
+              disabled={hasStarted || hasExpired}
+              className={(hasStarted || hasExpired) ? 'field-disabled' : ''}
             />
             <small>
               Provide minSpending, rate, points, or any combination. At least one reward mechanism is required.
             </small>
           </div>
+          {hasExpired && (
+            <div className="promotion-started-warning">
+              Promotion already expired, no edits allowed.
+            </div>
+          )}
+          {hasStarted && !hasExpired && (
+            <div className="promotion-started-warning">
+              Promotion already started, only end time can be updated.
+            </div>
+          )}
           <div className="form-actions">
-            {isEditMode && (
+            {isEditMode && !hasStarted && (
               <button
                 type="button"
                 onClick={() => setShowDeleteConfirm(true)}
@@ -296,9 +346,11 @@ const CreatePromotion = () => {
             >
               Cancel
             </button>
-            <button type="submit" className="btn btn-primary" disabled={loading || deleting}>
-              {loading ? (isEditMode ? 'Updating...' : 'Creating...') : (isEditMode ? 'Update Promotion' : 'Create Promotion')}
-            </button>
+            {!hasExpired && (
+              <button type="submit" className="btn btn-primary" disabled={loading || deleting}>
+                {loading ? (isEditMode ? 'Updating...' : 'Creating...') : (isEditMode ? 'Update Promotion' : 'Create Promotion')}
+              </button>
+            )}
           </div>
         </form>
       </div>

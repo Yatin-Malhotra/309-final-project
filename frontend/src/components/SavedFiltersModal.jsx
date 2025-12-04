@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { toast } from 'react-toastify';
 import { savedFilterAPI } from '../services/api';
 import ConfirmationModal from './ConfirmationModal';
-import './SavedFilters.css';
+import '../styles/components/SavedFilters.css';
 
 const SavedFiltersModal = ({ isOpen, onClose, onSelect, page }) => {
   const [filters, setFilters] = useState([]);

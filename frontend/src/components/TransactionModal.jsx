@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { toast } from 'react-toastify';
 import { transactionAPI } from "../services/api";
 import { useAuth } from "../contexts/AuthContext";
-import './TransactionModal.css';
+import '../styles/components/TransactionModal.css';
 
 const TransactionModal = ({ isOpen, onClose, defaultType = 'redemption', onSuccess }) => {
   const { user, updateLocalUser } = useAuth();

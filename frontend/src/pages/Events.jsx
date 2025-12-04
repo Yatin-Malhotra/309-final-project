@@ -7,7 +7,7 @@ import { Link, useSearchParams } from 'react-router-dom';
 import SaveFilterModal from '../components/SaveFilterModal';
 import SavedFiltersModal from '../components/SavedFiltersModal';
 import ConfirmationModal from '../components/ConfirmationModal';
-import './Events.css';
+import '../styles/pages/Events.css';
 
 const Events = () => {
   const { user, hasRole } = useAuth();

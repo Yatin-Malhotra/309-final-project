@@ -23,8 +23,8 @@ import Users from './pages/Users';
 import CreateUser from './pages/CreateUser';
 import UserDetail from './pages/UserDetail';
 
-import './App.css';
-import './Toast.css';
+import './styles/App.css';
+import './styles/Toast.css';
 
 function AppContent() {
   const location = useLocation();

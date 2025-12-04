@@ -1,6 +1,5 @@
 // Analytics routes for dashboard metrics
-const { PrismaClient } = require('@prisma/client');
-const prisma = new PrismaClient();
+const { prisma } = require('../middleware');
 
 // Helper function to get date ranges
 const getDateRanges = () => {
@@ -223,7 +222,7 @@ const getOverview = async (req, res, next) => {
             })
         ]);
 
-        const [pointsSpentWeek, pointsSpentMonth] = await Promise.all([
+        const [redemptionsWeek, redemptionsMonth, transfersWeek, transfersMonth] = await Promise.all([
             prisma.transaction.aggregate({
                 where: {
                     type: 'redemption',
@@ -237,8 +236,35 @@ const getOverview = async (req, res, next) => {
                     createdAt: { gte: monthAgo }
                 },
                 _sum: { amount: true }
+            }),
+            prisma.transaction.aggregate({
+                where: {
+                    type: 'transfer',
+                    amount: { lt: 0 },
+                    createdAt: { gte: weekAgo }
+                },
+                _sum: { amount: true }
+            }),
+            prisma.transaction.aggregate({
+                where: {
+                    type: 'transfer',
+                    amount: { lt: 0 },
+                    createdAt: { gte: monthAgo }
+                },
+                _sum: { amount: true }
             })
         ]);
+        
+        const pointsSpentWeek = {
+            _sum: {
+                amount: (redemptionsWeek._sum.amount || 0) + (transfersWeek._sum.amount || 0)
+            }
+        };
+        const pointsSpentMonth = {
+            _sum: {
+                amount: (redemptionsMonth._sum.amount || 0) + (transfersMonth._sum.amount || 0)
+            }
+        };
 
         // User growth
         const [newUsersWeek, newUsersMonth, totalUsers] = await Promise.all([
@@ -443,7 +469,7 @@ const getTransactionAnalytics = async (req, res, next) => {
             const nextDate = new Date(date);
             nextDate.setDate(nextDate.getDate() + 1);
             
-            const [earned, spent] = await Promise.all([
+            const [earned, redemptions, transfers] = await Promise.all([
                 prisma.transaction.aggregate({
                     where: {
                         type: { in: ['purchase', 'event', 'adjustment'] },
@@ -457,13 +483,23 @@ const getTransactionAnalytics = async (req, res, next) => {
                         createdAt: { gte: date, lt: nextDate }
                     },
                     _sum: { amount: true }
+                }),
+                prisma.transaction.aggregate({
+                    where: {
+                        type: 'transfer',
+                        amount: { lt: 0 },
+                        createdAt: { gte: date, lt: nextDate }
+                    },
+                    _sum: { amount: true }
                 })
             ]);
+            
+            const spent = (redemptions._sum.amount || 0) + (transfers._sum.amount || 0);
             
             pointsFlow.push({
                 date: date.toISOString().split('T')[0],
                 earned: Math.abs(earned._sum.amount || 0),
-                spent: Math.abs(spent._sum.amount || 0)
+                spent: Math.abs(spent)
             });
         }
 

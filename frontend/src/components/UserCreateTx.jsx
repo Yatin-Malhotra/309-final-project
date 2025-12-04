@@ -4,7 +4,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { toast } from 'react-toastify';
 import { transactionAPI } from "../services/api";
 import { useAuth } from "../contexts/AuthContext";
-import '../pages/CreateTransaction.css';
+import '../styles/pages/CreateTransaction.css';
 
 const UserCreateTx = () => {
   const { user, updateLocalUser } = useAuth()
