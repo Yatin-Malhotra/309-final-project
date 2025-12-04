@@ -200,7 +200,10 @@ const CreateEvent = () => {
         // Only include points and published for managers/superusers
         if (hasRole('manager') || hasRole('superuser')) {
           data.points = parseInt(formData.points);
-          data.published = formData.published;
+          // Only include published when editing (not when creating)
+          if (isEditMode) {
+            data.published = formData.published;
+          }
           // Only send organizerIds if they've changed
           const organizerIdsChanged = JSON.stringify([...organizerIds].sort()) !== JSON.stringify([...originalOrganizerIds].sort());
           if (organizerIdsChanged) {
@@ -223,7 +226,10 @@ const CreateEvent = () => {
         // Only include points and published for managers/superusers
         if (hasRole('manager') || hasRole('superuser')) {
           data.points = parseInt(formData.points);
-          data.published = formData.published;
+          // Only include published when editing (not when creating)
+          if (isEditMode) {
+            data.published = formData.published;
+          }
           // Only send organizerIds if they've changed (to avoid unnecessary delete/recreate)
           const organizerIdsChanged = JSON.stringify([...organizerIds].sort()) !== JSON.stringify([...originalOrganizerIds].sort());
           if (organizerIdsChanged) {
@@ -485,8 +491,8 @@ const CreateEvent = () => {
             </div>
           )}
 
-          {(hasRole('manager') || hasRole('superuser')) && (
-            <div className={`form-group ${isEditMode && originalPublished ? 'published-disabled' : ''}`}>
+          {(hasRole('manager') || hasRole('superuser')) && isEditMode && (
+            <div className={`form-group ${originalPublished ? 'published-disabled' : ''}`}>
               <label>Published Status</label>
               <div className="switch-container">
                 <label className="switch">
@@ -496,14 +502,14 @@ const CreateEvent = () => {
                     onChange={(e) =>
                       setFormData({ ...formData, published: e.target.checked })
                     }
-                    disabled={(isEditMode && originalPublished) || hasExpired}
+                    disabled={originalPublished || hasExpired}
                   />
                   <span className="slider round"></span>
                 </label>
                 <span className="switch-label">{formData.published ? 'Published' : 'Draft'}</span>
               </div>
               <small>
-                {isEditMode && originalPublished 
+                {originalPublished 
                   ? 'Published events cannot be unpublished.'
                   : formData.published 
                     ? 'This event is visible to all users.' 
