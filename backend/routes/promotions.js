@@ -248,6 +248,26 @@ router.patch('/:promotionId', requireRole('manager'), async (req, res, next) => 
         }
         
         const now = new Date();
+        const hasStarted = promotion.startTime <= now;
+        
+        // If promotion has started, only allow endTime to be updated
+        if (hasStarted) {
+            const restrictedFields = ['name', 'description', 'type', 'startTime', 'minSpending', 'rate', 'points'];
+            const hasRestrictedFieldUpdate = restrictedFields.some(field => 
+                updates[field] !== undefined && updates[field] !== null
+            );
+            
+            if (hasRestrictedFieldUpdate) {
+                return res.status(400).json({ error: 'Cannot update after promotion started' });
+            }
+            
+            // Filter updates to only include endTime
+            const endTimeUpdate = updates.endTime;
+            updates = {};
+            if (endTimeUpdate !== undefined && endTimeUpdate !== null) {
+                updates.endTime = endTimeUpdate;
+            }
+        }
         
         // Validate time updates
         if (updates.startTime || updates.endTime) {
@@ -255,16 +275,8 @@ router.patch('/:promotionId', requireRole('manager'), async (req, res, next) => 
             const newEnd = updates.endTime ? new Date(updates.endTime) : promotion.endTime;
             
             if (newStart >= newEnd) return res.status(400).json({ error: 'Invalid times' });
-            if (updates.startTime && newStart < now) return res.status(400).json({ error: 'Times cannot be in past' });
-            if (updates.endTime && newEnd < now) return res.status(400).json({ error: 'Times cannot be in past' });
-        }
-        
-        if (promotion.startTime <= now) {
-            const restrictedFields = ['name', 'description', 'type', 'startTime', 'minSpending', 'rate', 'points'];
-            for (const field of restrictedFields) {
-                if (updates[field] !== undefined && updates[field] !== null) {
-                    return res.status(400).json({ error: 'Cannot update after promotion started' });
-                }
+            if (updates.startTime && !hasStarted && newStart < now) {
+                return res.status(400).json({ error: 'Times cannot be in past' });
             }
         }
         
