@@ -145,11 +145,8 @@ router.get('/', optionalAuth, validateQuery(z.object({
             where.endTime = { gte: now };
         }
         
-        const dbCount = await prisma.promotion.count({ where });
         let promotions = await prisma.promotion.findMany({
             where,
-            skip,
-            take: limitNum,
             include: targetUserId ? {
                 userPromotions: {
                     where: { userId: targetUserId }
@@ -165,6 +162,10 @@ router.get('/', optionalAuth, validateQuery(z.object({
             });
         }
         
+        const finalCount = promotions.length;
+        
+        promotions = promotions.slice(skip, skip + limitNum);
+        
         const results = promotions.map(p => {
             const result = {
                 id: p.id,
@@ -178,8 +179,6 @@ router.get('/', optionalAuth, validateQuery(z.object({
             if (isManagerOrAbove) result.startTime = p.startTime;
             return result;
         });
-        
-        const finalCount = (requesterIsManagerOrAbove && !utorid) ? dbCount : results.length;
         
         res.json({ count: finalCount, results });
     } catch (error) { next(error); }

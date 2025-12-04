@@ -106,11 +106,8 @@ const Events = () => {
       const response = await eventAPI.getEvents(params);
       let fetchedEvents = response.data.results || [];
       
-      // Filter by published status when viewing as regular/cashier role
-      // This ensures managers/superusers see only published events when switching to regular/cashier view
-      if (currentRole === 'regular' || currentRole === 'cashier') {
-        fetchedEvents = fetchedEvents.filter(event => event.published === true);
-      }
+      // Backend already filters by published=true for regular/cashier users
+      // No need for client-side filtering here
       
       setAllEvents(fetchedEvents);
       setCount(response.data.count || 0);
