@@ -3,7 +3,7 @@
  * This script populates the database with:
  * - At least 10 users (1 cashier, 1 manager, 1 superuser, 7+ regular users)
  * - At least 30 transactions (at least 2 of each type)
- * - At least 5 events and 5 promotions
+ * - At least 15 events and 15 promotions
  */
 'use strict';
 
@@ -271,6 +271,162 @@ async function main() {
                 pointsRemain: 7500,
                 published: true
             }
+        }),
+        prisma.event.create({
+            data: {
+                name: 'CSSU Career Fair',
+                description: 'Connect with top tech companies and explore internship and full-time opportunities.',
+                location: 'Myhal Centre, Room 150',
+                startTime: new Date(now.getTime() + 10 * 24 * 60 * 60 * 1000), // 10 days from now
+                endTime: new Date(now.getTime() + 10 * 24 * 60 * 60 * 1000 + 6 * 60 * 60 * 1000), // 6 hours later
+                capacity: 150,
+                pointsAllocated: 6000,
+                pointsRemain: 4000,
+                published: true
+            }
+        }),
+        prisma.event.create({
+            data: {
+                name: 'Web Development Bootcamp',
+                description: 'Intensive 2-day bootcamp covering React, Node.js, and modern web development practices.',
+                location: 'Bahen Centre, Room 1160',
+                startTime: new Date(now.getTime() + 5 * 24 * 60 * 60 * 1000), // 5 days from now
+                endTime: new Date(now.getTime() + 6 * 24 * 60 * 60 * 1000 + 8 * 60 * 60 * 1000), // Next day + 8 hours
+                capacity: 60,
+                pointsAllocated: 4000,
+                pointsRemain: 2500,
+                published: true
+            }
+        }),
+        prisma.event.create({
+            data: {
+                name: 'CSSU Study Session',
+                description: 'Collaborative study session with snacks and coffee provided. Bring your assignments!',
+                location: 'CSSU Office, Sandford Fleming Building',
+                startTime: new Date(now.getTime() + 1 * 24 * 60 * 60 * 1000), // 1 day from now
+                endTime: new Date(now.getTime() + 1 * 24 * 60 * 60 * 1000 + 5 * 60 * 60 * 1000), // 5 hours later
+                capacity: 25,
+                pointsAllocated: 1000,
+                pointsRemain: 600,
+                published: true
+            }
+        }),
+        prisma.event.create({
+            data: {
+                name: 'Machine Learning Workshop',
+                description: 'Introduction to machine learning concepts with hands-on Python exercises.',
+                location: 'Bahen Centre, Room 2195',
+                startTime: new Date(now.getTime() + 18 * 24 * 60 * 60 * 1000), // 18 days from now
+                endTime: new Date(now.getTime() + 18 * 24 * 60 * 60 * 1000 + 4 * 60 * 60 * 1000), // 4 hours later
+                capacity: 45,
+                pointsAllocated: 3500,
+                pointsRemain: 2800,
+                published: true
+            }
+        }),
+        prisma.event.create({
+            data: {
+                name: 'CSSU Movie Night',
+                description: 'Watch a tech-themed movie with popcorn and drinks. Vote for the movie on our Discord!',
+                location: 'Hart House, East Common Room',
+                startTime: new Date(now.getTime() + 4 * 24 * 60 * 60 * 1000), // 4 days from now
+                endTime: new Date(now.getTime() + 4 * 24 * 60 * 60 * 1000 + 3 * 60 * 60 * 1000), // 3 hours later
+                capacity: 80,
+                pointsAllocated: 2500,
+                pointsRemain: 1800,
+                published: true
+            }
+        }),
+        prisma.event.create({
+            data: {
+                name: 'Database Design Seminar',
+                description: 'Learn database normalization, indexing strategies, and query optimization techniques.',
+                location: 'Sanford Fleming Building, Room 2101',
+                startTime: new Date(now.getTime() + 25 * 24 * 60 * 60 * 1000), // 25 days from now
+                endTime: new Date(now.getTime() + 25 * 24 * 60 * 60 * 1000 + 3 * 60 * 60 * 1000), // 3 hours later
+                capacity: 35,
+                pointsAllocated: 2800,
+                pointsRemain: 2800,
+                published: false
+            }
+        }),
+        prisma.event.create({
+            data: {
+                name: 'CSSU Networking Mixer',
+                description: 'Network with alumni, industry professionals, and fellow students over refreshments.',
+                location: 'Myhal Centre, Atrium',
+                startTime: new Date(now.getTime() + 12 * 24 * 60 * 60 * 1000), // 12 days from now
+                endTime: new Date(now.getTime() + 12 * 24 * 60 * 60 * 1000 + 3 * 60 * 60 * 1000), // 3 hours later
+                capacity: 120,
+                pointsAllocated: 4500,
+                pointsRemain: 3200,
+                published: true
+            }
+        }),
+        prisma.event.create({
+            data: {
+                name: 'Cybersecurity Workshop',
+                description: 'Learn about common security vulnerabilities and how to protect your applications.',
+                location: 'Bahen Centre, Room 1240',
+                startTime: new Date(now.getTime() + 16 * 24 * 60 * 60 * 1000), // 16 days from now
+                endTime: new Date(now.getTime() + 16 * 24 * 60 * 60 * 1000 + 3 * 60 * 60 * 1000), // 3 hours later
+                capacity: 55,
+                pointsAllocated: 3800,
+                pointsRemain: 2400,
+                published: true
+            }
+        }),
+        prisma.event.create({
+            data: {
+                name: 'CSSU Code Review Session',
+                description: 'Get your code reviewed by experienced developers and learn best practices.',
+                location: 'CSSU Office, Sandford Fleming Building',
+                startTime: new Date(now.getTime() + 8 * 24 * 60 * 60 * 1000), // 8 days from now
+                endTime: new Date(now.getTime() + 8 * 24 * 60 * 60 * 1000 + 2 * 60 * 60 * 1000), // 2 hours later
+                capacity: 20,
+                pointsAllocated: 1200,
+                pointsRemain: 800,
+                published: true
+            }
+        }),
+        prisma.event.create({
+            data: {
+                name: 'Mobile App Development Talk',
+                description: 'Explore React Native and Flutter for cross-platform mobile development.',
+                location: 'Sanford Fleming Building, Room 1105',
+                startTime: new Date(now.getTime() + 22 * 24 * 60 * 60 * 1000), // 22 days from now
+                endTime: new Date(now.getTime() + 22 * 24 * 60 * 60 * 1000 + 2 * 60 * 60 * 1000), // 2 hours later
+                capacity: 50,
+                pointsAllocated: 2200,
+                pointsRemain: 1500,
+                published: true
+            }
+        }),
+        prisma.event.create({
+            data: {
+                name: 'CSSU Alumni Panel',
+                description: 'Hear from successful CSSU alumni about their career journeys and advice for students.',
+                location: 'Myhal Centre, Room 1210',
+                startTime: new Date(now.getTime() + 19 * 24 * 60 * 60 * 1000), // 19 days from now
+                endTime: new Date(now.getTime() + 19 * 24 * 60 * 60 * 1000 + 2 * 60 * 60 * 1000), // 2 hours later
+                capacity: 70,
+                pointsAllocated: 3200,
+                pointsRemain: 2200,
+                published: true
+            }
+        }),
+        prisma.event.create({
+            data: {
+                name: 'DevOps Fundamentals Workshop',
+                description: 'Introduction to CI/CD, Docker, and cloud deployment strategies.',
+                location: 'Bahen Centre, Room 2190',
+                startTime: new Date(now.getTime() + 27 * 24 * 60 * 60 * 1000), // 27 days from now
+                endTime: new Date(now.getTime() + 27 * 24 * 60 * 60 * 1000 + 4 * 60 * 60 * 1000), // 4 hours later
+                capacity: 40,
+                pointsAllocated: 3000,
+                pointsRemain: 3000,
+                published: false
+            }
         })
     ]);
 
@@ -307,6 +463,66 @@ async function main() {
                 eventId: events[4].id,
                 userId: superuser.id
             }
+        }),
+        prisma.eventOrganizer.create({
+            data: {
+                eventId: events[5].id,
+                userId: manager.id
+            }
+        }),
+        prisma.eventOrganizer.create({
+            data: {
+                eventId: events[6].id,
+                userId: cashier.id
+            }
+        }),
+        prisma.eventOrganizer.create({
+            data: {
+                eventId: events[7].id,
+                userId: manager.id
+            }
+        }),
+        prisma.eventOrganizer.create({
+            data: {
+                eventId: events[8].id,
+                userId: superuser.id
+            }
+        }),
+        prisma.eventOrganizer.create({
+            data: {
+                eventId: events[9].id,
+                userId: cashier.id
+            }
+        }),
+        prisma.eventOrganizer.create({
+            data: {
+                eventId: events[10].id,
+                userId: manager.id
+            }
+        }),
+        prisma.eventOrganizer.create({
+            data: {
+                eventId: events[11].id,
+                userId: superuser.id
+            }
+        }),
+        prisma.eventOrganizer.create({
+            data: {
+                eventId: events[12].id,
+                userId: manager.id
+            }
+        }),
+        prisma.eventOrganizer.create({
+            data: {
+                eventId: events[13].id,
+                userId: cashier.id
+            }
+        }),
+        prisma.eventOrganizer.create({
+            data: {
+                eventId: events[14].id,
+                userId: superuser.id
+            }
         })
     ]);
 
@@ -341,6 +557,60 @@ async function main() {
                 eventId: events[2].id,
                 userId: regularUsers[4].id
             }
+        }),
+        prisma.eventGuest.create({
+            data: {
+                eventId: events[5].id,
+                userId: regularUsers[5].id
+            }
+        }),
+        prisma.eventGuest.create({
+            data: {
+                eventId: events[5].id,
+                userId: regularUsers[6].id
+            }
+        }),
+        prisma.eventGuest.create({
+            data: {
+                eventId: events[6].id,
+                userId: regularUsers[0].id
+            }
+        }),
+        prisma.eventGuest.create({
+            data: {
+                eventId: events[7].id,
+                userId: regularUsers[1].id
+            }
+        }),
+        prisma.eventGuest.create({
+            data: {
+                eventId: events[8].id,
+                userId: regularUsers[2].id
+            }
+        }),
+        prisma.eventGuest.create({
+            data: {
+                eventId: events[9].id,
+                userId: regularUsers[3].id
+            }
+        }),
+        prisma.eventGuest.create({
+            data: {
+                eventId: events[10].id,
+                userId: regularUsers[4].id
+            }
+        }),
+        prisma.eventGuest.create({
+            data: {
+                eventId: events[11].id,
+                userId: regularUsers[5].id
+            }
+        }),
+        prisma.eventGuest.create({
+            data: {
+                eventId: events[12].id,
+                userId: regularUsers[6].id
+            }
         })
     ]);
 
@@ -354,14 +624,14 @@ async function main() {
                 type: 'automatic',
                 startTime: new Date(now.getTime() - 2 * 24 * 60 * 60 * 1000), // 2 days ago
                 endTime: new Date(now.getTime() + 2 * 24 * 60 * 60 * 1000), // 2 days from now
-                rate: 2.0
+                rate: 0.02 // for every dollar spent, 2 extra points are added
             }
         }),
         prisma.promotion.create({
             data: {
                 name: 'New Member Bonus',
                 description: 'Get 100 bonus points when you make your first purchase!',
-                type: 'automatic',
+                type: 'onetime',
                 startTime: new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000), // 30 days ago
                 endTime: new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000), // 30 days from now
                 points: 100,
@@ -386,7 +656,7 @@ async function main() {
                 type: 'automatic',
                 startTime: new Date(now.getTime() - 1 * 24 * 60 * 60 * 1000), // 1 day ago
                 endTime: new Date(now.getTime() + 1 * 24 * 60 * 60 * 1000), // 1 day from now
-                rate: 3.0
+                rate: 0.03 // for every dollar spent, 3 extra points are added
             }
         }),
         prisma.promotion.create({
@@ -398,6 +668,149 @@ async function main() {
                 endTime: new Date(now.getTime() + 15 * 24 * 60 * 60 * 1000), // 15 days from now
                 minSpending: 100.0,
                 points: 200
+            }
+        }),
+        prisma.promotion.create({
+            data: {
+                name: 'Midweek Bonus',
+                description: 'Spend $25 or more on Wednesday and get 40 bonus points!',
+                type: 'onetime',
+                startTime: new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000), // 7 days ago
+                endTime: new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000), // 7 days from now
+                minSpending: 25.0,
+                points: 40
+            }
+        }),
+        prisma.promotion.create({
+            data: {
+                name: 'Student Welcome Package',
+                description: 'New students get 150 bonus points on their first $20 purchase!',
+                type: 'onetime',
+                startTime: new Date(now.getTime() - 60 * 24 * 60 * 60 * 1000), // 60 days ago
+                endTime: new Date(now.getTime() + 60 * 24 * 60 * 60 * 1000), // 60 days from now
+                minSpending: 20.0,
+                points: 150
+            }
+        }),
+        prisma.promotion.create({
+            data: {
+                name: 'Lunch Rush Special',
+                description: 'Spend $15 or more between 11 AM and 2 PM and get 30 bonus points!',
+                type: 'onetime',
+                startTime: new Date(now.getTime() - 1 * 24 * 60 * 60 * 1000), // 1 day ago
+                endTime: new Date(now.getTime() + 14 * 24 * 60 * 60 * 1000), // 14 days from now
+                minSpending: 15.0,
+                points: 30
+            }
+        }),
+        prisma.promotion.create({
+            data: {
+                name: 'Referral Bonus',
+                description: 'Refer a friend and both get 75 bonus points when they make their first purchase!',
+                type: 'onetime',
+                startTime: new Date(now.getTime() - 20 * 24 * 60 * 60 * 1000), // 20 days ago
+                endTime: new Date(now.getTime() + 40 * 24 * 60 * 60 * 1000), // 40 days from now
+                points: 75,
+                minSpending: 5.0
+            }
+        }),
+        prisma.promotion.create({
+            data: {
+                name: 'Weekend Warrior',
+                description: 'Spend $35 or more on weekends (Saturday and Sunday) and get 90 bonus points!',
+                type: 'onetime',
+                startTime: new Date(now.getTime() - 3 * 24 * 60 * 60 * 1000), // 3 days ago
+                endTime: new Date(now.getTime() + 4 * 24 * 60 * 60 * 1000), // 4 days from now
+                minSpending: 35.0,
+                points: 90
+            }
+        }),
+        prisma.promotion.create({
+            data: {
+                name: 'Early Bird Special',
+                description: 'Spend $30 or more before 10 AM and get 60 bonus points!',
+                type: 'onetime',
+                startTime: new Date(now.getTime() - 8 * 24 * 60 * 60 * 1000), // 8 days ago
+                endTime: new Date(now.getTime() + 12 * 24 * 60 * 60 * 1000), // 12 days from now
+                minSpending: 30.0,
+                points: 60
+            }
+        }),
+        prisma.promotion.create({
+            data: {
+                name: 'Monthly Mega Points',
+                description: 'Spend $40 or more in the first week of the month and get 160 bonus points!',
+                type: 'onetime',
+                startTime: new Date(now.getTime() - 5 * 24 * 60 * 60 * 1000), // 5 days ago
+                endTime: new Date(now.getTime() + 2 * 24 * 60 * 60 * 1000), // 2 days from now
+                minSpending: 40.0,
+                points: 160
+            }
+        }),
+        prisma.promotion.create({
+            data: {
+                name: 'Loyalty Reward',
+                description: 'Make 5 purchases this month and get 100 bonus points!',
+                type: 'onetime',
+                startTime: new Date(now.getTime() - 15 * 24 * 60 * 60 * 1000), // 15 days ago
+                endTime: new Date(now.getTime() + 15 * 24 * 60 * 60 * 1000), // 15 days from now
+                points: 100,
+                minSpending: 0.0
+            }
+        }),
+        prisma.promotion.create({
+            data: {
+                name: 'Evening Boost',
+                description: 'Spend $20 or more after 6 PM and get 35 bonus points!',
+                type: 'onetime',
+                startTime: new Date(now.getTime() - 2 * 24 * 60 * 60 * 1000), // 2 days ago
+                endTime: new Date(now.getTime() + 8 * 24 * 60 * 60 * 1000), // 8 days from now
+                minSpending: 20.0,
+                points: 35
+            }
+        }),
+        prisma.promotion.create({
+            data: {
+                name: 'Birthday Bonus',
+                description: 'Celebrate your birthday month with 250 bonus points on any purchase!',
+                type: 'onetime',
+                startTime: new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000), // 90 days ago
+                endTime: new Date(now.getTime() + 90 * 24 * 60 * 60 * 1000), // 90 days from now
+                points: 250,
+                minSpending: 10.0
+            }
+        }),
+        prisma.promotion.create({
+            data: {
+                name: 'Study Break Special',
+                description: 'During exam season, spend $25 or more and get 55 bonus points!',
+                type: 'onetime',
+                startTime: new Date(now.getTime() - 4 * 24 * 60 * 60 * 1000), // 4 days ago
+                endTime: new Date(now.getTime() + 10 * 24 * 60 * 60 * 1000), // 10 days from now
+                minSpending: 25.0,
+                points: 55
+            }
+        }),
+        prisma.promotion.create({
+            data: {
+                name: 'Premium Member Exclusive',
+                description: 'Members with 500+ points get 80 bonus points on purchases over $40!',
+                type: 'onetime',
+                startTime: new Date(now.getTime() - 12 * 24 * 60 * 60 * 1000), // 12 days ago
+                endTime: new Date(now.getTime() + 18 * 24 * 60 * 60 * 1000), // 18 days from now
+                minSpending: 40.0,
+                points: 80
+            }
+        }),
+        prisma.promotion.create({
+            data: {
+                name: 'Flash Friday',
+                description: 'Spend $30 or more on Friday and get 90 bonus points!',
+                type: 'onetime',
+                startTime: new Date(now.getTime() - 1 * 24 * 60 * 60 * 1000), // 1 day ago
+                endTime: new Date(now.getTime() + 6 * 24 * 60 * 60 * 1000), // 6 days from now
+                minSpending: 30.0,
+                points: 90
             }
         })
     ]);
@@ -431,6 +844,69 @@ async function main() {
             data: {
                 userId: regularUsers[3].id,
                 promotionId: promotions[4].id, // Big Spender Reward
+                used: true
+            }
+        }),
+        prisma.userPromotion.create({
+            data: {
+                userId: regularUsers[4].id,
+                promotionId: promotions[5].id, // Midweek Bonus
+                used: false
+            }
+        }),
+        prisma.userPromotion.create({
+            data: {
+                userId: regularUsers[5].id,
+                promotionId: promotions[6].id, // Student Welcome Package
+                used: true
+            }
+        }),
+        prisma.userPromotion.create({
+            data: {
+                userId: regularUsers[6].id,
+                promotionId: promotions[7].id, // Lunch Rush Special
+                used: false
+            }
+        }),
+        prisma.userPromotion.create({
+            data: {
+                userId: regularUsers[0].id,
+                promotionId: promotions[8].id, // Referral Bonus
+                used: false
+            }
+        }),
+        prisma.userPromotion.create({
+            data: {
+                userId: regularUsers[1].id,
+                promotionId: promotions[9].id, // Weekend Warrior
+                used: true
+            }
+        }),
+        prisma.userPromotion.create({
+            data: {
+                userId: regularUsers[2].id,
+                promotionId: promotions[10].id, // Early Bird Special
+                used: false
+            }
+        }),
+        prisma.userPromotion.create({
+            data: {
+                userId: regularUsers[3].id,
+                promotionId: promotions[11].id, // Monthly Mega Points
+                used: true
+            }
+        }),
+        prisma.userPromotion.create({
+            data: {
+                userId: regularUsers[4].id,
+                promotionId: promotions[12].id, // Loyalty Reward
+                used: false
+            }
+        }),
+        prisma.userPromotion.create({
+            data: {
+                userId: regularUsers[5].id,
+                promotionId: promotions[13].id, // Evening Boost
                 used: true
             }
         })
