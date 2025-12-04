@@ -48,7 +48,7 @@ async function main() {
         // Manager
         prisma.user.create({
             data: {
-                utorid: 'mgr001',
+                utorid: 'manager1',
                 name: 'Manager One',
                 email: 'manager.one@mail.utoronto.ca',
                 password: defaultPassword,
@@ -61,7 +61,7 @@ async function main() {
         // Cashier
         prisma.user.create({
             data: {
-                utorid: 'cash01',
+                utorid: 'cashier1',
                 name: 'Cashier One',
                 email: 'cashier.one@mail.utoronto.ca',
                 password: defaultPassword,
