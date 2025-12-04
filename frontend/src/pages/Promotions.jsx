@@ -10,7 +10,7 @@ import ConfirmationModal from '../components/ConfirmationModal';
 import '../styles/pages/Promotions.css';
 
 const Promotions = () => {
-  const { hasRole, currentRole } = useAuth();
+  const { hasRole, currentRole, user } = useAuth();
   const [searchParams, setSearchParams] = useSearchParams();
   const [promotions, setPromotions] = useState([]);
   const [count, setCount] = useState(0);
@@ -47,24 +47,12 @@ const Promotions = () => {
         if (!params[key]) delete params[key];
       });
       
+      if ((currentRole === 'regular' || currentRole === 'cashier') && user?.utorid) {
+        params.utorid = user.utorid;
+      }
+      
       const response = await promotionAPI.getPromotions(params);
       let fetchedPromotions = response.data.results || [];
-      
-      // Filter by active status when viewing as regular/cashier role
-      // This ensures managers/superusers see only active promotions when switching to regular/cashier view
-      if (currentRole === 'regular' || currentRole === 'cashier') {
-        const now = new Date();
-        fetchedPromotions = fetchedPromotions.filter(promo => {
-          // If startTime is not provided (for non-managers), backend already filtered to active
-          // But we need to double-check in case we're viewing as a switched role
-          if (!promo.startTime) {
-            return new Date(promo.endTime) >= now;
-          }
-          const start = new Date(promo.startTime);
-          const end = new Date(promo.endTime);
-          return start <= now && end >= now;
-        });
-      }
       
       setPromotions(fetchedPromotions);
       setCount(response.data.count || 0);
