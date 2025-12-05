@@ -3,7 +3,7 @@
 <html lang="en">
 
 <head>
-    <title>Code coverage report for backend/routes/analytics.js</title>
+    <title>Code coverage report for backend/routes/transactions.js</title>
     <meta charset="utf-8" />
     <link rel="stylesheet" href="../../prettify.css" />
     <link rel="stylesheet" href="../../base.css" />
@@ -19,34 +19,34 @@
 <body>
 <div class='wrapper'>
     <div class='pad1'>
-        <h1><a href="../../index.html">All files</a> / <a href="index.html">backend/routes</a> analytics.js</h1>
+        <h1><a href="../../index.html">All files</a> / <a href="index.html">backend/routes</a> transactions.js</h1>
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">91.56% </span>
+                <span class="strong">53.49% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>152/166</span>
+                <span class='fraction'>153/286</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">58.1% </span>
+                <span class="strong">43.2% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>43/74</span>
+                <span class='fraction'>108/250</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">88.23% </span>
+                <span class="strong">42.85% </span>
                 <span class="quiet">Functions</span>
-                <span class='fraction'>30/34</span>
+                <span class='fraction'>12/28</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">91.02% </span>
+                <span class="strong">59.27% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>142/156</span>
+                <span class='fraction'>147/248</span>
             </div>
         
             
@@ -61,7 +61,7 @@
             </div>
         </template>
     </div>
-    <div class='status-line high'></div>
+    <div class='status-line medium'></div>
     <pre><table class="coverage">
 <tr><td class="line-count quiet"><a name='L1'></a><a href='#L1'>1</a>
 <a name='L2'></a><a href='#L2'>2</a>
@@ -729,421 +729,72 @@
 <a name='L664'></a><a href='#L664'>664</a>
 <a name='L665'></a><a href='#L665'>665</a>
 <a name='L666'></a><a href='#L666'>666</a>
-<a name='L667'></a><a href='#L667'>667</a>
-<a name='L668'></a><a href='#L668'>668</a>
-<a name='L669'></a><a href='#L669'>669</a>
-<a name='L670'></a><a href='#L670'>670</a>
-<a name='L671'></a><a href='#L671'>671</a>
-<a name='L672'></a><a href='#L672'>672</a>
-<a name='L673'></a><a href='#L673'>673</a>
-<a name='L674'></a><a href='#L674'>674</a>
-<a name='L675'></a><a href='#L675'>675</a>
-<a name='L676'></a><a href='#L676'>676</a>
-<a name='L677'></a><a href='#L677'>677</a>
-<a name='L678'></a><a href='#L678'>678</a>
-<a name='L679'></a><a href='#L679'>679</a>
-<a name='L680'></a><a href='#L680'>680</a>
-<a name='L681'></a><a href='#L681'>681</a>
-<a name='L682'></a><a href='#L682'>682</a>
-<a name='L683'></a><a href='#L683'>683</a>
-<a name='L684'></a><a href='#L684'>684</a>
-<a name='L685'></a><a href='#L685'>685</a>
-<a name='L686'></a><a href='#L686'>686</a>
-<a name='L687'></a><a href='#L687'>687</a>
-<a name='L688'></a><a href='#L688'>688</a>
-<a name='L689'></a><a href='#L689'>689</a>
-<a name='L690'></a><a href='#L690'>690</a>
-<a name='L691'></a><a href='#L691'>691</a>
-<a name='L692'></a><a href='#L692'>692</a>
-<a name='L693'></a><a href='#L693'>693</a>
-<a name='L694'></a><a href='#L694'>694</a>
-<a name='L695'></a><a href='#L695'>695</a>
-<a name='L696'></a><a href='#L696'>696</a>
-<a name='L697'></a><a href='#L697'>697</a>
-<a name='L698'></a><a href='#L698'>698</a>
-<a name='L699'></a><a href='#L699'>699</a>
-<a name='L700'></a><a href='#L700'>700</a>
-<a name='L701'></a><a href='#L701'>701</a>
-<a name='L702'></a><a href='#L702'>702</a>
-<a name='L703'></a><a href='#L703'>703</a>
-<a name='L704'></a><a href='#L704'>704</a>
-<a name='L705'></a><a href='#L705'>705</a>
-<a name='L706'></a><a href='#L706'>706</a>
-<a name='L707'></a><a href='#L707'>707</a>
-<a name='L708'></a><a href='#L708'>708</a>
-<a name='L709'></a><a href='#L709'>709</a>
-<a name='L710'></a><a href='#L710'>710</a>
-<a name='L711'></a><a href='#L711'>711</a>
-<a name='L712'></a><a href='#L712'>712</a>
-<a name='L713'></a><a href='#L713'>713</a>
-<a name='L714'></a><a href='#L714'>714</a>
-<a name='L715'></a><a href='#L715'>715</a>
-<a name='L716'></a><a href='#L716'>716</a>
-<a name='L717'></a><a href='#L717'>717</a>
-<a name='L718'></a><a href='#L718'>718</a>
-<a name='L719'></a><a href='#L719'>719</a>
-<a name='L720'></a><a href='#L720'>720</a>
-<a name='L721'></a><a href='#L721'>721</a>
-<a name='L722'></a><a href='#L722'>722</a>
-<a name='L723'></a><a href='#L723'>723</a>
-<a name='L724'></a><a href='#L724'>724</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<a name='L667'></a><a href='#L667'>667</a></td><td class="line-coverage quiet"><span class="cline-any cline-yes">6x</span>
+<span class="cline-any cline-yes">6x</span>
 <span class="cline-any cline-yes">6x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">6x</span>
-<span class="cline-any cline-yes">5x</span>
-<span class="cline-any cline-yes">5x</span>
-<span class="cline-any cline-yes">5x</span>
-<span class="cline-any cline-yes">5x</span>
-<span class="cline-any cline-yes">5x</span>
-<span class="cline-any cline-yes">5x</span>
-<span class="cline-any cline-yes">5x</span>
-<span class="cline-any cline-yes">5x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">5x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">6x</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">7x</span>
-<span class="cline-any cline-yes">7x</span>
-<span class="cline-any cline-yes">7x</span>
-<span class="cline-any cline-yes">7x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">7x</span>
-<span class="cline-any cline-yes">7x</span>
-<span class="cline-any cline-yes">7x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">7x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">6x</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">14x</span>
-<span class="cline-any cline-yes">14x</span>
-<span class="cline-any cline-yes">14x</span>
-<span class="cline-any cline-yes">14x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">14x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">14x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">6x</span>
+<span class="cline-any cline-yes">4x</span>
+<span class="cline-any cline-yes">4x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">4x</span>
+<span class="cline-any cline-yes">4x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">4x</span>
+<span class="cline-any cline-yes">3x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">3x</span>
+<span class="cline-any cline-yes">3x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">3x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">3x</span>
+<span class="cline-any cline-yes">3x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">3x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -1157,6 +808,19 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -1164,67 +828,73 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">6x</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -1232,73 +902,6 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">14x</span>
-<span class="cline-any cline-yes">14x</span>
-<span class="cline-any cline-yes">14x</span>
-<span class="cline-any cline-yes">14x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">14x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">14x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">14x</span>
-<span class="cline-any cline-yes">14x</span>
-<span class="cline-any cline-yes">14x</span>
-<span class="cline-any cline-yes">14x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">14x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">14x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">14x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -1313,189 +916,14 @@
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">6x</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">6x</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">2x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">6x</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -1509,728 +937,1129 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">// Analytics routes for dashboard metrics
-const { prisma } = require('../middleware');
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">3x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">3x</span>
+<span class="cline-any cline-yes">3x</span>
+<span class="cline-any cline-yes">3x</span>
+<span class="cline-any cline-yes">3x</span>
+<span class="cline-any cline-yes">3x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">6x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">6x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">6x</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">6x</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">6x</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">6x</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">6x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">const express = require('express');
+const router = express.Router();
+const { z } = require('zod');
+const {
+    prisma,
+    schemas,
+    requireRole,
+    validate,
+    validateQuery,
+    coerceBoolean,
+    calculatePurchasePoints
+} = require('../middleware');
 &nbsp;
-// Helper function to get date ranges
-const getDateRanges = () =&gt; {
-    const now = new Date();
-    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-    const weekAgo = new Date(today);
-    weekAgo.setDate(weekAgo.getDate() - 7);
-    const monthAgo = new Date(today);
-    monthAgo.setMonth(monthAgo.getMonth() - 1);
-    const thirtyDaysAgo = new Date(today);
-    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-    
-    return { today, weekAgo, monthAgo, thirtyDaysAgo, now };
-};
-&nbsp;
-// GET /analytics/cashier/stats - Cashier analytics
-const getCashierStats = async (req, res, next) =&gt; {
+// POST /transactions - Create purchase/adjustment
+router.post('/', requireRole('cashier'), validate(schemas.createTransaction), async (req, res, next) =&gt; {
     try {
-        const cashierId = req.user.id;
-        const { today, weekAgo, monthAgo } = getDateRanges();
-&nbsp;
-        // Transactions created by this cashier
-        const [transactionsToday, transactionsWeek, transactionsMonth, allTransactions] = await Promise.all([
-            prisma.transaction.count({
-                where: { createdBy: cashierId, createdAt: { gte: today } }
-            }),
-            prisma.transaction.count({
-                where: { createdBy: cashierId, createdAt: { gte: weekAgo } }
-            }),
-            prisma.transaction.count({
-                where: { createdBy: cashierId, createdAt: { gte: monthAgo } }
-            }),
-            prisma.transaction.findMany({
-                where: { createdBy: cashierId },
-                select: { amount: true, type: true, createdAt: true, processed: true }
-            })
-        ]);
-&nbsp;
-        // Redemptions processed
-        const [redemptionsToday, redemptionsWeek, redemptionsMonth] = await Promise.all([
-            prisma.transaction.count({
-                where: {
-                    type: 'redemption',
-                    processedBy: cashierId,
-                    createdAt: { gte: today }
-                }
-            }),
-            prisma.transaction.count({
-                where: {
-                    type: 'redemption',
-                    processedBy: cashierId,
-                    createdAt: { gte: weekAgo }
-                }
-            }),
-            prisma.transaction.count({
-                where: {
-                    type: 'redemption',
-                    processedBy: cashierId,
-                    createdAt: { gte: monthAgo }
-                }
-            })
-        ]);
-&nbsp;
-        // Users created by this cashier
-        const [usersToday, usersWeek, usersMonth] = await Promise.all([
-            prisma.user.count({
-                where: { createdAt: { gte: today } }
-                // Note: We don't track who created users, so this is all users
-            }),
-            prisma.user.count({
-                where: { createdAt: { gte: weekAgo } }
-            }),
-            prisma.user.count({
-                where: { createdAt: { gte: monthAgo } }
-            })
-        ]);
-&nbsp;
-        // Calculate average transaction value
-        const avgTransactionValue = allTransactions.length &gt; 0
-            ? allTransactions.reduce((sum, tx) =&gt; sum + Math.abs(tx.amount), 0) / allTransactions.length
-            : <span class="branch-1 cbranch-no" title="branch not covered" >0;</span>
-&nbsp;
-        // Total points issued
-        const pointsIssuedToday = allTransactions
-            .filter(tx =&gt; tx.createdAt &gt;= today &amp;&amp; ['purchase', 'event', 'adjustment'].includes(tx.type))
-            .reduce((sum, tx) =&gt; sum + Math.abs(tx.amount), 0);
-        const pointsIssuedWeek = allTransactions
-            .filter(tx =&gt; tx.createdAt &gt;= weekAgo &amp;&amp; ['purchase', 'event', 'adjustment'].includes(tx.type))
-            .reduce((sum, tx) =&gt; sum + Math.abs(tx.amount), 0);
-        const pointsIssuedMonth = allTransactions
-            .filter(tx =&gt; tx.createdAt &gt;= monthAgo &amp;&amp; ['purchase', 'event', 'adjustment'].includes(tx.type))
-            .reduce((sum, tx) =&gt; sum + Math.abs(tx.amount), 0);
-&nbsp;
-        // Pending redemptions count
-        const pendingRedemptions = await prisma.transaction.count({
-            where: { type: 'redemption', processed: false }
-        });
-&nbsp;
-        // Processing rate
-        const totalRedemptions = await prisma.transaction.count({
-            where: { type: 'redemption' }
-        });
-        const processingRate = totalRedemptions &gt; 0
-            ? ((totalRedemptions - pendingRedemptions) / totalRedemptions * 100).toFixed(1)
-            : <span class="branch-1 cbranch-no" title="branch not covered" >0;</span>
-&nbsp;
-        // Transaction types breakdown (only purchase and redemption for cashier)
-        const typeBreakdown = {
-            purchase: allTransactions.filter(tx =&gt; tx.type === 'purchase').length,
-            redemption: allTransactions.filter(tx =&gt; tx.type === 'redemption').length
-        };
-&nbsp;
-        // Daily transaction volume (last 7 days)
-        const dailyVolume = [];
-        for (let i = 6; i &gt;= 0; i--) {
-            const date = new Date(today);
-            date.setDate(date.getDate() - i);
-            const nextDate = new Date(date);
-            nextDate.setDate(nextDate.getDate() + 1);
+        const { utorid, type, spent, amount, relatedId, promotionIds = [], remark } = req.validatedData;
+        
+        const targetUser = await prisma.user.findUnique({ where: { utorid } });
+        <span class="missing-if-branch" title="if path not taken" >I</span>if (!targetUser) <span class="cstat-no" title="statement not covered" >return res.status(404).json({ error: 'User not found' });</span>
+        
+        let transaction, earnedPoints;
+        
+        if (type === 'purchase') {
+            <span class="missing-if-branch" title="if path not taken" >I</span>if (!spent || spent &lt;= 0) <span class="cstat-no" title="statement not covered" >return res.status(400).json({ error: 'Invalid spent amount' });</span>
             
-            const count = allTransactions.filter(tx =&gt; {
-                const txDate = new Date(tx.createdAt);
-                return txDate &gt;= date &amp;&amp; txDate &lt; nextDate;
-            }).length;
-            
-            dailyVolume.push({
-                date: date.toISOString().split('T')[0],
-                count
+            // Automatically fetch and include automatic promotions
+            const now = new Date();
+            const automaticPromotions = await prisma.promotion.findMany({
+                where: {
+                    type: 'automatic',
+                    startTime: { lte: now },
+                    endTime: { gte: now }
+                }
             });
+            
+            // Filter automatic promotions based on user role and minimum spending
+            const applicableAutomaticPromotions = automaticPromotions.filter(promo =&gt; {
+                // Check if user role allows this promotion (regular users see all active, managers/superusers see all)
+                const isManagerOrAbove = ['manager', 'superuser'].includes(targetUser.role);
+                // For now, all active automatic promotions are available to all users
+                // Check minimum spending requirement
+                if (promo.minSpending &amp;&amp; spent &lt; promo.minSpending) {
+                    return false;
+                }
+                return true;
+            });
+            
+            // Combine manual promotion IDs with automatic promotion IDs
+            const allPromotionIds = [...new Set([
+                ...promotionIds.map(id =&gt; parseInt(id)),
+                ...applicableAutomaticPromotions.map(p =&gt; p.id)
+            ])];
+            
+            earnedPoints = await calculatePurchasePoints(spent, allPromotionIds, targetUser.id);
+            
+            const creator = await prisma.user.findUnique({ where: { id: req.user.id } });
+            <span class="missing-if-branch" title="if path not taken" >I</span>if (!creator) <span class="cstat-no" title="statement not covered" >return res.status(404).json({ error: 'Creator not found' });</span>
+            
+            // Transaction is suspicious if creator is a cashier AND marked as suspicious
+            const suspicious = creator.role === 'cashier' &amp;&amp; Boolean(creator.suspicious);
+            // If cashier is suspicious, transaction should be pending (not processed)
+            const processed = !suspicious;
+            
+            transaction = await prisma.transaction.create({
+                data: {
+                    userId: targetUser.id,
+                    type: 'purchase',
+                    amount: earnedPoints, // Store the calculated points even if suspicious
+                    spent,
+                    suspicious,
+                    processed,
+                    remark: remark || <span class="branch-1 cbranch-no" title="branch not covered" >'',</span>
+                    createdBy: req.user.id
+                }
+            });
+            
+            // Link promotions (including automatic ones)
+            <span class="missing-if-branch" title="else path not taken" >E</span>if (allPromotionIds &amp;&amp; allPromotionIds.length &gt; 0) {
+                await prisma.transactionPromotion.createMany({
+                    data: allPromotionIds.map(pid =&gt; ({ transactionId: transaction.id, promotionId: pid }))
+                });
+                
+                // Mark one-time promotions as used
+                for (const pid of allPromotionIds) {
+                    const promo = await prisma.promotion.findUnique({ where: { id: pid } });
+                    <span class="missing-if-branch" title="if path not taken" >I</span>if (promo &amp;&amp; promo.type === 'onetime') {
+<span class="cstat-no" title="statement not covered" >                        await prisma.userPromotion.upsert({</span>
+                            where: { userId_promotionId: { userId: targetUser.id, promotionId: pid } },
+                            update: { used: true },
+                            create: { userId: targetUser.id, promotionId: pid, used: true }
+                        });
+                    }
+                }
+            }
+            
+            // Only update user points if transaction is NOT suspicious
+            // The transaction amount still stores the calculated points for audit purposes
+            <span class="missing-if-branch" title="else path not taken" >E</span>if (!suspicious) {
+                await prisma.user.update({
+                    where: { id: targetUser.id },
+                    data: { points: { increment: earnedPoints } }
+                });
+            }
+            
+            const creatorUser = await prisma.user.findUnique({ where: { id: req.user.id } });
+            return res.status(201).json({
+                id: transaction.id,
+                utorid: targetUser.utorid,
+                type: 'purchase',
+                spent: transaction.spent,
+                earned: suspicious ? <span class="branch-0 cbranch-no" title="branch not covered" >0 </span>: earnedPoints,
+                remark: transaction.remark,
+                promotionIds: allPromotionIds || <span class="branch-1 cbranch-no" title="branch not covered" >[],</span>
+                createdBy: creatorUser.utorid
+            });
+            
+        } else if (type === 'adjustment') {
+            <span class="missing-if-branch" title="if path not taken" >I</span>if (req.user.role !== 'manager' &amp;&amp; <span class="branch-1 cbranch-no" title="branch not covered" >req.user.role !== 'superuser')</span> {
+<span class="cstat-no" title="statement not covered" >                return res.status(403).json({ error: 'Forbidden' });</span>
+            }
+            // Check if required fields are missing (400)
+            <span class="missing-if-branch" title="if path not taken" >I</span>if (amount === undefined || amount === null) {
+<span class="cstat-no" title="statement not covered" >                return res.status(400).json({ error: 'Invalid adjustment data' });</span>
+            }
+            <span class="missing-if-branch" title="if path not taken" >I</span>if (relatedId === undefined || relatedId === null) {
+<span class="cstat-no" title="statement not covered" >                return res.status(400).json({ error: 'Invalid adjustment data' });</span>
+            }
+            
+            // Convert relatedId to number if needed (schema preprocessing should have done this, but handle edge cases)
+            let relatedIdNum;
+            if (typeof relatedId === 'number') {
+                relatedIdNum = relatedId;
+            } else <span class="cstat-no" title="statement not covered" ><span class="missing-if-branch" title="else path not taken" >E</span>if (typeof relatedId === 'string') {</span>
+<span class="cstat-no" title="statement not covered" >                relatedIdNum = parseInt(relatedId, 10);</span>
+<span class="cstat-no" title="statement not covered" >                if (isNaN(relatedIdNum) || relatedIdNum &lt;= 0) {</span>
+<span class="cstat-no" title="statement not covered" >                    return res.status(400).json({ error: 'Invalid adjustment data' });</span>
+                }
+            } else {
+<span class="cstat-no" title="statement not covered" >                return res.status(400).json({ error: 'Invalid adjustment data' });</span>
+            }
+            
+            // Check if related transaction exists (404) - this should come after format validation
+            const relatedTransaction = await prisma.transaction.findUnique({ where: { id: relatedIdNum } });
+            <span class="missing-if-branch" title="if path not taken" >I</span>if (!relatedTransaction) <span class="cstat-no" title="statement not covered" >return res.status(404).json({ error: 'Related transaction not found' });</span>
+            
+            transaction = await prisma.transaction.create({
+                data: {
+                    userId: targetUser.id,
+                    type: 'adjustment',
+                    amount,
+                    relatedId: relatedIdNum,
+                    remark: remark || <span class="branch-1 cbranch-no" title="branch not covered" >'',</span>
+                    createdBy: req.user.id,
+                    processed: true  // Adjustments are applied immediately, so they're processed
+                }
+            });
+            
+            // Link promotions
+            <span class="missing-if-branch" title="if path not taken" >I</span>if (promotionIds &amp;&amp; promotionIds.length &gt; 0) {
+<span class="cstat-no" title="statement not covered" >                await prisma.transactionPromotion.createMany({</span>
+                    data: promotionIds.map(<span class="fstat-no" title="function not covered" >pi</span>d =&gt; (<span class="cstat-no" title="statement not covered" >{ transactionId: transaction.id, promotionId: pid })</span>)
+                });
+            }
+            
+            // Apply adjustment immediately
+            await prisma.user.update({
+                where: { id: targetUser.id },
+                data: { points: { increment: amount } }
+            });
+            
+            const creatorUser = await prisma.user.findUnique({ where: { id: req.user.id } });
+            return res.status(201).json({
+                id: transaction.id,
+                utorid: targetUser.utorid,
+                amount: transaction.amount,
+                type: 'adjustment',
+                relatedId: transaction.relatedId,
+                remark: transaction.remark,
+                promotionIds: promotionIds || <span class="branch-1 cbranch-no" title="branch not covered" >[],</span>
+                createdBy: creatorUser.utorid,
+                processed: transaction.processed
+            });
+        } else <span class="missing-if-branch" title="else path not taken" >E</span>{
+<span class="cstat-no" title="statement not covered" >            return res.status(400).json({ error: 'Invalid transaction type' });</span>
+        }
+    } catch (error) {
+        <span class="missing-if-branch" title="else path not taken" >E</span>if (error.message.includes('Promotion') || error.message.includes('promotion')) {
+            return res.status(400).json({ error: error.message });
+        }
+<span class="cstat-no" title="statement not covered" >        if (error.message.includes('Invalid promotion')) {</span>
+<span class="cstat-no" title="statement not covered" >            return res.status(400).json({ error: error.message });</span>
+        }
+<span class="cstat-no" title="statement not covered" >        next(error);</span>
+    }
+});
+&nbsp;
+// GET /transactions - List all transactions
+router.get('/', requireRole('manager'), validateQuery(z.object({
+    name: z.string().optional(),
+    createdBy: z.string().optional(),
+    suspicious: z.string().optional(),
+    promotionId: z.string().optional(),
+    type: z.string().optional(),
+    relatedId: z.string().optional(),
+    amount: z.string().optional(),
+    operator: z.string().optional(),
+    page: z.preprocess(
+        (val) =&gt; (val === undefined || <span class="branch-1 cbranch-no" title="branch not covered" >val === null </span>|| <span class="branch-2 cbranch-no" title="branch not covered" >val === '')</span> ? '1' : <span class="branch-1 cbranch-no" title="branch not covered" >val,</span>
+        z.string().regex(/^\d+$/)
+    ),
+    limit: z.preprocess(
+        (val) =&gt; (val === undefined || <span class="branch-1 cbranch-no" title="branch not covered" >val === null </span>|| <span class="branch-2 cbranch-no" title="branch not covered" >val === '')</span> ? '10' : <span class="branch-1 cbranch-no" title="branch not covered" >val,</span>
+        z.string().regex(/^\d+$/)
+    ),
+    sortBy: z.enum(['id', 'amount', 'type', 'createdAt', 'processed', 'suspicious', 'user']).optional(),
+    order: z.enum(['asc', 'desc']).optional()
+})), async (req, res, next) =&gt; {
+    try {
+        const { name, createdBy, suspicious, promotionId, type, relatedId, amount, operator, page = <span class="branch-0 cbranch-no" title="branch not covered" >'1',</span> limit = <span class="branch-0 cbranch-no" title="branch not covered" >'10',</span> sortBy, order } = req.validatedQuery;
+        const pageNum = parseInt(page), limitNum = parseInt(limit);
+        
+        // FIX: Add validation
+        <span class="missing-if-branch" title="if path not taken" >I</span>if (pageNum &lt; 1) {
+<span class="cstat-no" title="statement not covered" >            return res.status(400).json({ error: 'Page must be at least 1' });</span>
+        }
+        <span class="missing-if-branch" title="if path not taken" >I</span>if (limitNum &lt; 1 || limitNum &gt; 100) {
+<span class="cstat-no" title="statement not covered" >            return res.status(400).json({ error: 'Limit must be between 1 and 100' });</span>
+        }
+        
+        const skip = (pageNum - 1) * limitNum;
+        
+        const where = {};
+        <span class="missing-if-branch" title="if path not taken" >I</span>if (name) {
+            const users = <span class="cstat-no" title="statement not covered" >await prisma.user.findMany({</span>
+                where: { OR: [{ utorid: { contains: name } }, { name: { contains: name } }] }
+            });
+<span class="cstat-no" title="statement not covered" >            where.userId = { in: users.map(<span class="fstat-no" title="function not covered" >u </span>=&gt; <span class="cstat-no" title="statement not covered" >u.id)</span> };</span>
+        }
+        <span class="missing-if-branch" title="if path not taken" >I</span>if (createdBy) {
+            const creator = <span class="cstat-no" title="statement not covered" >await prisma.user.findFirst({ where: { utorid: createdBy } });</span>
+<span class="cstat-no" title="statement not covered" >            if (creator) <span class="cstat-no" title="statement not covered" >where.createdBy = creator.id;</span></span>
+        }
+        if (suspicious) where.suspicious = suspicious === 'true';
+        <span class="missing-if-branch" title="if path not taken" >I</span>if (promotionId) {
+            const txPromos = <span class="cstat-no" title="statement not covered" >await prisma.transactionPromotion.findMany({ where: { promotionId: parseInt(promotionId) } });</span>
+<span class="cstat-no" title="statement not covered" >            where.id = { in: txPromos.map(<span class="fstat-no" title="function not covered" >tp</span> =&gt; <span class="cstat-no" title="statement not covered" >tp.transactionId)</span> };</span>
+        }
+        <span class="missing-if-branch" title="if path not taken" >I</span>if (type) <span class="cstat-no" title="statement not covered" >where.type = type;</span>
+        <span class="missing-if-branch" title="if path not taken" >I</span>if (relatedId) <span class="cstat-no" title="statement not covered" >where.relatedId = parseInt(relatedId);</span>
+        <span class="missing-if-branch" title="if path not taken" >I</span>if (amount &amp;&amp; <span class="branch-1 cbranch-no" title="branch not covered" >operator)</span> {
+<span class="cstat-no" title="statement not covered" >            where.amount = operator === 'gte' ? { gte: parseInt(amount) } : { lte: parseInt(amount) };</span>
         }
 &nbsp;
-        // Top 5 most active users (by transaction count created by this cashier)
-        const userTransactionCounts = {};
-        allTransactions.forEach(tx =&gt; {
-            // We need to get userId from transactions
-            // For now, we'll get it from the transaction relation
+        const orderBy = {};
+        <span class="missing-if-branch" title="if path not taken" >I</span>if (sortBy) {
+<span class="cstat-no" title="statement not covered" >            if (sortBy === 'user') {</span>
+<span class="cstat-no" title="statement not covered" >                orderBy.user = { utorid: order || 'asc' };</span>
+            } else {
+<span class="cstat-no" title="statement not covered" >                orderBy[sortBy] = order || 'asc';</span>
+            }
+        } else {
+            orderBy.createdAt = 'desc';
+        }
+        
+        const count = await prisma.transaction.count({ where });
+        const transactions = await prisma.transaction.findMany({
+            where, skip, take: limitNum,
+            include: {
+                user: { select: { utorid: true } },
+                creator: { select: { utorid: true } },
+                transactionPromotions: { select: { promotionId: true } }
+            },
+            orderBy
         });
         
-        const topUsers = await prisma.transaction.groupBy({
-            by: ['userId'],
-            where: { createdBy: cashierId },
-            _count: { id: true },
-            orderBy: { _count: { id: 'desc' } },
-            take: 5
+        const results = transactions.map(tx =&gt; {
+            const result = {
+                id: tx.id,
+                utorid: tx.user.utorid,
+                amount: tx.amount,
+                type: tx.type,
+                promotionIds: tx.transactionPromotions.map(<span class="fstat-no" title="function not covered" >tp</span> =&gt; <span class="cstat-no" title="statement not covered" >tp.promotionId)</span>,
+                remark: tx.remark,
+                createdBy: tx.creator.utorid,
+                createdAt: tx.createdAt,
+                processed: tx.processed
+            };
+            <span class="missing-if-branch" title="else path not taken" >E</span>if (tx.spent) result.spent = tx.spent;
+            <span class="missing-if-branch" title="if path not taken" >I</span>if (tx.relatedId) <span class="cstat-no" title="statement not covered" >result.relatedId = tx.relatedId;</span>
+            <span class="missing-if-branch" title="else path not taken" >E</span>if (tx.type === 'purchase' || <span class="branch-1 cbranch-no" title="branch not covered" >tx.type === 'adjustment')</span> result.suspicious = tx.suspicious;
+            <span class="missing-if-branch" title="if path not taken" >I</span>if (tx.type === 'redemption') <span class="cstat-no" title="statement not covered" >result.redeemed = Math.abs(tx.amount);</span>
+            return result;
         });
-&nbsp;
-        const topUsersWithDetails = await Promise.all(
-            topUsers.map(async (item) =&gt; {
-                const user = await prisma.user.findUnique({
-                    where: { id: item.userId },
-                    select: { id: true, name: true, utorid: true }
-                });
-                return {
-                    userId: item.userId,
-                    name: user?.name || <span class="branch-1 cbranch-no" title="branch not covered" >'Unknown',</span>
-                    utorid: user?.utorid || <span class="branch-1 cbranch-no" title="branch not covered" >'Unknown',</span>
-                    transactionCount: item._count.id
-                };
-            })
-        );
-&nbsp;
-        res.json({
-            transactions: {
-                today: transactionsToday,
-                week: transactionsWeek,
-                month: transactionsMonth
-            },
-            redemptions: {
-                today: redemptionsToday,
-                week: redemptionsWeek,
-                month: redemptionsMonth
-            },
-            usersCreated: {
-                today: usersToday,
-                week: usersWeek,
-                month: usersMonth
-            },
-            averageTransactionValue: Math.round(avgTransactionValue),
-            pointsIssued: {
-                today: pointsIssuedToday,
-                week: pointsIssuedWeek,
-                month: pointsIssuedMonth
-            },
-            processingRate: parseFloat(processingRate),
-            pendingRedemptions,
-            typeBreakdown,
-            dailyVolume,
-            topUsers: topUsersWithDetails
-        });
-    } catch (error) {
-<span class="cstat-no" title="statement not covered" >        next(error);</span>
-    }
-};
-&nbsp;
-// GET /analytics/overview - System-wide overview (Manager)
-const getOverview = async (req, res, next) =&gt; {
-    try {
-        const { today, weekAgo, monthAgo, thirtyDaysAgo } = getDateRanges();
-&nbsp;
-        // Total points in circulation
-        const totalPoints = await prisma.user.aggregate({
-            _sum: { points: true }
-        });
-&nbsp;
-        // Points earned vs spent
-        const [pointsEarnedWeek, pointsEarnedMonth] = await Promise.all([
-            prisma.transaction.aggregate({
-                where: {
-                    type: { in: ['purchase', 'event', 'adjustment'] },
-                    createdAt: { gte: weekAgo }
-                },
-                _sum: { amount: true }
-            }),
-            prisma.transaction.aggregate({
-                where: {
-                    type: { in: ['purchase', 'event', 'adjustment'] },
-                    createdAt: { gte: monthAgo }
-                },
-                _sum: { amount: true }
-            })
-        ]);
-&nbsp;
-        const [redemptionsWeek, redemptionsMonth, transfersWeek, transfersMonth] = await Promise.all([
-            prisma.transaction.aggregate({
-                where: {
-                    type: 'redemption',
-                    createdAt: { gte: weekAgo }
-                },
-                _sum: { amount: true }
-            }),
-            prisma.transaction.aggregate({
-                where: {
-                    type: 'redemption',
-                    createdAt: { gte: monthAgo }
-                },
-                _sum: { amount: true }
-            }),
-            prisma.transaction.aggregate({
-                where: {
-                    type: 'transfer',
-                    amount: { lt: 0 },
-                    createdAt: { gte: weekAgo }
-                },
-                _sum: { amount: true }
-            }),
-            prisma.transaction.aggregate({
-                where: {
-                    type: 'transfer',
-                    amount: { lt: 0 },
-                    createdAt: { gte: monthAgo }
-                },
-                _sum: { amount: true }
-            })
-        ]);
         
-        const pointsSpentWeek = {
-            _sum: {
-                amount: (redemptionsWeek._sum.amount || <span class="branch-1 cbranch-no" title="branch not covered" >0)</span> + (transfersWeek._sum.amount || 0)
-            }
-        };
-        const pointsSpentMonth = {
-            _sum: {
-                amount: (redemptionsMonth._sum.amount || <span class="branch-1 cbranch-no" title="branch not covered" >0)</span> + (transfersMonth._sum.amount || 0)
-            }
-        };
+        res.json({ count, results });
+    } catch (error) { <span class="cstat-no" title="statement not covered" >next(error); </span>}
+});
 &nbsp;
-        // User growth
-        const [newUsersWeek, newUsersMonth, totalUsers] = await Promise.all([
-            prisma.user.count({ where: { createdAt: { gte: weekAgo } } }),
-            prisma.user.count({ where: { createdAt: { gte: monthAgo } } }),
-            prisma.user.count()
-        ]);
-&nbsp;
-        // Transaction volume
-        const [transactionsToday, transactionsWeek, transactionsMonth] = await Promise.all([
-            prisma.transaction.count({ where: { createdAt: { gte: today } } }),
-            prisma.transaction.count({ where: { createdAt: { gte: weekAgo } } }),
-            prisma.transaction.count({ where: { createdAt: { gte: monthAgo } } })
-        ]);
-&nbsp;
-        // User growth trend (last 14 days / 2 weeks)
-        const userGrowthTrend = [];
-        for (let i = 13; i &gt;= 0; i--) {
-            const date = new Date(today);
-            date.setDate(date.getDate() - i);
-            const nextDate = new Date(date);
-            nextDate.setDate(nextDate.getDate() + 1);
-            
-            const count = await prisma.user.count({
-                where: {
-                    createdAt: { gte: date, lt: nextDate }
-                }
-            });
-            
-            userGrowthTrend.push({
-                date: date.toISOString().split('T')[0],
-                count
-            });
+// GET /transactions/redemptions - List redemption transactions (cashier only)
+router.get('/redemptions', requireRole('cashier'), validateQuery(z.object({
+    page: z.preprocess(
+<span class="fstat-no" title="function not covered" >        (v</span>al) =&gt; <span class="cstat-no" title="statement not covered" >(val === undefined || val === null || val === '') ? '1' : val,</span>
+        z.string().regex(/^\d+$/)
+    ),
+    limit: z.preprocess(
+<span class="fstat-no" title="function not covered" >        (v</span>al) =&gt; <span class="cstat-no" title="statement not covered" >(val === undefined || val === null || val === '') ? '10' : val,</span>
+        z.string().regex(/^\d+$/)
+    ),
+    processed: z.string().optional(),
+    sortBy: z.enum(['id', 'amount', 'type', 'createdAt', 'processed', 'user']).optional(),
+    order: z.enum(['asc', 'desc']).optional()
+})), <span class="fstat-no" title="function not covered" >as</span>ync (req, res, next) =&gt; {
+<span class="cstat-no" title="statement not covered" >    try {</span>
+        const { page = <span class="branch-0 cbranch-no" title="branch not covered" >'1',</span> limit = <span class="branch-0 cbranch-no" title="branch not covered" >'10',</span> processed, sortBy, order } = <span class="cstat-no" title="statement not covered" >req.validatedQuery;</span>
+        const pageNum = <span class="cstat-no" title="statement not covered" >parseInt(page),</span> limitNum = <span class="cstat-no" title="statement not covered" >parseInt(limit);</span>
+        
+<span class="cstat-no" title="statement not covered" >        if (pageNum &lt; 1) {</span>
+<span class="cstat-no" title="statement not covered" >            return res.status(400).json({ error: 'Page must be at least 1' });</span>
+        }
+<span class="cstat-no" title="statement not covered" >        if (limitNum &lt; 1 || limitNum &gt; 100) {</span>
+<span class="cstat-no" title="statement not covered" >            return res.status(400).json({ error: 'Limit must be between 1 and 100' });</span>
+        }
+        
+        const skip = <span class="cstat-no" title="statement not covered" >(pageNum - 1) * limitNum;</span>
+        
+        const where = <span class="cstat-no" title="statement not covered" >{ type: 'redemption' };</span>
+<span class="cstat-no" title="statement not covered" >        if (processed !== undefined) {</span>
+<span class="cstat-no" title="statement not covered" >            where.processed = processed === 'true';</span>
         }
 &nbsp;
-        // Points distribution
-        const pointsDistribution = {
-            '0-100': await prisma.user.count({ where: { points: { gte: 0, lt: 100 } } }),
-            '100-500': await prisma.user.count({ where: { points: { gte: 100, lt: 500 } } }),
-            '500-1000': await prisma.user.count({ where: { points: { gte: 500, lt: 1000 } } }),
-            '1000+': await prisma.user.count({ where: { points: { gte: 1000 } } })
-        };
-&nbsp;
-        res.json({
-            totalPointsInCirculation: totalPoints._sum.points || 0,
-            pointsFlow: {
-                week: {
-                    earned: Math.abs(pointsEarnedWeek._sum.amount || <span class="branch-1 cbranch-no" title="branch not covered" >0)</span>,
-                    spent: Math.abs(pointsSpentWeek._sum.amount || <span class="branch-1 cbranch-no" title="branch not covered" >0)</span>,
-                    net: Math.abs(pointsEarnedWeek._sum.amount || <span class="branch-1 cbranch-no" title="branch not covered" >0)</span> - Math.abs(pointsSpentWeek._sum.amount || <span class="branch-1 cbranch-no" title="branch not covered" >0)</span>
-                },
-                month: {
-                    earned: Math.abs(pointsEarnedMonth._sum.amount || <span class="branch-1 cbranch-no" title="branch not covered" >0)</span>,
-                    spent: Math.abs(pointsSpentMonth._sum.amount || <span class="branch-1 cbranch-no" title="branch not covered" >0)</span>,
-                    net: Math.abs(pointsEarnedMonth._sum.amount || <span class="branch-1 cbranch-no" title="branch not covered" >0)</span> - Math.abs(pointsSpentMonth._sum.amount || <span class="branch-1 cbranch-no" title="branch not covered" >0)</span>
-                }
+        const orderBy = <span class="cstat-no" title="statement not covered" >{};</span>
+<span class="cstat-no" title="statement not covered" >        if (sortBy) {</span>
+<span class="cstat-no" title="statement not covered" >            if (sortBy === 'user') {</span>
+<span class="cstat-no" title="statement not covered" >                 orderBy.user = { utorid: order || 'asc' };</span>
+            } else {
+<span class="cstat-no" title="statement not covered" >                orderBy[sortBy] = order || 'asc';</span>
+            }
+        } else {
+<span class="cstat-no" title="statement not covered" >            orderBy.createdAt = 'desc';</span>
+        }
+        
+        const count = <span class="cstat-no" title="statement not covered" >await prisma.transaction.count({ where });</span>
+        const transactions = <span class="cstat-no" title="statement not covered" >await prisma.transaction.findMany({</span>
+            where, skip, take: limitNum,
+            include: {
+                user: { select: { utorid: true, name: true } },
+                creator: { select: { utorid: true } },
+                processor: { select: { utorid: true } }
             },
-            userGrowth: {
-                week: newUsersWeek,
-                month: newUsersMonth,
-                total: totalUsers
-            },
-            transactionVolume: {
-                today: transactionsToday,
-                week: transactionsWeek,
-                month: transactionsMonth
-            },
-            userGrowthTrend,
-            pointsDistribution
+            orderBy
         });
-    } catch (error) {
-<span class="cstat-no" title="statement not covered" >        next(error);</span>
-    }
-};
+        
+        const results = <span class="cstat-no" title="statement not covered" >transactions.map(<span class="fstat-no" title="function not covered" >tx</span> =&gt; {</span>
+            const result = <span class="cstat-no" title="statement not covered" >{</span>
+                id: tx.id,
+                utorid: tx.user.utorid,
+                userName: tx.user.name,
+                amount: Math.abs(tx.amount), // Return as positive
+                type: tx.type,
+                remark: tx.remark,
+                createdBy: tx.creator.utorid,
+                createdAt: tx.createdAt,
+                processed: tx.processed,
+                redeemed: Math.abs(tx.amount)
+            };
+<span class="cstat-no" title="statement not covered" >            if (tx.processor) <span class="cstat-no" title="statement not covered" >result.processedBy = tx.processor.utorid;</span></span>
+<span class="cstat-no" title="statement not covered" >            return result;</span>
+        });
+        
+<span class="cstat-no" title="statement not covered" >        res.json({ count, results });</span>
+    } catch (error) { <span class="cstat-no" title="statement not covered" >next(error); </span>}
+});
 &nbsp;
-// GET /analytics/users - User analytics (Manager)
-const getUserAnalytics = async (req, res, next) =&gt; {
+// GET /transactions/:transactionId - Get single transaction
+router.get('/:transactionId', requireRole('cashier'), async (req, res, next) =&gt; {
     try {
-        const { today, weekAgo, monthAgo } = getDateRanges();
-&nbsp;
-        const [newUsersWeek, newUsersMonth, verifiedUsers, unverifiedUsers, suspiciousUsers, totalUsers] = await Promise.all([
-            prisma.user.count({ where: { createdAt: { gte: weekAgo } } }),
-            prisma.user.count({ where: { createdAt: { gte: monthAgo } } }),
-            prisma.user.count({ where: { verified: true } }),
-            prisma.user.count({ where: { verified: false } }),
-            prisma.user.count({ where: { suspicious: true } }),
-            prisma.user.count()
-        ]);
-&nbsp;
-        // Top 10 users by points balance
-        const topUsersByPoints = await prisma.user.findMany({
-            orderBy: { points: 'desc' },
-            take: 10,
-            select: {
-                id: true,
-                name: true,
-                utorid: true,
-                points: true,
-                verified: true
+        const transactionId = parseInt(req.params.transactionId);
+        <span class="missing-if-branch" title="if path not taken" >I</span>if (isNaN(transactionId)) <span class="cstat-no" title="statement not covered" >return res.status(400).json({ error: 'Invalid transaction ID' });</span>
+        const tx = await prisma.transaction.findUnique({
+            where: { id: transactionId },
+            include: {
+                user: { select: { utorid: true } },
+                creator: { select: { utorid: true } },
+                transactionPromotions: { select: { promotionId: true } }
             }
         });
-&nbsp;
-        // Top 10 users by transaction count
-        const topUsersByTxCount = await prisma.transaction.groupBy({
-            by: ['userId'],
-            _count: { id: true },
-            orderBy: { _count: { id: 'desc' } },
-            take: 10
-        });
-&nbsp;
-        const topUsersByTxWithDetails = await Promise.all(
-            topUsersByTxCount.map(<span class="fstat-no" title="function not covered" >as</span>ync (item) =&gt; {
-                const user = <span class="cstat-no" title="statement not covered" >await prisma.user.findUnique({</span>
-                    where: { id: item.userId },
-                    select: { id: true, name: true, utorid: true, points: true }
-                });
-<span class="cstat-no" title="statement not covered" >                return {</span>
-                    userId: item.userId,
-                    name: user?.name || 'Unknown',
-                    utorid: user?.utorid || 'Unknown',
-                    points: user?.points || 0,
-                    transactionCount: item._count.id
-                };
-            })
-        );
-&nbsp;
-        res.json({
-            newUsers: {
-                week: newUsersWeek,
-                month: newUsersMonth
-            },
-            verified: {
-                verified: verifiedUsers,
-                unverified: unverifiedUsers
-            },
-            suspicious: suspiciousUsers,
-            total: totalUsers,
-            topUsersByPoints,
-            topUsersByTransactionCount: topUsersByTxWithDetails
-        });
-    } catch (error) {
-<span class="cstat-no" title="statement not covered" >        next(error);</span>
-    }
-};
-&nbsp;
-// GET /analytics/transactions - Transaction analytics (Manager)
-const getTransactionAnalytics = async (req, res, next) =&gt; {
-    try {
-        const { today, weekAgo, monthAgo, thirtyDaysAgo } = getDateRanges();
-&nbsp;
-        // Transaction volume
-        const [volumeToday, volumeWeek, volumeMonth] = await Promise.all([
-            prisma.transaction.count({ where: { createdAt: { gte: today } } }),
-            prisma.transaction.count({ where: { createdAt: { gte: weekAgo } } }),
-            prisma.transaction.count({ where: { createdAt: { gte: monthAgo } } })
-        ]);
-&nbsp;
-        // Transaction types breakdown
-        const typeBreakdown = {
-            purchase: await prisma.transaction.count({ where: { type: 'purchase' } }),
-            redemption: await prisma.transaction.count({ where: { type: 'redemption' } }),
-            adjustment: await prisma.transaction.count({ where: { type: 'adjustment' } }),
-            event: await prisma.transaction.count({ where: { type: 'event' } }),
-            transfer: await prisma.transaction.count({ where: { type: 'transfer' } })
+        <span class="missing-if-branch" title="if path not taken" >I</span>if (!tx) <span class="cstat-no" title="statement not covered" >return res.status(404).json({ error: 'Transaction not found' });</span>
+        
+        const result = {
+            id: tx.id,
+            utorid: tx.user.utorid,
+            type: tx.type,
+            amount: tx.amount,
+            promotionIds: tx.transactionPromotions.map(<span class="fstat-no" title="function not covered" >tp</span> =&gt; <span class="cstat-no" title="statement not covered" >tp.promotionId)</span>,
+            remark: tx.remark,
+            createdBy: tx.creator.utorid,
+            createdAt: tx.createdAt,
+            processed: tx.processed
         };
+        <span class="missing-if-branch" title="else path not taken" >E</span>if (tx.spent) result.spent = tx.spent;
+        <span class="missing-if-branch" title="if path not taken" >I</span>if (tx.relatedId) <span class="cstat-no" title="statement not covered" >result.relatedId = tx.relatedId;</span>
+        <span class="missing-if-branch" title="else path not taken" >E</span>if (tx.type === 'purchase' || <span class="branch-1 cbranch-no" title="branch not covered" >tx.type === 'adjustment')</span> result.suspicious = tx.suspicious;
+        
+        res.json(result);
+    } catch (error) { <span class="cstat-no" title="statement not covered" >next(error); </span>}
+});
 &nbsp;
-        // Suspicious transactions
-        const suspiciousCount = await prisma.transaction.count({
-            where: { suspicious: true }
+// PATCH /transactions/:transactionId/suspicious - Flag transaction
+router.patch('/:transactionId/suspicious', requireRole('manager'), async (req, res, next) =&gt; {
+    try {
+        const suspicious = coerceBoolean(req.body.suspicious);
+        <span class="missing-if-branch" title="if path not taken" >I</span>if (typeof suspicious !== 'boolean') <span class="cstat-no" title="statement not covered" >return res.status(400).json({ error: 'Invalid data' });</span>
+        
+        const transactionId = parseInt(req.params.transactionId);
+        <span class="missing-if-branch" title="if path not taken" >I</span>if (isNaN(transactionId)) <span class="cstat-no" title="statement not covered" >return res.status(400).json({ error: 'Invalid transaction ID' });</span>
+        const tx = await prisma.transaction.findUnique({
+            where: { id: transactionId },
+            include: { user: true, creator: { select: { utorid: true } }, transactionPromotions: { select: { promotionId: true } } }
         });
-&nbsp;
-        // Average transaction value
-        const avgResult = await prisma.transaction.aggregate({
-            _avg: { amount: true }
-        });
-&nbsp;
-        // Transaction volume trend (last 14 days / 2 weeks)
-        const volumeTrend = [];
-        for (let i = 13; i &gt;= 0; i--) {
-            const date = new Date(today);
-            date.setDate(date.getDate() - i);
-            const nextDate = new Date(date);
-            nextDate.setDate(nextDate.getDate() + 1);
-            
-            const count = await prisma.transaction.count({
-                where: {
-                    createdAt: { gte: date, lt: nextDate }
-                }
+        <span class="missing-if-branch" title="if path not taken" >I</span>if (!tx) <span class="cstat-no" title="statement not covered" >return res.status(404).json({ error: 'Transaction not found' });</span>
+        
+        // Update points based on flag change
+        if (suspicious &amp;&amp; !tx.suspicious) {
+            // Marking as suspicious - deduct points
+            await prisma.user.update({
+                where: { id: tx.userId },
+                data: { points: { decrement: tx.amount } }
             });
-            
-            volumeTrend.push({
-                date: date.toISOString().split('T')[0],
-                count
+        } else <span class="missing-if-branch" title="else path not taken" >E</span>if (!suspicious &amp;&amp; tx.suspicious) {
+            // Clearing suspicious - add points
+            await prisma.user.update({
+                where: { id: tx.userId },
+                data: { points: { increment: tx.amount } }
             });
         }
+        
+        // If marking as suspicious and transaction was processed, set processed to false
+        const updateData = { suspicious };
+        if (suspicious &amp;&amp; tx.processed) {
+            updateData.processed = false;
+        } else <span class="missing-if-branch" title="else path not taken" >E</span>if (!suspicious &amp;&amp; tx.suspicious) {
+            <span class="missing-if-branch" title="else path not taken" >E</span>if (tx.type === 'purchase' || <span class="branch-1 cbranch-no" title="branch not covered" >tx.type === 'adjustment' </span>&amp;&amp; <span class="branch-2 cbranch-no" title="branch not covered" >!tx.processed)</span> {
+                updateData.processed = true;
+                updateData.processedBy = req.user.id;
+            }
+        }
+        
+        const updated = await prisma.transaction.update({
+            where: { id: tx.id },
+            data: updateData
+        });
+        
+        res.json({
+            id: updated.id,
+            utorid: tx.user.utorid,
+            type: updated.type,
+            spent: updated.spent,
+            amount: updated.amount,
+            promotionIds: tx.transactionPromotions.map(<span class="fstat-no" title="function not covered" >tp</span> =&gt; <span class="cstat-no" title="statement not covered" >tp.promotionId)</span>,
+            suspicious: updated.suspicious,
+            processed: updated.processed,
+            remark: updated.remark,
+            createdBy: tx.creator.utorid,
+            createdAt: tx.createdAt
+        });
+    } catch (error) { <span class="cstat-no" title="statement not covered" >next(error); </span>}
+});
 &nbsp;
-        // Points flow chart (earned vs spent over last 14 days / 2 weeks)
-        const pointsFlow = [];
-        for (let i = 13; i &gt;= 0; i--) {
-            const date = new Date(today);
-            date.setDate(date.getDate() - i);
-            const nextDate = new Date(date);
-            nextDate.setDate(nextDate.getDate() + 1);
-            
-            const [earned, redemptions, transfers] = await Promise.all([
-                prisma.transaction.aggregate({
-                    where: {
-                        type: { in: ['purchase', 'event', 'adjustment'] },
-                        createdAt: { gte: date, lt: nextDate }
-                    },
-                    _sum: { amount: true }
-                }),
-                prisma.transaction.aggregate({
-                    where: {
-                        type: 'redemption',
-                        createdAt: { gte: date, lt: nextDate }
-                    },
-                    _sum: { amount: true }
-                }),
-                prisma.transaction.aggregate({
-                    where: {
-                        type: 'transfer',
-                        amount: { lt: 0 },
-                        createdAt: { gte: date, lt: nextDate }
-                    },
-                    _sum: { amount: true }
-                })
-            ]);
-            
-            const spent = (redemptions._sum.amount || 0) + (transfers._sum.amount || 0);
-            
-            pointsFlow.push({
-                date: date.toISOString().split('T')[0],
-                earned: Math.abs(earned._sum.amount || 0),
-                spent: Math.abs(spent)
+// PATCH /transactions/:transactionId/amount - Update transaction amount
+router.patch('/:transactionId/amount', requireRole('manager'), <span class="fstat-no" title="function not covered" >as</span>ync (req, res, next) =&gt; {
+<span class="cstat-no" title="statement not covered" >    try {</span>
+        const amount = <span class="cstat-no" title="statement not covered" >parseFloat(req.body.amount);</span>
+<span class="cstat-no" title="statement not covered" >        if (isNaN(amount)) <span class="cstat-no" title="statement not covered" >return res.status(400).json({ error: 'Invalid amount' });</span></span>
+        
+        const transactionId = <span class="cstat-no" title="statement not covered" >parseInt(req.params.transactionId);</span>
+<span class="cstat-no" title="statement not covered" >        if (isNaN(transactionId)) <span class="cstat-no" title="statement not covered" >return res.status(400).json({ error: 'Invalid transaction ID' });</span></span>
+        
+        const tx = <span class="cstat-no" title="statement not covered" >await prisma.transaction.findUnique({</span>
+            where: { id: transactionId },
+            include: { 
+                user: true, 
+                creator: { select: { utorid: true } }, 
+                transactionPromotions: { select: { promotionId: true } } 
+            }
+        });
+<span class="cstat-no" title="statement not covered" >        if (!tx) <span class="cstat-no" title="statement not covered" >return res.status(404).json({ error: 'Transaction not found' });</span></span>
+        
+        // Only allow updating amount for purchase and adjustment transactions
+<span class="cstat-no" title="statement not covered" >        if (tx.type !== 'purchase' &amp;&amp; tx.type !== 'adjustment') {</span>
+<span class="cstat-no" title="statement not covered" >            return res.status(400).json({ error: 'Cannot update amount for this transaction type' });</span>
+        }
+        
+        // Calculate the difference
+        const oldAmount = <span class="cstat-no" title="statement not covered" >tx.amount;</span>
+        const difference = <span class="cstat-no" title="statement not covered" >amount - oldAmount;</span>
+        
+        // Update user points if transaction is not suspicious
+<span class="cstat-no" title="statement not covered" >        if (!tx.suspicious) {</span>
+<span class="cstat-no" title="statement not covered" >            await prisma.user.update({</span>
+                where: { id: tx.userId },
+                data: { points: { increment: difference } }
             });
         }
-&nbsp;
-        // Total points volume
-        const totalPointsVolume = await prisma.transaction.aggregate({
-            _sum: { amount: true }
+        
+        // Update transaction amount
+        const updated = <span class="cstat-no" title="statement not covered" >await prisma.transaction.update({</span>
+            where: { id: tx.id },
+            data: { amount }
         });
-&nbsp;
-        res.json({
-            volume: {
-                today: volumeToday,
-                week: volumeWeek,
-                month: volumeMonth
-            },
-            typeBreakdown,
-            suspicious: suspiciousCount,
-            averageTransactionValue: Math.round(Math.abs(avgResult._avg.amount || <span class="branch-1 cbranch-no" title="branch not covered" >0)</span>),
-            volumeTrend,
-            pointsFlow,
-            totalPointsVolume: Math.abs(totalPointsVolume._sum.amount || <span class="branch-1 cbranch-no" title="branch not covered" >0)</span>
+        
+<span class="cstat-no" title="statement not covered" >        res.json({</span>
+            id: updated.id,
+            utorid: tx.user.utorid,
+            type: updated.type,
+            spent: updated.spent,
+            amount: updated.amount,
+            promotionIds: tx.transactionPromotions.map(<span class="fstat-no" title="function not covered" >tp</span> =&gt; <span class="cstat-no" title="statement not covered" >tp.promotionId)</span>,
+            suspicious: updated.suspicious,
+            remark: updated.remark,
+            createdBy: tx.creator.utorid,
+            createdAt: updated.createdAt
         });
-    } catch (error) {
-<span class="cstat-no" title="statement not covered" >        next(error);</span>
-    }
-};
+    } catch (error) { <span class="cstat-no" title="statement not covered" >next(error); </span>}
+});
 &nbsp;
-// GET /analytics/events - Event analytics (Manager)
-const getEventAnalytics = async (req, res, next) =&gt; {
+// PATCH /transactions/:transactionId/spent - Update transaction spent amount
+router.patch('/:transactionId/spent', requireRole('manager'), <span class="fstat-no" title="function not covered" >as</span>ync (req, res, next) =&gt; {
+<span class="cstat-no" title="statement not covered" >    try {</span>
+        const spent = <span class="cstat-no" title="statement not covered" >parseFloat(req.body.spent);</span>
+<span class="cstat-no" title="statement not covered" >        if (isNaN(spent) || spent &lt;= 0) <span class="cstat-no" title="statement not covered" >return res.status(400).json({ error: 'Invalid spent amount' });</span></span>
+        
+        const transactionId = <span class="cstat-no" title="statement not covered" >parseInt(req.params.transactionId);</span>
+<span class="cstat-no" title="statement not covered" >        if (isNaN(transactionId)) <span class="cstat-no" title="statement not covered" >return res.status(400).json({ error: 'Invalid transaction ID' });</span></span>
+        
+        const tx = <span class="cstat-no" title="statement not covered" >await prisma.transaction.findUnique({</span>
+            where: { id: transactionId },
+            include: { 
+                user: true, 
+                creator: { select: { utorid: true } }, 
+                transactionPromotions: { select: { promotionId: true } } 
+            }
+        });
+<span class="cstat-no" title="statement not covered" >        if (!tx) <span class="cstat-no" title="statement not covered" >return res.status(404).json({ error: 'Transaction not found' });</span></span>
+        
+        // Only allow updating spent for purchase transactions
+<span class="cstat-no" title="statement not covered" >        if (tx.type !== 'purchase') {</span>
+<span class="cstat-no" title="statement not covered" >            return res.status(400).json({ error: 'Cannot update spent for this transaction type' });</span>
+        }
+        
+        // Recalculate points based on new spent amount and promotions
+        const promotionIds = <span class="cstat-no" title="statement not covered" >tx.transactionPromotions.map(<span class="fstat-no" title="function not covered" >tp</span> =&gt; <span class="cstat-no" title="statement not covered" >tp.promotionId)</span>;</span>
+        const newAmount = <span class="cstat-no" title="statement not covered" >await calculatePurchasePoints(spent, promotionIds, tx.userId);</span>
+        const oldAmount = <span class="cstat-no" title="statement not covered" >tx.amount;</span>
+        const amountDifference = <span class="cstat-no" title="statement not covered" >newAmount - oldAmount;</span>
+        
+        // Update user points if transaction is not suspicious
+<span class="cstat-no" title="statement not covered" >        if (!tx.suspicious &amp;&amp; amountDifference !== 0) {</span>
+<span class="cstat-no" title="statement not covered" >            await prisma.user.update({</span>
+                where: { id: tx.userId },
+                data: { points: { increment: amountDifference } }
+            });
+        }
+        
+        // Update transaction spent and amount
+        const updated = <span class="cstat-no" title="statement not covered" >await prisma.transaction.update({</span>
+            where: { id: tx.id },
+            data: { 
+                spent,
+                amount: newAmount
+            }
+        });
+        
+<span class="cstat-no" title="statement not covered" >        res.json({</span>
+            id: updated.id,
+            utorid: tx.user.utorid,
+            type: updated.type,
+            spent: updated.spent,
+            amount: updated.amount,
+            promotionIds: tx.transactionPromotions.map(<span class="fstat-no" title="function not covered" >tp</span> =&gt; <span class="cstat-no" title="statement not covered" >tp.promotionId)</span>,
+            suspicious: updated.suspicious,
+            remark: updated.remark,
+            createdBy: tx.creator.utorid,
+            createdAt: updated.createdAt
+        });
+    } catch (error) { <span class="cstat-no" title="statement not covered" >next(error); </span>}
+});
+&nbsp;
+// PATCH /transactions/:transactionId/processed - Process redemption or purchase
+router.patch('/:transactionId/processed', requireRole('cashier'), async (req, res, next) =&gt; {
     try {
-        const now = new Date();
-&nbsp;
-        // Total events
-        const [totalEvents, publishedEvents, unpublishedEvents] = await Promise.all([
-            prisma.event.count(),
-            prisma.event.count({ where: { published: true } }),
-            prisma.event.count({ where: { published: false } })
-        ]);
-&nbsp;
-        // Upcoming events
-        const upcomingEvents = await prisma.event.count({
-            where: { startTime: { gte: now } }
+        const processed = coerceBoolean(req.body.processed);
+        <span class="missing-if-branch" title="if path not taken" >I</span>if (processed !== true) <span class="cstat-no" title="statement not covered" >return res.status(400).json({ error: 'Invalid data' });</span>
+        
+        const transactionId = parseInt(req.params.transactionId);
+        <span class="missing-if-branch" title="if path not taken" >I</span>if (isNaN(transactionId)) <span class="cstat-no" title="statement not covered" >return res.status(400).json({ error: 'Invalid transaction ID' });</span>
+        const tx = await prisma.transaction.findUnique({
+            where: { id: transactionId },
+            include: { user: true, creator: { select: { utorid: true } }, transactionPromotions: { select: { promotionId: true } } }
         });
-&nbsp;
-        // Event attendance rates
-        const events = await prisma.event.findMany({
-            include: {
-                guests: true
+        <span class="missing-if-branch" title="if path not taken" >I</span>if (!tx) <span class="cstat-no" title="statement not covered" >return res.status(404).json({ error: 'Transaction not found' });</span>
+        <span class="missing-if-branch" title="if path not taken" >I</span>if (tx.processed) <span class="cstat-no" title="statement not covered" >return res.status(400).json({ error: 'Already processed' });</span>
+        
+        // Cashiers can only process redemptions
+        <span class="missing-if-branch" title="if path not taken" >I</span>if (req.user.role === 'cashier' &amp;&amp; tx.type !== 'redemption') {
+<span class="cstat-no" title="statement not covered" >            return res.status(403).json({ error: 'Cashiers can only process redemptions' });</span>
+        }
+        
+        // Managers can process purchase transactions (pending and not suspicious)
+        if (tx.type === 'purchase') {
+            <span class="missing-if-branch" title="if path not taken" >I</span>if (req.user.role !== 'manager' &amp;&amp; <span class="branch-1 cbranch-no" title="branch not covered" >req.user.role !== 'superuser')</span> {
+<span class="cstat-no" title="statement not covered" >                return res.status(403).json({ error: 'Only managers can process purchase transactions' });</span>
             }
-        });
-&nbsp;
-        const attendanceData = events.map(event =&gt; ({
-            eventId: event.id,
-            name: event.name,
-            capacity: event.capacity,
-            guestsRegistered: event.guests.length,
-            attendanceRate: event.capacity ? <span class="branch-0 cbranch-no" title="branch not covered" >(event.guests.length / event.capacity * 100).toFixed(1) </span>: null
-        }));
-&nbsp;
-        // Most popular events (top 5 by guest count)
-        const popularEvents = events
-            .sort(<span class="fstat-no" title="function not covered" >(a</span>, b) =&gt; <span class="cstat-no" title="statement not covered" >b.guests.length - a.guests.length)</span>
-            .slice(0, 5)
-            .map(event =&gt; ({
-                eventId: event.id,
-                name: event.name,
-                guestCount: event.guests.length,
-                capacity: event.capacity
-            }));
-&nbsp;
-        // Total points allocated to events
-        const totalPointsAllocated = events.reduce((sum, event) =&gt; sum + event.pointsAllocated, 0);
-&nbsp;
-        // Points remaining in events
-        const totalPointsRemaining = events.reduce((sum, event) =&gt; sum + event.pointsRemain, 0);
-&nbsp;
-        res.json({
-            total: totalEvents,
-            published: publishedEvents,
-            unpublished: unpublishedEvents,
-            upcoming: upcomingEvents,
-            attendanceData,
-            popularEvents,
-            totalPointsAllocated,
-            totalPointsRemaining
-        });
-    } catch (error) {
-<span class="cstat-no" title="statement not covered" >        next(error);</span>
-    }
-};
-&nbsp;
-// GET /analytics/promotions - Promotion analytics (Manager)
-const getPromotionAnalytics = async (req, res, next) =&gt; {
-    try {
-        const now = new Date();
-&nbsp;
-        // Active promotions
-        const activePromotions = await prisma.promotion.count({
-            where: {
-                startTime: { lte: now },
-                endTime: { gte: now }
+            <span class="missing-if-branch" title="if path not taken" >I</span>if (tx.suspicious) {
+<span class="cstat-no" title="statement not covered" >                return res.status(400).json({ error: 'Cannot process suspicious transactions' });</span>
             }
+            // Add points to user
+            await prisma.user.update({
+                where: { id: tx.userId },
+                data: { points: { increment: tx.amount } }
+            });
+        } else if (tx.type === 'redemption') {
+            // For redemptions, check if user has enough points
+            <span class="missing-if-branch" title="if path not taken" >I</span>if (tx.user.points &lt; Math.abs(tx.amount)) <span class="cstat-no" title="statement not covered" >return res.status(400).json({ error: 'Insufficient points' });</span>
+            // Deduct points (amount is negative, so increment by negative = subtract)
+            await prisma.user.update({
+                where: { id: tx.userId },
+                data: { points: { increment: tx.amount } }
+            });
+        } else <span class="missing-if-branch" title="else path not taken" >E</span>{
+<span class="cstat-no" title="statement not covered" >            return res.status(400).json({ error: 'Cannot process this transaction type' });</span>
+        }
+        
+        const updated = await prisma.transaction.update({
+            where: { id: tx.id },
+            data: { processed: true, processedBy: req.user.id }
         });
-&nbsp;
-        // All promotions with usage counts
-        const promotions = await prisma.promotion.findMany({
-            include: {
-                transactionPromotions: true,
-                userPromotions: {
-                    where: { used: true }
-                }
-            }
-        });
-&nbsp;
-        const promotionUsage = promotions.map(promo =&gt; ({
-            promotionId: promo.id,
-            name: promo.name,
-            type: promo.type,
-            usageCount: promo.transactionPromotions.length + promo.userPromotions.length
-        }));
-&nbsp;
-        // Most effective promotions (top 5 by usage)
-        const effectivePromotions = promotionUsage
-            .sort(<span class="fstat-no" title="function not covered" >(a</span>, b) =&gt; <span class="cstat-no" title="statement not covered" >b.usageCount - a.usageCount)</span>
-            .slice(0, 5);
-&nbsp;
-        // Promotion type breakdown
-        const typeBreakdown = {
-            automatic: promotions.filter(p =&gt; p.type === 'automatic').length,
-            onetime: promotions.filter(p =&gt; p.type === 'onetime').length
+        
+        const processor = await prisma.user.findUnique({ where: { id: req.user.id } });
+        
+        const result = {
+            id: updated.id,
+            utorid: tx.user.utorid,
+            type: updated.type,
+            processed: updated.processed,
+            processedBy: processor.utorid,
+            remark: updated.remark,
+            createdAt: updated.createdAt
         };
+        
+        if (tx.type === 'redemption') {
+            result.redeemed = Math.abs(updated.amount);
+            result.createdBy = tx.user.utorid;
+        } else <span class="missing-if-branch" title="else path not taken" >E</span>if (tx.type === 'purchase') {
+            result.spent = updated.spent;
+            result.amount = updated.amount;
+            result.promotionIds = tx.transactionPromotions.map(<span class="fstat-no" title="function not covered" >tp</span> =&gt; <span class="cstat-no" title="statement not covered" >tp.promotionId)</span>;
+            result.createdBy = tx.creator.utorid;
+        }
+        
+        res.json(result);
+    } catch (error) { <span class="cstat-no" title="statement not covered" >next(error); </span>}
+});
 &nbsp;
-        // Total points awarded via promotions
-        // This is calculated from transactions that have promotions linked
-        const transactionsWithPromotions = await prisma.transactionPromotion.findMany({
-            include: {
-                transaction: true
-            }
-        });
-&nbsp;
-        const totalPointsAwarded = transactionsWithPromotions.reduce(<span class="fstat-no" title="function not covered" >(s</span>um, tp) =&gt; {
-            // Only count positive amounts (earned points)
-<span class="cstat-no" title="statement not covered" >            if (tp.transaction.amount &gt; 0) {</span>
-<span class="cstat-no" title="statement not covered" >                return sum + tp.transaction.amount;</span>
-            }
-<span class="cstat-no" title="statement not covered" >            return sum;</span>
-        }, 0);
-&nbsp;
-        res.json({
-            active: activePromotions,
-            total: promotions.length,
-            promotionUsage,
-            effectivePromotions,
-            typeBreakdown,
-            totalPointsAwarded
-        });
-    } catch (error) {
-<span class="cstat-no" title="statement not covered" >        next(error);</span>
-    }
-};
-&nbsp;
-// GET /analytics/financial - Financial insights (Manager)
-const getFinancialAnalytics = async (req, res, next) =&gt; {
-    try {
-        const { weekAgo, monthAgo } = getDateRanges();
-&nbsp;
-        // Total money spent (sum of `spent` field in purchase transactions)
-        const [totalSpentWeek, totalSpentMonth, allPurchases] = await Promise.all([
-            prisma.transaction.aggregate({
-                where: {
-                    type: 'purchase',
-                    createdAt: { gte: weekAgo }
-                },
-                _sum: { spent: true }
-            }),
-            prisma.transaction.aggregate({
-                where: {
-                    type: 'purchase',
-                    createdAt: { gte: monthAgo }
-                },
-                _sum: { spent: true }
-            }),
-            prisma.transaction.findMany({
-                where: { type: 'purchase' },
-                select: { spent: true, amount: true }
-            })
-        ]);
-&nbsp;
-        // Average spending per transaction
-        const avgSpending = allPurchases.length &gt; 0
-            ? allPurchases.reduce((sum, tx) =&gt; sum + (tx.spent || <span class="branch-1 cbranch-no" title="branch not covered" >0)</span>, 0) / allPurchases.length
-            : <span class="branch-1 cbranch-no" title="branch not covered" >0;</span>
-&nbsp;
-        // Points per dollar ratio
-        const totalSpent = allPurchases.reduce((sum, tx) =&gt; sum + (tx.spent || <span class="branch-1 cbranch-no" title="branch not covered" >0)</span>, 0);
-        const totalPoints = allPurchases.reduce((sum, tx) =&gt; sum + Math.abs(tx.amount), 0);
-        const pointsPerDollar = totalSpent &gt; 0 ? (totalPoints / totalSpent).toFixed(2) : <span class="branch-1 cbranch-no" title="branch not covered" >0;</span>
-&nbsp;
-        res.json({
-            totalSpent: {
-                week: totalSpentWeek._sum.spent || <span class="branch-1 cbranch-no" title="branch not covered" >0,</span>
-                month: totalSpentMonth._sum.spent || <span class="branch-1 cbranch-no" title="branch not covered" >0,</span>
-                allTime: totalSpent
-            },
-            averageSpendingPerTransaction: Math.round(avgSpending * 100) / 100,
-            pointsPerDollarRatio: parseFloat(pointsPerDollar)
-        });
-    } catch (error) {
-<span class="cstat-no" title="statement not covered" >        next(error);</span>
-    }
-};
-&nbsp;
-module.exports = {
-    getCashierStats,
-    getOverview,
-    getUserAnalytics,
-    getTransactionAnalytics,
-    getEventAnalytics,
-    getPromotionAnalytics,
-    getFinancialAnalytics
-};
+module.exports = router;
 &nbsp;
 &nbsp;</pre></td></tr></table></pre>
 

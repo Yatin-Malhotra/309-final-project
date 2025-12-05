@@ -54,7 +54,7 @@ describe('Analytics Endpoints', () => {
 
             const res = await request(app)
                 .get('/analytics/cashier/stats')
-                .set('Authorization', `Bearer ${token}`);
+                .set('Cookie', `token=${token}`);
 
             expect(res.statusCode).toEqual(200);
             expect(res.body.transactions.today).toBe(1); // 1 purchase
@@ -70,7 +70,7 @@ describe('Analytics Endpoints', () => {
 
             const res = await request(app)
                 .get('/analytics/overview')
-                .set('Authorization', `Bearer ${token}`);
+                .set('Cookie', `token=${token}`);
 
             expect(res.statusCode).toEqual(200);
             expect(res.body.totalPointsInCirculation).toBeDefined();
@@ -85,7 +85,7 @@ describe('Analytics Endpoints', () => {
             
             const res = await request(app)
                 .get('/analytics/users')
-                .set('Authorization', `Bearer ${token}`);
+                .set('Cookie', `token=${token}`);
 
             expect(res.statusCode).toEqual(200);
             expect(res.body.total).toBeGreaterThanOrEqual(1);
@@ -101,7 +101,7 @@ describe('Analytics Endpoints', () => {
 
             const res = await request(app)
                 .get('/analytics/transactions')
-                .set('Authorization', `Bearer ${token}`);
+                .set('Cookie', `token=${token}`);
 
             expect(res.statusCode).toEqual(200);
             expect(res.body.typeBreakdown.purchase).toBeGreaterThanOrEqual(1);
@@ -129,7 +129,7 @@ describe('Analytics Endpoints', () => {
 
             const res = await request(app)
                 .get('/analytics/events')
-                .set('Authorization', `Bearer ${token}`);
+                .set('Cookie', `token=${token}`);
 
             expect(res.statusCode).toEqual(200);
             expect(res.body.total).toBeGreaterThanOrEqual(1);
@@ -155,7 +155,7 @@ describe('Analytics Endpoints', () => {
 
             const res = await request(app)
                 .get('/analytics/promotions')
-                .set('Authorization', `Bearer ${token}`);
+                .set('Cookie', `token=${token}`);
 
             expect(res.statusCode).toEqual(200);
             expect(res.body.total).toBeGreaterThanOrEqual(1);
@@ -171,7 +171,7 @@ describe('Analytics Endpoints', () => {
 
             const res = await request(app)
                 .get('/analytics/financial')
-                .set('Authorization', `Bearer ${token}`);
+                .set('Cookie', `token=${token}`);
 
             expect(res.statusCode).toEqual(200);
             expect(res.body.totalSpent.allTime).toBeGreaterThanOrEqual(25.0);

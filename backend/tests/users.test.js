@@ -23,7 +23,7 @@ describe('User Endpoints', () => {
 
             const res = await request(app)
                 .post('/users')
-                .set('Authorization', `Bearer ${cashierToken}`)
+                .set('Cookie', `token=${cashierToken}`)
                 .send(newUser);
 
             expect(res.statusCode).toEqual(201);
@@ -42,7 +42,7 @@ describe('User Endpoints', () => {
 
             const res = await request(app)
                 .post('/users')
-                .set('Authorization', `Bearer ${userToken}`)
+                .set('Cookie', `token=${userToken}`)
                 .send(newUser);
 
             expect(res.statusCode).toEqual(403);
@@ -60,7 +60,7 @@ describe('User Endpoints', () => {
 
             const res = await request(app)
                 .get('/users')
-                .set('Authorization', `Bearer ${managerToken}`);
+                .set('Cookie', `token=${managerToken}`);
 
             expect(res.statusCode).toEqual(200);
             expect(res.body.results.length).toBeGreaterThanOrEqual(3); // manager + regular + cashier
@@ -69,7 +69,7 @@ describe('User Endpoints', () => {
             const resVerified = await request(app)
                 .get('/users')
                 .query({ verified: 'true' })
-                .set('Authorization', `Bearer ${managerToken}`);
+                .set('Cookie', `token=${managerToken}`);
             
             expect(resVerified.body.results.some(u => u.utorid === regular.utorid)).toBe(true);
             expect(resVerified.body.results.some(u => u.utorid === cashier.utorid)).toBe(false);
@@ -82,7 +82,7 @@ describe('User Endpoints', () => {
             const res = await request(app)
                 .get('/users')
                 .query({ role: 'cashier' })
-                .set('Authorization', `Bearer ${managerToken}`);
+                .set('Cookie', `token=${managerToken}`);
 
             expect(res.statusCode).toEqual(200);
             expect(res.body.results.every(u => u.role === 'cashier')).toBe(true);
@@ -95,7 +95,7 @@ describe('User Endpoints', () => {
 
             const res = await request(app)
                 .get('/users/me')
-                .set('Authorization', `Bearer ${token}`);
+                .set('Cookie', `token=${token}`);
 
             expect(res.statusCode).toEqual(200);
             expect(res.body.utorid).toEqual(user.utorid);
@@ -114,7 +114,7 @@ describe('User Endpoints', () => {
 
             const res = await request(app)
                 .patch('/users/me')
-                .set('Authorization', `Bearer ${token}`)
+                .set('Cookie', `token=${token}`)
                 .send(updates);
 
             expect(res.statusCode).toEqual(200);
@@ -131,7 +131,7 @@ describe('User Endpoints', () => {
 
             const res = await request(app)
                 .get(`/users/${targetUser.id}`)
-                .set('Authorization', `Bearer ${cashierToken}`);
+                .set('Cookie', `token=${cashierToken}`);
 
             expect(res.statusCode).toEqual(200);
             expect(res.body.utorid).toEqual(targetUser.utorid);
@@ -145,7 +145,7 @@ describe('User Endpoints', () => {
 
             const res = await request(app)
                 .patch(`/users/${targetUser.id}`)
-                .set('Authorization', `Bearer ${managerToken}`)
+                .set('Cookie', `token=${managerToken}`)
                 .send({ 
                     role: 'cashier',
                     verified: true,

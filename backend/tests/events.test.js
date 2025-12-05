@@ -28,7 +28,7 @@ describe('Event Endpoints', () => {
 
             const res = await request(app)
                 .post('/events')
-                .set('Authorization', `Bearer ${managerToken}`)
+                .set('Cookie', `token=${managerToken}`)
                 .send(eventData);
 
             expect(res.statusCode).toEqual(201);
@@ -49,7 +49,7 @@ describe('Event Endpoints', () => {
 
             const res = await request(app)
                 .post('/events')
-                .set('Authorization', `Bearer ${userToken}`)
+                .set('Cookie', `token=${userToken}`)
                 .send(eventData);
 
             expect(res.statusCode).toEqual(403);
@@ -114,7 +114,7 @@ describe('Event Endpoints', () => {
             // Test list all published (regular user)
             const res1 = await request(app)
                 .get('/events')
-                .set('Authorization', `Bearer ${userToken}`);
+                .set('Cookie', `token=${userToken}`);
             expect(res1.body.results.length).toBe(2); // Past + Future
             expect(res1.body.results.find(e => e.name === 'Unpublished Event')).toBeUndefined();
 
@@ -122,7 +122,7 @@ describe('Event Endpoints', () => {
             const res2 = await request(app)
                 .get('/events')
                 .query({ ended: 'true' })
-                .set('Authorization', `Bearer ${userToken}`);
+                .set('Cookie', `token=${userToken}`);
             expect(res2.body.results.length).toBeGreaterThanOrEqual(1);
             expect(res2.body.results[0].name).toEqual('Past Event');
 
@@ -130,7 +130,7 @@ describe('Event Endpoints', () => {
             const res3 = await request(app)
                 .get('/events')
                 .query({ registered: 'true' })
-                .set('Authorization', `Bearer ${userToken}`);
+                .set('Cookie', `token=${userToken}`);
             expect(res3.body.results.length).toBe(1);
             expect(res3.body.results[0].id).toEqual(futureEvent.id);
             expect(res3.body.results[0].isRegistered).toBe(true);
@@ -144,7 +144,7 @@ describe('Event Endpoints', () => {
 
             const createRes = await request(app)
                 .post('/events')
-                .set('Authorization', `Bearer ${managerToken}`)
+                .set('Cookie', `token=${managerToken}`)
                 .send({
                     name: 'Public Event',
                     description: 'Desc',
@@ -158,12 +158,12 @@ describe('Event Endpoints', () => {
             
             await request(app)
                 .patch(`/events/${eventId}`)
-                .set('Authorization', `Bearer ${managerToken}`)
+                .set('Cookie', `token=${managerToken}`)
                 .send({ published: true });
 
             const res = await request(app)
                 .post(`/events/${eventId}/guests/me`)
-                .set('Authorization', `Bearer ${token}`);
+                .set('Cookie', `token=${token}`);
 
             expect(res.statusCode).toEqual(201);
             expect(res.body.guestAdded).toBeDefined();
@@ -190,7 +190,7 @@ describe('Event Endpoints', () => {
 
             const res = await request(app)
                 .post(`/events/${event.id}/guests/me`)
-                .set('Authorization', `Bearer ${userToken}`);
+                .set('Cookie', `token=${userToken}`);
 
             expect(res.statusCode).toEqual(410);
             expect(res.body.error).toMatch(/full/);
@@ -214,7 +214,7 @@ describe('Event Endpoints', () => {
 
             const res = await request(app)
                 .post(`/events/${event.id}/guests/me`)
-                .set('Authorization', `Bearer ${userToken}`);
+                .set('Cookie', `token=${userToken}`);
 
             expect(res.statusCode).toEqual(410);
             expect(res.body.error).toMatch(/ended/);
@@ -242,7 +242,7 @@ describe('Event Endpoints', () => {
 
             const res = await request(app)
                 .post(`/events/${event.id}/guests/me`)
-                .set('Authorization', `Bearer ${userToken}`);
+                .set('Cookie', `token=${userToken}`);
 
             expect(res.statusCode).toEqual(400);
             expect(res.body.error).toMatch(/Already registered/);
@@ -255,7 +255,7 @@ describe('Event Endpoints', () => {
 
             const createRes = await request(app)
                 .post('/events')
-                .set('Authorization', `Bearer ${managerToken}`)
+                .set('Cookie', `token=${managerToken}`)
                 .send({
                     name: 'Event to Update',
                     description: 'Desc',
@@ -269,7 +269,7 @@ describe('Event Endpoints', () => {
 
             const res = await request(app)
                 .patch(`/events/${eventId}`)
-                .set('Authorization', `Bearer ${managerToken}`)
+                .set('Cookie', `token=${managerToken}`)
                 .send({ name: 'Updated Event Name' });
 
             expect(res.statusCode).toEqual(200);
@@ -283,7 +283,7 @@ describe('Event Endpoints', () => {
 
             const createRes = await request(app)
                 .post('/events')
-                .set('Authorization', `Bearer ${managerToken}`)
+                .set('Cookie', `token=${managerToken}`)
                 .send({
                     name: 'Event to Delete',
                     description: 'Desc',
@@ -297,7 +297,7 @@ describe('Event Endpoints', () => {
 
             const res = await request(app)
                 .delete(`/events/${eventId}`)
-                .set('Authorization', `Bearer ${managerToken}`);
+                .set('Cookie', `token=${managerToken}`);
 
             expect(res.statusCode).toEqual(204);
         });
@@ -307,7 +307,7 @@ describe('Event Endpoints', () => {
 
             const createRes = await request(app)
                 .post('/events')
-                .set('Authorization', `Bearer ${managerToken}`)
+                .set('Cookie', `token=${managerToken}`)
                 .send({
                     name: 'Published Event',
                     description: 'Desc',
@@ -321,12 +321,12 @@ describe('Event Endpoints', () => {
             
             await request(app)
                 .patch(`/events/${eventId}`)
-                .set('Authorization', `Bearer ${managerToken}`)
+                .set('Cookie', `token=${managerToken}`)
                 .send({ published: true });
 
             const res = await request(app)
                 .delete(`/events/${eventId}`)
-                .set('Authorization', `Bearer ${managerToken}`);
+                .set('Cookie', `token=${managerToken}`);
 
             expect(res.statusCode).toEqual(400);
         });
@@ -339,7 +339,7 @@ describe('Event Endpoints', () => {
 
             const createRes = await request(app)
                 .post('/events')
-                .set('Authorization', `Bearer ${managerToken}`)
+                .set('Cookie', `token=${managerToken}`)
                 .send({
                     name: 'Org Event',
                     description: 'Desc',
@@ -353,7 +353,7 @@ describe('Event Endpoints', () => {
 
             const res = await request(app)
                 .post(`/events/${eventId}/organizers`)
-                .set('Authorization', `Bearer ${managerToken}`)
+                .set('Cookie', `token=${managerToken}`)
                 .send({ utorid: regular.utorid });
 
             expect(res.statusCode).toEqual(201);

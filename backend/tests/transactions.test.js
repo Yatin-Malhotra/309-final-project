@@ -37,7 +37,7 @@ describe('Transaction Endpoints', () => {
 
             const res = await request(app)
                 .post('/transactions')
-                .set('Authorization', `Bearer ${cashierToken}`)
+                .set('Cookie', `token=${cashierToken}`)
                 .send(transactionData);
 
             expect(res.statusCode).toEqual(201);
@@ -58,7 +58,7 @@ describe('Transaction Endpoints', () => {
 
             const res = await request(app)
                 .post('/transactions')
-                .set('Authorization', `Bearer ${cashierToken}`)
+                .set('Cookie', `token=${cashierToken}`)
                 .send(transactionData);
 
             expect(res.statusCode).toEqual(400);
@@ -82,7 +82,7 @@ describe('Transaction Endpoints', () => {
 
             const res = await request(app)
                 .post('/transactions')
-                .set('Authorization', `Bearer ${cashierToken}`)
+                .set('Cookie', `token=${cashierToken}`)
                 .send({
                     utorid: targetUser.utorid,
                     type: 'purchase',
@@ -102,7 +102,7 @@ describe('Transaction Endpoints', () => {
 
             const res = await request(app)
                 .post('/users/me/transactions')
-                .set('Authorization', `Bearer ${token}`)
+                .set('Cookie', `token=${token}`)
                 .send({
                     type: 'redemption',
                     amount: 500,
@@ -135,7 +135,7 @@ describe('Transaction Endpoints', () => {
 
             const res = await request(app)
                 .post('/transactions')
-                .set('Authorization', `Bearer ${managerToken}`)
+                .set('Cookie', `token=${managerToken}`)
                 .send({
                     utorid: targetUser.utorid,
                     type: 'adjustment',
@@ -159,7 +159,7 @@ describe('Transaction Endpoints', () => {
 
             const res = await request(app)
                 .post(`/users/${recipient.utorid}/transactions`)
-                .set('Authorization', `Bearer ${senderToken}`)
+                .set('Cookie', `token=${senderToken}`)
                 .send({
                     type: 'transfer',
                     amount: 200,
@@ -189,7 +189,7 @@ describe('Transaction Endpoints', () => {
 
             const res = await request(app)
                 .patch(`/transactions/${tx.id}/processed`)
-                .set('Authorization', `Bearer ${cashierToken}`)
+                .set('Cookie', `token=${cashierToken}`)
                 .send({ processed: true });
 
             expect(res.statusCode).toEqual(200);
@@ -224,7 +224,7 @@ describe('Transaction Endpoints', () => {
 
             const res = await request(app)
                 .patch(`/transactions/${tx.id}/processed`)
-                .set('Authorization', `Bearer ${managerToken}`)
+                .set('Cookie', `token=${managerToken}`)
                 .send({ processed: true });
 
             expect(res.statusCode).toEqual(200);
@@ -250,7 +250,7 @@ describe('Transaction Endpoints', () => {
 
             const res = await request(app)
                 .get(`/transactions/${tx.id}`)
-                .set('Authorization', `Bearer ${cashierToken}`);
+                .set('Cookie', `token=${cashierToken}`);
 
             expect(res.statusCode).toEqual(200);
             expect(res.body.id).toEqual(tx.id);
@@ -278,7 +278,7 @@ describe('Transaction Endpoints', () => {
             // Flag suspicious
             const res = await request(app)
                 .patch(`/transactions/${tx.id}/suspicious`)
-                .set('Authorization', `Bearer ${managerToken}`)
+                .set('Cookie', `token=${managerToken}`)
                 .send({ suspicious: true });
 
             expect(res.statusCode).toEqual(200);
@@ -291,7 +291,7 @@ describe('Transaction Endpoints', () => {
             // Unflag suspicious
             const res2 = await request(app)
                 .patch(`/transactions/${tx.id}/suspicious`)
-                .set('Authorization', `Bearer ${managerToken}`)
+                .set('Cookie', `token=${managerToken}`)
                 .send({ suspicious: false });
             
             expect(res2.statusCode).toEqual(200);
@@ -334,7 +334,7 @@ describe('Transaction Endpoints', () => {
 
             const res = await request(app)
                 .get('/transactions')
-                .set('Authorization', `Bearer ${managerToken}`);
+                .set('Cookie', `token=${managerToken}`);
 
             expect(res.statusCode).toEqual(200);
             expect(res.body.results.length).toBeGreaterThanOrEqual(2);
@@ -342,7 +342,7 @@ describe('Transaction Endpoints', () => {
             const resSuspicious = await request(app)
                 .get('/transactions')
                 .query({ suspicious: 'true' })
-                .set('Authorization', `Bearer ${managerToken}`);
+                .set('Cookie', `token=${managerToken}`);
             
             expect(resSuspicious.body.results.length).toBe(1);
             expect(resSuspicious.body.results[0].suspicious).toBe(true);

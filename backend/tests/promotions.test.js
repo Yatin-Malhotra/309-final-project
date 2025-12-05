@@ -26,7 +26,7 @@ describe('Promotion Endpoints', () => {
 
             const res = await request(app)
                 .post('/promotions')
-                .set('Authorization', `Bearer ${managerToken}`)
+                .set('Cookie', `token=${managerToken}`)
                 .send(promoData);
 
             expect(res.statusCode).toEqual(201);
@@ -47,7 +47,7 @@ describe('Promotion Endpoints', () => {
 
             const res = await request(app)
                 .post('/promotions')
-                .set('Authorization', `Bearer ${managerToken}`)
+                .set('Cookie', `token=${managerToken}`)
                 .send(promoData);
 
             expect(res.statusCode).toEqual(400);
@@ -60,7 +60,7 @@ describe('Promotion Endpoints', () => {
             
             await request(app)
                 .post('/promotions')
-                .set('Authorization', `Bearer ${managerToken}`)
+                .set('Cookie', `token=${managerToken}`)
                 .send({
                     name: 'List Promo',
                     description: 'Desc',
@@ -72,7 +72,7 @@ describe('Promotion Endpoints', () => {
 
             const res = await request(app)
                 .get('/promotions')
-                .set('Authorization', `Bearer ${managerToken}`);
+                .set('Cookie', `token=${managerToken}`);
 
             expect(res.statusCode).toEqual(200);
             expect(res.body.results.length).toBeGreaterThanOrEqual(1);
@@ -85,7 +85,7 @@ describe('Promotion Endpoints', () => {
 
             const createRes = await request(app)
                 .post('/promotions')
-                .set('Authorization', `Bearer ${managerToken}`)
+                .set('Cookie', `token=${managerToken}`)
                 .send({
                     name: 'Update Promo',
                     description: 'Desc',
@@ -99,7 +99,7 @@ describe('Promotion Endpoints', () => {
 
             const res = await request(app)
                 .patch(`/promotions/${promoId}`)
-                .set('Authorization', `Bearer ${managerToken}`)
+                .set('Cookie', `token=${managerToken}`)
                 .send({ name: 'Updated Name' });
 
             expect(res.statusCode).toEqual(200);
@@ -113,7 +113,7 @@ describe('Promotion Endpoints', () => {
 
             const createRes = await request(app)
                 .post('/promotions')
-                .set('Authorization', `Bearer ${managerToken}`)
+                .set('Cookie', `token=${managerToken}`)
                 .send({
                     name: 'Delete Promo',
                     description: 'Desc',
@@ -127,7 +127,7 @@ describe('Promotion Endpoints', () => {
 
             const res = await request(app)
                 .delete(`/promotions/${promoId}`)
-                .set('Authorization', `Bearer ${managerToken}`);
+                .set('Cookie', `token=${managerToken}`);
 
             expect(res.statusCode).toEqual(204);
         });
@@ -137,7 +137,7 @@ describe('Promotion Endpoints', () => {
 
             const createRes = await request(app)
                 .post('/promotions')
-                .set('Authorization', `Bearer ${managerToken}`)
+                .set('Cookie', `token=${managerToken}`)
                 .send({
                     name: 'Active Promo',
                     description: 'Desc',
@@ -151,7 +151,7 @@ describe('Promotion Endpoints', () => {
 
             const res = await request(app)
                 .delete(`/promotions/${promoId}`)
-                .set('Authorization', `Bearer ${managerToken}`);
+                .set('Cookie', `token=${managerToken}`);
 
             expect(res.statusCode).toEqual(403);
         });
