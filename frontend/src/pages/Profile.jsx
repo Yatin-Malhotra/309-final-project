@@ -80,16 +80,19 @@ const Profile = () => {
     setSuccess('');
 
     if (passwordData.new !== passwordData.confirm) {
-      setError('New passwords do not match.');
+      const errorMessage = 'New passwords do not match.';
+      setError(errorMessage);
+      toast.error(errorMessage);
       return;
     }
 
     const passwordRegex =
       /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]).{8,20}$/;
     if (!passwordRegex.test(passwordData.new)) {
-      setError(
-        'Password must be 8-20 characters and contain uppercase, lowercase, digit, and special character.'
-      );
+      const errorMessage =
+        'Password must be 8-20 characters and contain uppercase, lowercase, digit, and special character.';
+      setError(errorMessage);
+      toast.error(errorMessage);
       return;
     }
 
