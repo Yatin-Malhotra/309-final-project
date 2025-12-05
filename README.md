@@ -301,7 +301,7 @@ The project utilizes modern testing frameworks for reliability.
 ## Security Measures
 
 1. Mime Check in Multer to ensure only correct file types are allowed, prevents spoofing.
-2. JWT is stored in cookies to prevent the risk of XSS and CSRF.
+2. JWT is stored in httpOnly cookies to prevent the risk of XSS and CSRF.
     ````js
     res.cookie('token', token, {
         httpOnly: true,    // Prevents XSS (JS cannot read the cookie)
@@ -309,7 +309,7 @@ The project utilizes modern testing frameworks for reliability.
         sameSite: 'strict' // Blocks the cookie on cross-site requests (Prevents CSRF)
     });
     ````
-3. CORS is configured to only allow FRONTEND_URL. Requests without an origin have also been blocked to prevent CSRF.
+3. CORS is configured to only allow FRONTEND_URL. Requests without an origin have been allowed to allow Avatar uploads.
 
 ## Advanced Features
 
