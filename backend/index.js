@@ -19,8 +19,25 @@ if (!JWT_SECRET) {
     process.exit(1);
 }
 
+// CORS Configuration
+const allowedOrigins = [];
+if (process.env.FRONTEND_URL) {
+    allowedOrigins.push(process.env.FRONTEND_URL);
+}
+allowedOrigins.push('http://localhost:3000');
+
+app.use(cors({
+    origin: (origin, callback) => {
+        if (allowedOrigins.indexOf(origin) !== -1) {
+            callback(null, true);
+        } else {
+            callback(new Error('Not allowed by CORS'));
+        }
+    },
+    credentials: true
+}));
+
 // Middleware
-app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
