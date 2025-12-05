@@ -452,8 +452,7 @@ router.patch('/:eventId', async (req, res, next) => {
             delete updates.points;
         }
         
-        // Published can only be set to true
-        if (updates.published !== undefined && !updates.published) {
+        if (updates.published !== undefined && !updates.published && event.published) {
             return res.status(400).json({ error: 'Cannot unpublish event' });
         }
         
