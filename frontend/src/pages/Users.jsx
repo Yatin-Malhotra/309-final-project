@@ -94,10 +94,12 @@ const Users = () => {
     if (currentSort.key) {
       setFilters(prev => {
         if (prev.sortBy === currentSort.key && prev.order === currentSort.direction) return prev;
-        return { ...prev, sortBy: currentSort.key, order: currentSort.direction };
+        const newFilters = { ...prev, sortBy: currentSort.key, order: currentSort.direction, page: 1 };
+        setSearchParams(newFilters);
+        return newFilters;
       });
     }
-  }, [currentSort]);
+  }, [currentSort, setSearchParams]);
 
   const handleSaveFilter = async (name) => {
     try {
