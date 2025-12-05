@@ -117,8 +117,12 @@ router.get('/', optionalAuth, validateQuery(z.object({
             where.endTime = { gte: now };
         } else if (isManagerOrAbove) {
             // Only apply time filters if explicitly requested with 'true' or 'false'
-            if (started === 'true' || started === 'false') {
-                where.startTime = started === 'true' ? { lte: now } : { gt: now };
+            if (started === 'true') {
+                // Active promotions: started and not ended
+                where.startTime = { lte: now };
+                where.endTime = { gte: now };
+            } else if (started === 'false') {
+                where.startTime = { gt: now };
             }
             if (ended === 'true' || ended === 'false') {
                 where.endTime = ended === 'true' ? { lte: now } : { gt: now };

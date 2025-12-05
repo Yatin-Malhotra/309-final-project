@@ -217,7 +217,7 @@ const Promotions = () => {
                 }}
               >
                 <option value="">All</option>
-                <option value="active">Active / Past Start</option>
+                <option value="active">Active</option>
                 <option value="upcoming">Upcoming</option>
                 <option value="ended">Ended</option>
               </select>
