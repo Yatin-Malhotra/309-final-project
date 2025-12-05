@@ -8,9 +8,10 @@ Final Project Group # 63
 - [Local Development](#local-development)
 - [Production Deployment (Railway)](#production-deployment-railway)
 - [URLs](#urls)
-- [Demo Accounts](#demo-accounts)
+- [Demo Database](#demo-database)
 - [Architecture](#architecture)
 - [Technology Stack](#technology-stack)
+- [Security Measures](#security-measures)
 - [Advanced Features](#advanced-features)
   - [QR Code Integration](#1-qr-code-integration)
   - [PDF Export](#2-pdf-export)
@@ -148,7 +149,9 @@ The next five variables come directly from the emailJS service which we used for
 
 ---
 
-## Demo Accounts (Not all accounts shown for readability purposes)
+## Demo Database
+
+### Accounts (Not all accounts shown for readability purposes)
 
 The seeded database includes the following demo accounts (all use password: `password`):
 
@@ -291,9 +294,14 @@ The project utilizes modern testing frameworks for reliability.
 | Backend | Node.js, Express.js |
 | Database | SQLite with Prisma ORM |
 | Auth | JWT (JSON Web Tokens), bcrypt |
-| Security | express-rate-limit |
+| Security | Restrictive CORS, Zod Validation, Mime Check|
 
 ---
+
+## Security Measures
+
+1. Mime Check in Multer to ensure only correct file types are allowed, prevents spoofing.
+2. CORS is configured to only allow FRONTEND_URL. Requests without an origin have also been blocked to prevent CSRF.
 
 ## Advanced Features
 

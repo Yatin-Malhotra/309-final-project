@@ -264,18 +264,19 @@ const Transactions = () => {
     setError('');
     try {
       const params = { ...filters };
+
+      Object.keys(params).forEach((key) => {
+        if (params[key] === '' || params[key] === null || params[key] === undefined) {
+          delete params[key];
+        }
+      });
       
       // If client-side operations (filtering or sorting) are active, fetch maximum results
       if (needsClientSideData()) {
         // Remove page parameter and set limit to maximum (100) to get more results for client-side operations
         delete params.page;
         params.limit = 100; // Maximum allowed by backend
-      } else {
-        // Keep server-side pagination when no client-side operations
-        Object.keys(params).forEach((key) => {
-          if (!params[key]) delete params[key];
-        });
-      }
+      } 
 
       let response;
       if (hasRole('manager')) {
