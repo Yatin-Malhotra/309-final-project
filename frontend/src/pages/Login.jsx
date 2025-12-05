@@ -23,7 +23,6 @@ const Login = () => {
       await authAPI.login(utorid, password);
       
       // Fetch user data using the API service
-      // Token is now handled via httpOnly cookie
       const userResponse = await userAPI.getMe();
       const userData = userResponse.data;
       
