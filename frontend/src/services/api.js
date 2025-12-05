@@ -15,22 +15,11 @@ export const getAvatarUrl = (avatarUrl) => {
 // Create axios instance with default config
 const api = axios.create({
   baseURL: API_BASE_URL,
+  withCredentials: true, // Enable sending cookies
   headers: {
     'Content-Type': 'application/json',
   },
 });
-
-// Add token to requests if available
-api.interceptors.request.use(
-  (config) => {
-    const token = localStorage.getItem('token');
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
-    return config;
-  },
-  (error) => Promise.reject(error)
-);
 
 // Handle token expiration and auth failures
 api.interceptors.response.use(
@@ -40,10 +29,10 @@ api.interceptors.response.use(
 
     if (
       error.response?.status === 401 && 
-      !originalRequestUrl.includes('/auth')
+      !originalRequestUrl.includes('/auth') &&
+      window.location.pathname !== '/login'
     ) {
-      localStorage.removeItem('token');
-      localStorage.removeItem('user');
+      localStorage.removeItem('user'); // Only clear user data, token is in cookie
       window.location.href = '/login';
     }
     return Promise.reject(error);
@@ -53,6 +42,7 @@ api.interceptors.response.use(
 // Auth endpoints
 export const authAPI = {
   login: (utorid, password) => api.post('/auth/tokens', { utorid, password }),
+  logout: () => api.post('/auth/logout'),
   requestReset: (utorid) => api.post('/auth/resets', { utorid }),
   resetPassword: (resetToken, utorid, password) =>
     api.post(`/auth/resets/${resetToken}`, { utorid, password }),

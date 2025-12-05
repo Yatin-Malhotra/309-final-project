@@ -1,6 +1,6 @@
 // Authentication context for managing user state
 import { createContext, useContext, useState, useEffect } from 'react';
-import { userAPI } from '../services/api';
+import { userAPI, authAPI } from '../services/api';
 
 const AuthContext = createContext(null);
 
@@ -20,29 +20,21 @@ export const AuthProvider = ({ children }) => {
   const [currentRole, setCurrentRole] = useState(null)
   const [allowedRoles, setAllowedRoles] = useState([])
 
-  // Load user from localStorage and verify token
+  // Load user and verify session
   useEffect(() => {
     const loadUser = async () => {
-      const token = localStorage.getItem('token');
-      const savedUser = localStorage.getItem('user');
-
-      if (token && savedUser) {
-        try {
-          const userData = JSON.parse(savedUser);
-          setUser(userData);
-          // Verify token is still valid by fetching current user
-          const response = await userAPI.getMe();
-          const updatedUser = response.data;
-          setUser(updatedUser);
-          localStorage.setItem('user', JSON.stringify(updatedUser));
-        } catch (error) {
-          // Token invalid, clear storage
-          localStorage.removeItem('token');
-          localStorage.removeItem('user');
-          localStorage.removeItem('currentRole');
-          setUser(null);
-          setCurrentRole(null);
-        }
+      try {
+        // Try to fetch user data - if cookie is valid, this will succeed
+        const response = await userAPI.getMe();
+        const updatedUser = response.data;
+        setUser(updatedUser);
+        localStorage.setItem('user', JSON.stringify(updatedUser));
+      } catch (error) {
+        // Session invalid or no cookie
+        localStorage.removeItem('user');
+        localStorage.removeItem('currentRole');
+        setUser(null);
+        setCurrentRole(null);
       }
       setLoading(false);
     };
@@ -96,15 +88,18 @@ export const AuthProvider = ({ children }) => {
     }
   }, [currentRole, user]);
 
-  const login = (token, userData) => {
-    localStorage.setItem('token', token);
+  const login = (userData) => {
     localStorage.setItem('user', JSON.stringify(userData));
     setUser(userData);
     // Role will be restored by the useEffect that watches user.role
   };
 
-  const logout = () => {
-    localStorage.removeItem('token');
+  const logout = async () => {
+    try {
+      await authAPI.logout();
+    } catch (error) {
+      console.error('Logout failed', error);
+    }
     localStorage.removeItem('user');
     localStorage.removeItem('currentRole');
     setUser(null);

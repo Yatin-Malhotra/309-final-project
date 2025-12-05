@@ -43,10 +43,9 @@ describe('Login Page', () => {
   });
 
   it('should handle successful login', async () => {
-    const mockToken = 'fake-token';
     const mockUser = { id: 1, utorid: 'testuser', role: 'regular', verified: true };
 
-    authAPI.login.mockResolvedValueOnce({ data: { token: mockToken } });
+    authAPI.login.mockResolvedValueOnce({ data: { token: 'ignored-by-frontend' } });
     userAPI.getMe.mockResolvedValueOnce({ data: mockUser });
 
     renderLogin();
@@ -57,9 +56,7 @@ describe('Login Page', () => {
 
     await waitFor(() => {
       expect(authAPI.login).toHaveBeenCalledWith('testuser', 'password123');
-      expect(localStorage.getItem('token')).toBe(mockToken);
-      // We can't easily check navigation here without mocking useNavigate, 
-      // but we can check if login function was called implicitly via side effects
+      expect(localStorage.getItem('user')).toBeTruthy();
     });
   });
 
