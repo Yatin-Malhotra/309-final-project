@@ -264,6 +264,12 @@ const Transactions = () => {
     setError('');
     try {
       const params = { ...filters };
+
+      Object.keys(params).forEach((key) => {
+        if (params[key] === '' || params[key] === null || params[key] === undefined) {
+          delete params[key];
+        }
+      });
       
       // Clean up empty params
       Object.keys(params).forEach((key) => {
