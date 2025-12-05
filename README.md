@@ -294,14 +294,22 @@ The project utilizes modern testing frameworks for reliability.
 | Backend | Node.js, Express.js |
 | Database | SQLite with Prisma ORM |
 | Auth | JWT (JSON Web Tokens), bcrypt |
-| Security | Restrictive CORS, Zod Validation, Mime Check|
+| Security | httpOnly Cookies, Restrictive CORS, Zod Validation, Mime Check|
 
 ---
 
 ## Security Measures
 
 1. Mime Check in Multer to ensure only correct file types are allowed, prevents spoofing.
-2. CORS is configured to only allow FRONTEND_URL. Requests without an origin have also been blocked to prevent CSRF.
+2. JWT is stored in cookies to prevent the risk of XSS and CSRF.
+    ````js
+    res.cookie('token', token, {
+        httpOnly: true,    // Prevents XSS (JS cannot read the cookie)
+        secure: true,      // Cookie only sent over HTTPS
+        sameSite: 'strict' // Blocks the cookie on cross-site requests (Prevents CSRF)
+    });
+    ````
+3. CORS is configured to only allow FRONTEND_URL. Requests without an origin have also been blocked to prevent CSRF.
 
 ## Advanced Features
 
