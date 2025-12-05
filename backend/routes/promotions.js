@@ -12,24 +12,8 @@ const {
 } = require('../middleware');
 
 // POST /promotions - Create promotion
-router.post('/', async (req, res, next) => {
+router.post('/', requireRole('manager'), async (req, res, next) => {
     try {
-        // Check authentication and authorization FIRST (before validation)
-        const token = jwtUtils.extractToken(req.headers.authorization);
-        if (!token) return res.status(401).json({ error: 'Unauthorized' });
-        
-        let authUser;
-        try {
-            authUser = jwtUtils.verifyToken(token);
-        } catch (error) {
-            return res.status(401).json({ error: 'Unauthorized' });
-        }
-        
-        const roleHierarchy = { regular: 0, cashier: 1, manager: 2, superuser: 3 };
-        if (roleHierarchy[authUser.role] < 2) { // manager level
-            return res.status(403).json({ error: 'Forbidden' });
-        }
-        
         // Now validate request body
         let validatedData;
         try {

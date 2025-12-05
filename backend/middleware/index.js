@@ -459,7 +459,7 @@ const upload = multer({
 
 // Middleware functions
 const authenticate = (req, res, next) => {
-    let token = req.cookies?.token || jwtUtils.extractToken(req.headers.authorization);
+    let token = req.cookies?.token;
     if (!token) return res.status(401).json({ error: 'Unauthorized' });
     try {
         req.user = jwtUtils.verifyToken(token);
