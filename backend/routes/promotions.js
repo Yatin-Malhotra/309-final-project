@@ -12,24 +12,8 @@ const {
 } = require('../middleware');
 
 // POST /promotions - Create promotion
-router.post('/', async (req, res, next) => {
+router.post('/', requireRole('manager'), async (req, res, next) => {
     try {
-        // Check authentication and authorization FIRST (before validation)
-        const token = jwtUtils.extractToken(req.headers.authorization);
-        if (!token) return res.status(401).json({ error: 'Unauthorized' });
-        
-        let authUser;
-        try {
-            authUser = jwtUtils.verifyToken(token);
-        } catch (error) {
-            return res.status(401).json({ error: 'Unauthorized' });
-        }
-        
-        const roleHierarchy = { regular: 0, cashier: 1, manager: 2, superuser: 3 };
-        if (roleHierarchy[authUser.role] < 2) { // manager level
-            return res.status(403).json({ error: 'Forbidden' });
-        }
-        
         // Now validate request body
         let validatedData;
         try {
@@ -133,8 +117,12 @@ router.get('/', optionalAuth, validateQuery(z.object({
             where.endTime = { gte: now };
         } else if (isManagerOrAbove) {
             // Only apply time filters if explicitly requested with 'true' or 'false'
-            if (started === 'true' || started === 'false') {
-                where.startTime = started === 'true' ? { lte: now } : { gt: now };
+            if (started === 'true') {
+                // Active promotions: started and not ended
+                where.startTime = { lte: now };
+                where.endTime = { gte: now };
+            } else if (started === 'false') {
+                where.startTime = { gt: now };
             }
             if (ended === 'true' || ended === 'false') {
                 where.endTime = ended === 'true' ? { lte: now } : { gt: now };

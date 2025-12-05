@@ -271,12 +271,19 @@ const Transactions = () => {
         }
       });
       
+      // Clean up empty params
+      Object.keys(params).forEach((key) => {
+        if (params[key] === '' || params[key] === null || params[key] === undefined) {
+          delete params[key];
+        }
+      });
+      
       // If client-side operations (filtering or sorting) are active, fetch maximum results
       if (needsClientSideData()) {
         // Remove page parameter and set limit to maximum (100) to get more results for client-side operations
         delete params.page;
         params.limit = 100; // Maximum allowed by backend
-      } 
+      }
 
       let response;
       if (hasRole('manager')) {

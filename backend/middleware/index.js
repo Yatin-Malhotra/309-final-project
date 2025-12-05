@@ -459,7 +459,7 @@ const upload = multer({
 
 // Middleware functions
 const authenticate = (req, res, next) => {
-    const token = jwtUtils.extractToken(req.headers.authorization);
+    let token = req.cookies?.token;
     if (!token) return res.status(401).json({ error: 'Unauthorized' });
     try {
         req.user = jwtUtils.verifyToken(token);
@@ -473,7 +473,7 @@ const requireRole = (minRole) => {
     const roleHierarchy = { regular: 0, cashier: 1, manager: 2, superuser: 3 };
     const minLevel = roleHierarchy[minRole];
     return (req, res, next) => {
-        const token = jwtUtils.extractToken(req.headers.authorization);
+        let token = req.cookies?.token;
         if (!token) return res.status(401).json({ error: 'Unauthorized' });
         
         try {
@@ -489,7 +489,7 @@ const requireRole = (minRole) => {
 };
 
 const optionalAuth = (req, res, next) => {
-    const token = jwtUtils.extractToken(req.headers.authorization);
+    let token = req.cookies?.token;
     if (token) {
         try { req.user = jwtUtils.verifyToken(token); }
         catch (error) { req.user = null; }

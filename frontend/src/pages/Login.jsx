@@ -20,15 +20,13 @@ const Login = () => {
     setLoading(true);
 
     try {
-      const response = await authAPI.login(utorid, password);
-      const { token } = response.data;
+      await authAPI.login(utorid, password);
       
       // Fetch user data using the API service
-      localStorage.setItem('token', token);
       const userResponse = await userAPI.getMe();
       const userData = userResponse.data;
       
-      login(token, userData);
+      login(userData);
       navigate('/dashboard');
     } catch (err) {
       const errorMessage = err.response?.data?.error || 'Login failed. Please try again.';

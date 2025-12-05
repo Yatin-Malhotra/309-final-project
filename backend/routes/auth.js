@@ -14,8 +14,23 @@ router.post('/tokens', validate(schemas.login), async (req, res, next) => {
         }
         const { token, expiresAt } = jwtUtils.generateToken(user);
         await prisma.user.update({ where: { id: user.id }, data: { lastLogin: new Date() } });
+        
+        // Set httpOnly cookie
+        res.cookie('token', token, {
+            httpOnly: true,
+            secure: true,
+            sameSite: 'strict',
+            maxAge: 24 * 60 * 60 * 1000 // 24 hours
+        });
+        
         res.json({ token, expiresAt });
     } catch (error) { next(error); }
+});
+
+// POST /auth/logout - Logout
+router.post('/logout', (req, res) => {
+    res.clearCookie('token');
+    res.json({ message: 'Logged out successfully' });
 });
 
 // POST /auth/resets/:resetToken - Reset password

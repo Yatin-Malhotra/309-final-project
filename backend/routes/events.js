@@ -13,7 +13,7 @@ const {
 } = require('../middleware');
 
 // POST /events - Validate request body better
-router.post('/', validate(schemas.createEvent), async (req, res, next) => {
+router.post('/', requireRole('manager'), validate(schemas.createEvent), async (req, res, next) => {
     try {
         const { name, description, location, startTime, endTime, capacity, points } = req.body;
         
@@ -28,20 +28,6 @@ router.post('/', validate(schemas.createEvent), async (req, res, next) => {
         
         if (start >= end) return res.status(400).json({ error: 'End time must be after start time' });
         if (start < new Date()) return res.status(400).json({ error: 'Start time cannot be in the past' });
-        
-        // NOW check permissions
-        const token = jwtUtils.extractToken(req.headers.authorization);
-        if (!token) return res.status(401).json({ error: 'Unauthorized' });
-        
-        try {
-            req.user = jwtUtils.verifyToken(token);
-            const roleHierarchy = { regular: 0, cashier: 1, manager: 2, superuser: 3 };
-            if (roleHierarchy[req.user.role] < 2) { // manager level
-                return res.status(403).json({ error: 'Forbidden' });
-            }
-        } catch (error) {
-            return res.status(401).json({ error: 'Unauthorized' });
-        }
         
         // Handle organizerIds if provided
         const organizerIds = req.body.organizerIds || [];
@@ -277,7 +263,7 @@ router.get('/', optionalAuth, validateQuery(z.object({
 });
 
 // GET /events/:eventId - Get event details (enforce error order)
-router.get('/:eventId', async (req, res, next) => {
+router.get('/:eventId', optionalAuth, async (req, res, next) => {
     try {
         const eventId = parseInt(req.params.eventId);
         if (isNaN(eventId)) return res.status(404).json({ error: 'Event not found' });
@@ -292,11 +278,7 @@ router.get('/:eventId', async (req, res, next) => {
         if (!event) return res.status(404).json({ error: 'Event not found' });
 
         // Authentication (401) then authorization (403)
-        let authUser = null;
-        const token = jwtUtils.extractToken(req.headers.authorization);
-        if (token) {
-            try { authUser = jwtUtils.verifyToken(token); } catch (_) { return res.status(401).json({ error: 'Unauthorized' }); }
-        }
+        const authUser = req.user; // optionalAuth middleware sets req.user or null
 
         const isManagerOrAbove = authUser && ['manager', 'superuser'].includes(authUser.role);
         const isEventOrganizer = authUser ? await isOrganizer(eventId, authUser.id) : false;
@@ -351,11 +333,12 @@ router.patch('/:eventId', async (req, res, next) => {
         });
         if (!event) return res.status(404).json({ error: 'Event not found' });
 
-        // 4) Check authentication (401)
-        const token = jwtUtils.extractToken(req.headers.authorization);
+        // 4) Check authentication (401) - use authenticate middleware logic
+        let token = req.cookies?.token;
         if (!token) return res.status(401).json({ error: 'Unauthorized' });
         let authUser;
         try { authUser = jwtUtils.verifyToken(token); } catch (_) { return res.status(401).json({ error: 'Unauthorized' }); }
+        req.user = authUser;
 
         // 5) Check authorization (403)
         const isManagerOrAbove = ['manager', 'superuser'].includes(authUser.role);
@@ -604,7 +587,7 @@ router.delete('/:eventId', async (req, res, next) => {
         }
 
         // Now authentication and authorization
-        const token = jwtUtils.extractToken(req.headers.authorization);
+        let token = req.cookies?.token;
         if (!token) return res.status(401).json({ error: 'Unauthorized' });
         let authUser;
         try { authUser = jwtUtils.verifyToken(token); } catch (_) { return res.status(401).json({ error: 'Unauthorized' }); }
@@ -640,7 +623,7 @@ router.post('/:eventId/organizers', async (req, res, next) => {
         if (event.endTime <= new Date()) return res.status(410).json({ error: 'Event has ended' });
         
         // Authentication and authorization
-        const token = jwtUtils.extractToken(req.headers.authorization);
+        let token = req.cookies?.token;
         if (!token) return res.status(401).json({ error: 'Unauthorized' });
         let authUser;
         try { authUser = jwtUtils.verifyToken(token); } catch (_) { return res.status(401).json({ error: 'Unauthorized' }); }
@@ -760,7 +743,7 @@ router.post('/:eventId/guests', async (req, res, next) => {
         }
 
         // Authentication (401) and authorization (403)
-        const token = jwtUtils.extractToken(req.headers.authorization);
+        let token = req.cookies?.token;
         if (!token) return res.status(401).json({ error: 'Unauthorized' });
         let authUser;
         try { authUser = jwtUtils.verifyToken(token); } catch (_) { return res.status(401).json({ error: 'Unauthorized' }); }
@@ -828,7 +811,7 @@ router.delete('/:eventId/guests/me', async (req, res, next) => {
         if (!event) return res.status(404).json({ error: 'Event not found' });
 
         // Authentication (401) - needed to check if user is a guest
-        const token = jwtUtils.extractToken(req.headers.authorization);
+        let token = req.cookies?.token;
         if (!token) return res.status(401).json({ error: 'Unauthorized' });
         let authUser;
         try { authUser = jwtUtils.verifyToken(token); } catch (_) { return res.status(401).json({ error: 'Unauthorized' }); }
@@ -862,7 +845,7 @@ router.delete('/:eventId/guests/:userId', async (req, res, next) => {
         if (!event) return res.status(404).json({ error: 'Event not found' });
         
         // Authentication (401) and authorization (403) - only managers/superusers can remove guests
-        const token = jwtUtils.extractToken(req.headers.authorization);
+        let token = req.cookies?.token;
         if (!token) return res.status(401).json({ error: 'Unauthorized' });
         let authUser;
         try { authUser = jwtUtils.verifyToken(token); } catch (_) { return res.status(401).json({ error: 'Unauthorized' }); }
@@ -950,7 +933,7 @@ router.post('/:eventId/transactions', async (req, res, next) => {
         if (!event) return res.status(404).json({ error: 'Event not found' });
 
         // Authentication and authorization
-        const token = jwtUtils.extractToken(req.headers.authorization);
+        let token = req.cookies?.token;
         if (!token) return res.status(401).json({ error: 'Unauthorized' });
         let authUser;
         try { authUser = jwtUtils.verifyToken(token); } catch (_) { return res.status(401).json({ error: 'Unauthorized' }); }
