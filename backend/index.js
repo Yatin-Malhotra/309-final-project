@@ -28,6 +28,11 @@ allowedOrigins.push('http://localhost:3000');
 
 app.use(cors({
     origin: (origin, callback) => {
+        // Allow requests with no origin (like same-origin requests, direct navigation, or some image requests)
+        if (!origin) {
+            return callback(null, true);
+        }
+        
         if (allowedOrigins.indexOf(origin) !== -1) {
             callback(null, true);
         } else {
